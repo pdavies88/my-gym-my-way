@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { AboutLink } from '@/components/about-link';
 import { BmiCard } from '@/components/bmi-card';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -64,6 +65,23 @@ export default function MeScreen() {
             {AppName} has no paywall, no ads, no account and no tracking. Your equipment, workouts, history and body
             measurements stay on this phone.
           </ThemedText>
+          <View style={styles.links}>
+            <AboutLink
+              label="Privacy policy"
+              url="https://pdavies88.github.io/my-gym-my-way/privacy/"
+              icon={{ ios: 'hand.raised', android: 'privacy_tip' }}
+            />
+            <AboutLink
+              label="Support"
+              url="https://pdavies88.github.io/my-gym-my-way/support/"
+              icon={{ ios: 'questionmark.circle', android: 'help' }}
+            />
+            <AboutLink
+              label="Contact"
+              url="mailto:preston5@protonmail.com"
+              icon={{ ios: 'envelope', android: 'mail' }}
+            />
+          </View>
           <ThemedText type="mono" themeColor="textSecondary">
             v{Constants.expoConfig?.version ?? '1.0.0'}
           </ThemedText>
@@ -75,5 +93,6 @@ export default function MeScreen() {
 
 const styles = StyleSheet.create({
   group: { gap: Spacing.three },
+  links: { marginVertical: Spacing.one },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });
