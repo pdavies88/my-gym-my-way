@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Card } from '@/components/card';
-import { ExerciseDemo } from '@/components/exercise-demo';
+import { ExerciseVideo } from '@/components/exercise-video';
 import { Screen, SectionHeader } from '@/components/screen';
 import { Tag } from '@/components/tag';
 import { ThemedText } from '@/components/themed-text';
@@ -11,6 +11,7 @@ import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { equipmentName } from '@/lib/equipment';
 import { canDo, getExercise, SLOT_LABELS } from '@/lib/exercises';
+import { getVideo } from '@/lib/videos';
 
 export default function ExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,6 +31,7 @@ export default function ExerciseScreen() {
       ? 'Bodyweight only'
       : exercise.needs.map((option) => option.map(equipmentName).join(' + ')).join(' or ');
   const available = canDo(exercise, owned);
+  const video = getVideo(exercise.id);
 
   return (
     <Screen tab={false}>
@@ -41,7 +43,7 @@ export default function ExerciseScreen() {
         <ThemedText type="title">{exercise.name}</ThemedText>
       </View>
 
-      <ExerciseDemo motionId={exercise.motion} />
+      {video && <ExerciseVideo video={video} />}
 
       <Animated.View entering={FadeInDown.delay(80).duration(320)} style={styles.tags}>
         {exercise.muscles.map((muscle) => (

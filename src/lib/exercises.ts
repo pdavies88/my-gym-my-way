@@ -1,5 +1,4 @@
 import type { EquipmentId } from './equipment';
-import type { MotionId } from './motion/motions';
 
 /** The role an exercise can fill in a generated workout. */
 export type Slot =
@@ -27,7 +26,11 @@ export interface Exercise {
    * An empty list means bodyweight only.
    */
   needs: EquipmentId[][];
-  motion: MotionId;
+  /**
+   * Movement pattern. Exercises that share one, like a curl and a hammer curl, are near-duplicates,
+   * so the generator never puts both in one workout.
+   */
+  pattern: string;
   cues: string[];
   /** A suggested starting point. The app doesn’t track sets or reps. */
   prescription: string;
@@ -43,7 +46,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['squat'],
     muscles: ['Quads', 'Glutes'],
     needs: BODYWEIGHT,
-    motion: 'squat',
+    pattern: 'squat',
     cues: [
       'Stand with feet shoulder-width apart, toes turned out a little.',
       'Sit your hips back and down. Push your knees out over your toes.',
@@ -58,7 +61,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['squat', 'cardio'],
     muscles: ['Quads', 'Glutes', 'Calves'],
     needs: BODYWEIGHT,
-    motion: 'squat-jump',
+    pattern: 'squat-jump',
     cues: [
       'Drop into a quarter squat and swing your arms back.',
       'Explode up and swing your arms overhead.',
@@ -72,7 +75,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['squat'],
     muscles: ['Quads', 'Glutes', 'Core'],
     needs: [['dumbbells'], ['kettlebell']],
-    motion: 'goblet-squat',
+    pattern: 'goblet-squat',
     cues: [
       'Hold one weight against your chest with both hands, elbows pointing down.',
       'Keep your chest up as you sit down between your knees.',
@@ -87,7 +90,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['squat'],
     muscles: ['Quads', 'Glutes', 'Lower back'],
     needs: [['barbell', 'rack']],
-    motion: 'back-squat',
+    pattern: 'back-squat',
     cues: [
       'Set the bar on your upper back, not your neck. Squeeze your shoulder blades together.',
       'Brace your core with a big breath before each rep.',
@@ -103,7 +106,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hinge'],
     muscles: ['Glutes', 'Hamstrings'],
     needs: BODYWEIGHT,
-    motion: 'glute-bridge',
+    pattern: 'glute-bridge',
     cues: [
       'Lie on your back with knees bent and feet flat, close to your hips.',
       'Push through your heels and lift your hips until your body is straight from shoulders to knees.',
@@ -118,7 +121,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hinge'],
     muscles: ['Hamstrings', 'Glutes', 'Lower back'],
     needs: [['dumbbells']],
-    motion: 'romanian-deadlift',
+    pattern: 'romanian-deadlift',
     cues: [
       'Hold the dumbbells in front of your thighs with soft knees.',
       'Push your hips back and slide the weights down your legs.',
@@ -133,7 +136,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hinge'],
     muscles: ['Hamstrings', 'Glutes', 'Back'],
     needs: [['barbell']],
-    motion: 'deadlift',
+    pattern: 'deadlift',
     cues: [
       'Stand with the bar over the middle of your feet.',
       'Grip just outside your knees. Pull the slack out of the bar and flatten your back.',
@@ -148,7 +151,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hinge'],
     muscles: ['Hamstrings', 'Glutes'],
     needs: [['kettlebell']],
-    motion: 'kettlebell-deadlift',
+    pattern: 'kettlebell-deadlift',
     cues: [
       'Stand with the kettlebell between your feet.',
       'Hinge and bend your knees to grip the handle with a flat back.',
@@ -162,7 +165,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hinge', 'cardio'],
     muscles: ['Glutes', 'Hamstrings', 'Core'],
     needs: [['kettlebell']],
-    motion: 'kettlebell-swing',
+    pattern: 'kettlebell-swing',
     cues: [
       'Hike the bell back between your legs like a football snap.',
       'Snap your hips forward hard. The bell floats up to chest height.',
@@ -178,7 +181,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['lunge'],
     muscles: ['Quads', 'Glutes'],
     needs: BODYWEIGHT,
-    motion: 'lunge',
+    pattern: 'lunge',
     cues: [
       'Step one foot back and lower your back knee toward the floor.',
       'Keep your front shin close to vertical.',
@@ -192,7 +195,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['lunge'],
     muscles: ['Quads', 'Glutes'],
     needs: [['dumbbells']],
-    motion: 'dumbbell-lunge',
+    pattern: 'dumbbell-lunge',
     cues: [
       'Hold a dumbbell in each hand at your sides.',
       'Step back and drop your back knee toward the floor.',
@@ -206,7 +209,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['lunge', 'squat'],
     muscles: ['Quads', 'Glutes'],
     needs: [['bench']],
-    motion: 'split-squat',
+    pattern: 'split-squat',
     cues: [
       'Rest the top of your back foot on a bench behind you.',
       'Lower straight down until your front thigh is about level with the floor.',
@@ -221,7 +224,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['lunge'],
     muscles: ['Quads', 'Glutes'],
     needs: [['box'], ['bench']],
-    motion: 'step-up',
+    pattern: 'step-up',
     cues: [
       'Place your whole foot on the box.',
       'Drive through that heel to stand on top. Don’t push off the back foot.',
@@ -236,7 +239,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['calves'],
     muscles: ['Calves'],
     needs: BODYWEIGHT,
-    motion: 'calf-raise',
+    pattern: 'calf-raise',
     cues: [
       'Stand tall with feet hip-width apart. Hold a wall for balance if you need to.',
       'Rise onto the balls of your feet as high as you can.',
@@ -251,7 +254,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush'],
     muscles: ['Chest', 'Triceps', 'Shoulders'],
     needs: BODYWEIGHT,
-    motion: 'push-up',
+    pattern: 'push-up',
     cues: [
       'Hands a little wider than your shoulders. Body straight from head to heels.',
       'Lower your chest to just above the floor. Elbows at about 45 degrees.',
@@ -265,7 +268,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush'],
     muscles: ['Chest', 'Triceps'],
     needs: BODYWEIGHT,
-    motion: 'knee-push-up',
+    pattern: 'knee-push-up',
     cues: [
       'Kneel and place your hands a little wider than your shoulders.',
       'Keep a straight line from your head to your knees.',
@@ -279,7 +282,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush', 'triceps'],
     muscles: ['Triceps', 'Chest'],
     needs: BODYWEIGHT,
-    motion: 'diamond-push-up',
+    pattern: 'diamond-push-up',
     cues: [
       'Bring your hands together under your chest, thumbs and fingers touching.',
       'Keep your elbows tucked close to your sides as you lower.',
@@ -293,7 +296,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush'],
     muscles: ['Chest', 'Triceps', 'Shoulders'],
     needs: [['dumbbells', 'bench']],
-    motion: 'dumbbell-bench-press',
+    pattern: 'dumbbell-bench-press',
     cues: [
       'Lie on the bench with feet flat on the floor.',
       'Start with the dumbbells over your chest, arms straight.',
@@ -308,7 +311,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush'],
     muscles: ['Chest', 'Triceps', 'Shoulders'],
     needs: [['barbell', 'bench', 'rack']],
-    motion: 'bench-press',
+    pattern: 'bench-press',
     cues: [
       'Eyes under the bar. Squeeze your shoulder blades together and plant your feet.',
       'Unrack and lower the bar to your lower chest.',
@@ -323,7 +326,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpush'],
     muscles: ['Chest', 'Triceps'],
     needs: [['dumbbells']],
-    motion: 'floor-press',
+    pattern: 'floor-press',
     cues: [
       'Lie on the floor with knees bent and a dumbbell in each hand.',
       'Lower until your upper arms touch the floor.',
@@ -337,7 +340,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['triceps', 'hpush'],
     muscles: ['Triceps', 'Chest'],
     needs: [['bench'], ['box']],
-    motion: 'bench-dip',
+    pattern: 'bench-dip',
     cues: [
       'Sit on the edge of the bench, hands beside your hips, fingers forward.',
       'Slide forward off the bench with knees bent and feet flat.',
@@ -353,7 +356,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpush'],
     muscles: ['Shoulders', 'Triceps'],
     needs: [['dumbbells']],
-    motion: 'overhead-press',
+    pattern: 'overhead-press',
     cues: [
       'Hold the dumbbells at shoulder height, palms forward.',
       'Brace your core and squeeze your glutes so your back doesn’t arch.',
@@ -368,7 +371,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpush'],
     muscles: ['Shoulders', 'Triceps', 'Core'],
     needs: [['barbell']],
-    motion: 'barbell-overhead-press',
+    pattern: 'barbell-overhead-press',
     cues: [
       'Hold the bar on the front of your shoulders, hands just outside them.',
       'Move your head back slightly and press the bar straight up.',
@@ -382,7 +385,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpush'],
     muscles: ['Shoulders', 'Triceps', 'Core'],
     needs: [['kettlebell']],
-    motion: 'kettlebell-press',
+    pattern: 'kettlebell-press',
     cues: [
       'Rack the kettlebell at your shoulder, wrist straight.',
       'Brace and press straight up until your arm is locked.',
@@ -396,7 +399,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpush'],
     muscles: ['Shoulders', 'Triceps'],
     needs: BODYWEIGHT,
-    motion: 'pike-push-up',
+    pattern: 'pike-push-up',
     cues: [
       'Start in a push-up, then walk your feet in and lift your hips high.',
       'Bend your elbows and lower the top of your head toward the floor.',
@@ -410,7 +413,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpush'],
     muscles: ['Shoulders', 'Triceps'],
     needs: [['bands']],
-    motion: 'band-overhead-press',
+    pattern: 'band-overhead-press',
     cues: [
       'Stand on the band with feet hip-width apart. Hold the ends at shoulder height.',
       'Press straight up until your arms are straight.',
@@ -425,7 +428,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpull'],
     muscles: ['Upper back', 'Lats', 'Biceps'],
     needs: [['dumbbells']],
-    motion: 'bent-over-row',
+    pattern: 'bent-over-row',
     cues: [
       'Hinge forward with a flat back, dumbbells hanging under your shoulders.',
       'Pull your elbows back toward your hips.',
@@ -439,7 +442,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpull'],
     muscles: ['Upper back', 'Lats', 'Biceps'],
     needs: [['barbell']],
-    motion: 'barbell-row',
+    pattern: 'barbell-row',
     cues: [
       'Hinge forward with a flat back and an overhand grip.',
       'Pull the bar to your lower ribs.',
@@ -453,7 +456,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpull'],
     muscles: ['Lats', 'Upper back', 'Biceps'],
     needs: [['kettlebell']],
-    motion: 'single-arm-row',
+    pattern: 'single-arm-row',
     cues: [
       'Stagger your stance and rest your free hand on your thigh.',
       'Pull the bell up beside your ribs, elbow close to your body.',
@@ -467,7 +470,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpull'],
     muscles: ['Upper back', 'Lats', 'Biceps'],
     needs: [['bands']],
-    motion: 'seated-row',
+    pattern: 'seated-row',
     cues: [
       'Sit with legs straight and loop the band around your feet.',
       'Sit tall and pull your hands to your stomach.',
@@ -481,7 +484,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['hpull'],
     muscles: ['Upper back', 'Lats', 'Biceps'],
     needs: [['cable']],
-    motion: 'seated-row',
+    pattern: 'seated-row',
     cues: [
       'Sit tall with your feet braced and knees soft.',
       'Pull the handle to your stomach, leading with your elbows.',
@@ -495,7 +498,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['shoulders', 'hpull'],
     muscles: ['Rear shoulders', 'Upper back'],
     needs: [['bands']],
-    motion: 'band-pull-apart',
+    pattern: 'band-pull-apart',
     cues: [
       'Hold the band in front of you at shoulder height, arms straight.',
       'Pull your hands apart until the band touches your chest.',
@@ -509,7 +512,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['shoulders', 'hpull'],
     muscles: ['Rear shoulders', 'Upper back'],
     needs: [['cable'], ['bands']],
-    motion: 'face-pull',
+    pattern: 'face-pull',
     cues: [
       'Anchor the rope or band at face height.',
       'Pull toward your forehead and spread your hands apart.',
@@ -524,7 +527,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpull'],
     muscles: ['Lats', 'Upper back', 'Biceps'],
     needs: [['pullupBar']],
-    motion: 'pull-up',
+    pattern: 'pull-up',
     cues: [
       'Hang with an overhand grip a little wider than your shoulders.',
       'Pull your elbows down toward your ribs until your chin passes the bar.',
@@ -539,7 +542,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpull', 'biceps'],
     muscles: ['Lats', 'Biceps'],
     needs: [['pullupBar']],
-    motion: 'chin-up',
+    pattern: 'chin-up',
     cues: [
       'Hang with palms facing you, hands shoulder-width apart.',
       'Pull your chest toward the bar.',
@@ -553,7 +556,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['vpull'],
     muscles: ['Lats', 'Biceps'],
     needs: [['cable'], ['bands']],
-    motion: 'lat-pulldown',
+    pattern: 'lat-pulldown',
     cues: [
       'Kneel or sit facing the anchor with arms reaching up.',
       'Pull the handle down to your upper chest, elbows driving toward your hips.',
@@ -568,7 +571,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['biceps'],
     muscles: ['Biceps'],
     needs: [['dumbbells']],
-    motion: 'curl',
+    pattern: 'curl',
     cues: [
       'Stand tall with the dumbbells at your sides, palms forward.',
       'Curl the weights up without swinging. Keep your elbows by your ribs.',
@@ -582,7 +585,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['biceps'],
     muscles: ['Biceps', 'Forearms'],
     needs: [['dumbbells']],
-    motion: 'curl',
+    pattern: 'curl',
     cues: [
       'Hold the dumbbells with palms facing each other.',
       'Curl them up, keeping your thumbs on top.',
@@ -596,7 +599,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['biceps'],
     muscles: ['Biceps'],
     needs: [['barbell']],
-    motion: 'barbell-curl',
+    pattern: 'barbell-curl',
     cues: [
       'Hold the bar shoulder-width apart, palms forward.',
       'Curl it to your shoulders while your elbows stay still.',
@@ -610,7 +613,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['biceps'],
     muscles: ['Biceps'],
     needs: [['bands'], ['cable']],
-    motion: 'band-curl',
+    pattern: 'band-curl',
     cues: [
       'Stand on the band and hold the ends, palms forward.',
       'Curl your hands up to your shoulders.',
@@ -624,7 +627,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['triceps'],
     muscles: ['Triceps'],
     needs: [['dumbbells']],
-    motion: 'overhead-extension',
+    pattern: 'overhead-extension',
     cues: [
       'Hold one dumbbell overhead with both hands.',
       'Lower it behind your head by bending your elbows. Keep them pointing up.',
@@ -638,7 +641,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['triceps'],
     muscles: ['Triceps'],
     needs: [['cable'], ['bands']],
-    motion: 'pushdown',
+    pattern: 'pushdown',
     cues: [
       'Anchor the band or cable above head height.',
       'Pin your elbows to your sides.',
@@ -653,7 +656,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['shoulders'],
     muscles: ['Side shoulders'],
     needs: [['dumbbells']],
-    motion: 'lateral-raise',
+    pattern: 'lateral-raise',
     cues: [
       'Hold light dumbbells at your sides with a slight bend in your elbows.',
       'Raise your arms out to the sides until they reach shoulder height.',
@@ -667,7 +670,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['shoulders'],
     muscles: ['Side shoulders'],
     needs: [['bands']],
-    motion: 'band-lateral-raise',
+    pattern: 'band-lateral-raise',
     cues: [
       'Stand on the band and hold an end in each hand.',
       'Raise your arms out to the sides to shoulder height.',
@@ -682,7 +685,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Abs', 'Core'],
     needs: BODYWEIGHT,
-    motion: 'plank',
+    pattern: 'plank',
     cues: [
       'Rest on your forearms with elbows under your shoulders.',
       'Make a straight line from head to heels. Squeeze your glutes.',
@@ -696,7 +699,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Abs', 'Core'],
     needs: BODYWEIGHT,
-    motion: 'dead-bug',
+    pattern: 'dead-bug',
     cues: [
       'Lie on your back with arms pointing up and knees over your hips.',
       'Press your lower back into the floor.',
@@ -710,7 +713,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Abs'],
     needs: BODYWEIGHT,
-    motion: 'crunch',
+    pattern: 'crunch',
     cues: [
       'Lie on your back with knees bent and fingertips behind your ears.',
       'Curl your shoulders off the floor by squeezing your abs.',
@@ -724,7 +727,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Lower abs', 'Hip flexors'],
     needs: BODYWEIGHT,
-    motion: 'leg-raise',
+    pattern: 'leg-raise',
     cues: [
       'Lie on your back with your legs straight and hands at your sides.',
       'Keep your lower back pressed down and lift your legs to vertical.',
@@ -738,7 +741,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Core', 'Lower back', 'Glutes'],
     needs: BODYWEIGHT,
-    motion: 'bird-dog',
+    pattern: 'bird-dog',
     cues: [
       'Start on hands and knees with a flat back.',
       'Reach one arm forward and the opposite leg back.',
@@ -752,7 +755,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core', 'cardio'],
     muscles: ['Core', 'Shoulders', 'Hip flexors'],
     needs: BODYWEIGHT,
-    motion: 'mountain-climber',
+    pattern: 'mountain-climber',
     cues: [
       'Start in a high plank with hands under your shoulders.',
       'Drive one knee toward your chest, then switch legs quickly.',
@@ -766,7 +769,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Obliques', 'Abs'],
     needs: [['medicineBall'], ['dumbbells'], ['kettlebell']],
-    motion: 'russian-twist',
+    pattern: 'russian-twist',
     cues: [
       'Sit leaning back slightly, knees bent, holding the weight at your chest.',
       'Turn your shoulders to one side, then the other.',
@@ -780,7 +783,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Lower abs', 'Hip flexors', 'Grip'],
     needs: [['pullupBar']],
-    motion: 'hanging-knee-raise',
+    pattern: 'hanging-knee-raise',
     cues: [
       'Hang from the bar with straight arms.',
       'Pull your knees up toward your chest without swinging.',
@@ -794,7 +797,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Abs', 'Lats', 'Core'],
     needs: [['abWheel']],
-    motion: 'ab-rollout',
+    pattern: 'ab-rollout',
     cues: [
       'Kneel and hold the wheel under your shoulders.',
       'Roll forward slowly while you keep your back from sagging.',
@@ -808,7 +811,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core', 'cardio'],
     muscles: ['Core', 'Shoulders', 'Lats'],
     needs: [['medicineBall']],
-    motion: 'medicine-ball-slam',
+    pattern: 'medicine-ball-slam',
     cues: [
       'Lift the ball overhead and rise onto your toes.',
       'Slam it into the floor in front of you as hard as you can.',
@@ -823,7 +826,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Full body'],
     needs: BODYWEIGHT,
-    motion: 'jumping-jack',
+    pattern: 'jumping-jack',
     cues: [
       'Jump your feet out wide while you swing your arms overhead.',
       'Jump back to feet together, arms at your sides.',
@@ -837,7 +840,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Hip flexors', 'Quads', 'Calves'],
     needs: BODYWEIGHT,
-    motion: 'high-knees',
+    pattern: 'high-knees',
     cues: [
       'Run in place and drive each knee up to hip height.',
       'Pump your arms in rhythm with your legs.',
@@ -851,7 +854,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Full body'],
     needs: BODYWEIGHT,
-    motion: 'burpee',
+    pattern: 'burpee',
     cues: [
       'Squat down and place your hands on the floor.',
       'Jump your feet back into a plank.',
@@ -865,7 +868,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Calves', 'Shoulders'],
     needs: [['jumpRope']],
-    motion: 'jump-rope',
+    pattern: 'jump-rope',
     cues: [
       'Keep your elbows close and turn the rope with your wrists.',
       'Make small, quick hops just high enough to clear the rope.',
@@ -879,7 +882,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Legs', 'Back', 'Arms'],
     needs: [['rower']],
-    motion: 'rowing-machine',
+    pattern: 'rowing-machine',
     cues: [
       'Push with your legs first, then lean back, then pull with your arms.',
       'Return in reverse order: arms, body, then legs.',
@@ -893,7 +896,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Quads', 'Glutes', 'Calves'],
     needs: [['bike']],
-    motion: 'stationary-bike',
+    pattern: 'stationary-bike',
     cues: [
       'Set the seat so your knee is slightly bent at the bottom of each pedal stroke.',
       'Keep your upper body relaxed.',
@@ -907,7 +910,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['cardio'],
     muscles: ['Legs', 'Heart and lungs'],
     needs: [['treadmill']],
-    motion: 'run',
+    pattern: 'run',
     cues: [
       'Start with a few minutes of walking to warm up.',
       'Run tall with short, quick steps.',
@@ -921,7 +924,7 @@ export const EXERCISES: readonly Exercise[] = [
     slots: ['core'],
     muscles: ['Grip', 'Core', 'Traps'],
     needs: [['dumbbells'], ['kettlebell']],
-    motion: 'farmer-carry',
+    pattern: 'farmer-carry',
     cues: [
       'Hold a heavy weight in each hand at your sides.',
       'Stand tall with shoulders down and back.',

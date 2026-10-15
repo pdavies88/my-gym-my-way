@@ -16,14 +16,6 @@ const palette = {
   danger: '#FF5A5A',
   border: '#272B28',
   success: '#C8FF2E',
-  // 3D demo colors
-  figure: '#E4E7E2',
-  figureJoint: '#C8FF2E',
-  floor: '#151815',
-  grid: '#2A302B',
-  metal: '#8E959B',
-  plate: '#2E332F',
-  wood: '#2B302C',
 } as const;
 
 export const Colors = { light: palette, dark: palette } as const;

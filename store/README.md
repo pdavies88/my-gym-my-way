@@ -42,7 +42,7 @@ These URLs assume the GitHub repo is `pdavies88/my-gym-my-way`. Change them if t
 | Subtitle | Home gym workouts, no paywall | 30 |
 | Primary category | Health & Fitness | |
 | Secondary category | Sports | |
-| Content rights | No, it does not contain, show or access third-party content | |
+| Content rights | Yes, it shows third-party content: embedded YouTube videos, played through YouTube's own embedded player under YouTube's Terms of Service and credited to each channel | |
 | Copyright | 2026 Preston Davies | |
 | Price | Free | |
 
@@ -65,8 +65,8 @@ Pick a focus (full body, upper, lower, push, pull or core) and a length. The app
 OR BUILD YOUR OWN
 Hand-pick every exercise from a library of over 60 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
 
-SEE EVERY MOVE IN 3D
-Every exercise has a looping 3D demonstration. Drag to rotate the figure and check your form from any angle. The demos are built into the app, so they work offline.
+WATCH EVERY MOVE
+Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
 
 A SIMPLE SESSION CHECKLIST
 Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. Finish, and the session goes into your history.
@@ -79,7 +79,7 @@ FREE. FOR REAL.
 - No ads
 - No account or sign-up
 - No analytics or tracking
-- No internet connection needed
+- Works offline, except the exercise videos
 - Your equipment, workouts, history and measurements stay on your phone
 
 My Gym My Way gives general fitness information for adults. It is not medical advice. Talk to a doctor before starting a new exercise program.
@@ -102,8 +102,10 @@ App Store Connect → **App Privacy → Get Started**.
 
 The label then shows "Data Not Collected".
 
+**Review before submitting:** the exercise videos are YouTube embeds in a web view, in privacy-enhanced mode. YouTube receives the viewer's IP address and may record views. That is the standard YouTube embed, not a third-party SDK in the app, and the privacy policy discloses it. Re-read Apple's current App Privacy guidance before answering, in case it now counts embedded web players.
+
 Why this answer:
-- **Nothing leaves the device.** The app sends no data anywhere. Its only network use is opening its own privacy and support pages when the user taps them. Equipment, workouts, history, height, weight and settings are stored only in the app's on-device storage.
+- **The user's data never leaves the device.** Equipment, workouts, history, height, weight and settings are stored only in the app's on-device storage. The app's network use is loading YouTube's embedded player for exercise videos and opening its own privacy and support pages.
 - **No third-party code collects data.** The app has no analytics, crash reporting, advertising or tracking SDK.
 - **Consistency:** the app's privacy manifest (`ios.privacyManifests` in `app.json`) declares no collected data types and no tracking, so the build and the label match. It lists the required-reason APIs that React Native and Expo modules use, taken from their own `PrivacyInfo.xcprivacy` files.
 
@@ -113,7 +115,7 @@ Answer **None** or **No** to every content question: violence, sexual content, p
 
 | Question | Answer | Why |
 | --- | --- | --- |
-| Unrestricted web access | No | The app only opens its own privacy and support pages, in an in-app browser. |
+| Unrestricted web access | No | The app only loads YouTube's embedded player for exercise videos and opens its own privacy and support pages. Links out of the player open in the YouTube app or Safari. |
 | User-generated content shared with others | No | Nothing is shared between users. |
 | Messaging or chat | No | |
 | Advertising | No | |
@@ -139,30 +141,30 @@ These notes also answer the six questions in Apple's "Guideline 2.1 - Informatio
 
 ```
 1. SCREEN RECORDING
-Attached: a recording on a physical iPhone running the latest iOS, starting from launch. It shows choosing equipment, generating a workout, the 3D exercise demo, completing a session, the history and the BMI calculator. The app has no account registration or login, no user-generated content shared with other users, and no paid content or in-app purchases.
+Attached: a recording on a physical iPhone running the latest iOS, starting from launch. It shows choosing equipment, generating a workout, an exercise video, completing a session, the history and the BMI calculator. The app has no account registration or login, no user-generated content shared with other users, and no paid content or in-app purchases.
 
 2. PURPOSE AND AUDIENCE
-My Gym My Way helps adults who train at home plan workouts with the equipment they own. Most workout apps assume a full commercial gym or hide plans behind a subscription. This app asks which equipment the user has, then generates or lets them build workouts that use only that equipment. Each exercise has form cues and a 3D demonstration. The app is free, with no paywall, ads, account or analytics, and it works offline.
+My Gym My Way helps adults who train at home plan workouts with the equipment they own. Most workout apps assume a full commercial gym or hide plans behind a subscription. This app asks which equipment the user has, then generates or lets them build workouts that use only that equipment. Each exercise has form cues and a demonstration video embedded from YouTube. The app is free, with no paywall, ads, account or analytics, and everything except the videos works offline.
 
 3. SETUP AND TEST INSTRUCTIONS
 No login, credentials or sample files are needed.
 a. Launch the app. On the Train tab, tap "Choose equipment", tick a few items (for example Dumbbells and Weight bench) and go back.
 b. Tap "Generate". Pick a focus and a length. Tap "Shuffle" to get a new mix, or swap a single exercise. Tap "Save workout".
-c. Tap any exercise to open its detail page with the 3D demonstration. Drag to rotate the figure.
+c. Tap any exercise to open its detail page with its YouTube demonstration video. Tap play. The credit line under the video opens it on YouTube.
 d. From the saved workout, tap "Start workout". Tick off each exercise, then tap "Finish workout".
 e. Open the History tab to see the session. Open it and tap "Delete from history" to remove it.
 f. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.
 g. Me > About links to the privacy policy and support page.
 
 4. EXTERNAL SERVICES
-None. The app has no backend server, authentication service, payment processor, analytics, crash reporting or advertising SDK. Its only network use is opening its own privacy policy and support pages in an in-app browser when the user taps them. All data is stored on the device.
+YouTube, for exercise demonstration videos. Each exercise embeds one public YouTube video with YouTube's own embedded player, in privacy-enhanced mode (youtube-nocookie.com). The app has no backend server, authentication service, payment processor, analytics, crash reporting or advertising SDK. It also opens its own privacy policy and support pages in an in-app browser when the user taps them. All user data is stored on the device.
 
 5. REGIONAL DIFFERENCES
 The app works the same in every region. All features are available everywhere, and users can choose US or metric units.
 
 6. REGULATED INDUSTRY AND THIRD-PARTY MATERIAL
 The app is not a medical device and does not diagnose, treat or manage any medical condition. It gives general fitness information for adults. The BMI calculator uses the standard formula and World Health Organization adult categories, and says in the app that it is not medical advice.
-No protected third-party material is used. The exercise text was written for this app, and the 3D figures and equipment are drawn in code from simple shapes. Fonts are Archivo under the SIL Open Font License.
+The exercise videos are public YouTube videos shown through YouTube's embedded player under YouTube's Terms of Service. Each is credited to its channel, with a link to watch it on YouTube. The exercise text was written for this app. Fonts are Archivo under the SIL Open Font License.
 
 Privacy policy: https://pdavies88.github.io/my-gym-my-way/privacy/
 Support: https://pdavies88.github.io/my-gym-my-way/support/
@@ -178,7 +180,7 @@ Apple asks for a recording on a physical iPhone running the latest iOS, starting
    1. On the Home Screen, tap the app icon.
    2. Train tab: tap **Choose equipment**, tick a few items and go back.
    3. Tap **Generate**, pick a focus and length, tap **Shuffle** once, then **Save workout**.
-   4. Tap an exercise and rotate the 3D demo.
+   4. Tap an exercise and play its video.
    5. Tap **Start workout**, tick off every exercise and tap **Finish workout**.
    6. History tab: open the session, then tap **Delete from history** and confirm.
    7. Me tab: enter a height and weight to show the BMI, then **About → Privacy policy**.
@@ -191,7 +193,7 @@ Not taken yet. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, f
 
 1. Train tab with saved workouts
 2. Generate screen with a focus picked and the exercise list
-3. Exercise detail with the 3D demo
+3. Exercise detail with the video
 4. Session checklist part way through
 5. Library filtered to your equipment
 6. History
@@ -210,7 +212,7 @@ For the 6.1"/6.3" slot, resize to 1206 × 2622: `mkdir -p 6.3-inch && for f in 0
 | Full description | Same as the App Store description above | 4,000 |
 | App icon | `store/android/play-icon-512.png` | 512 × 512 |
 | Category | Health & Fitness | |
-| Data safety | No data collected, no data shared | |
+| Data safety | No data collected, no data shared. Review the YouTube note under App Privacy first. | |
 
 The Play feature graphic (1024 × 500) and phone screenshots are not made yet. The Whatcha Eatin' repo has `scripts/generate-play-assets.mjs` to copy for them.
 

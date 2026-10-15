@@ -40,11 +40,11 @@ describe('generateWorkout', () => {
     }
   });
 
-  it('never picks two exercises with the same motion', () => {
+  it('never picks two exercises with the same movement pattern', () => {
     for (let seed = 0; seed < 50; seed++) {
       const ids = generateWorkout({ focus: 'upper', count: 8, owned: everything, seed });
-      const motions = ids.map((id) => getExercise(id)!.motion);
-      expect(new Set(motions).size).toBe(motions.length);
+      const patterns = ids.map((id) => getExercise(id)!.pattern);
+      expect(new Set(patterns).size).toBe(patterns.length);
     }
   });
 

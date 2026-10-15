@@ -73,9 +73,9 @@ function pickWeighted(candidates: Exercise[], random: () => number): Exercise | 
   return candidates[candidates.length - 1];
 }
 
-/** Whether two exercises share the same 3D motion. Used to avoid near-duplicates like two kinds of curl. */
-function sameMotion(a: Exercise, b: Exercise) {
-  return a.motion === b.motion;
+/** Whether two exercises share a movement pattern. Used to avoid near-duplicates like two kinds of curl. */
+function samePattern(a: Exercise, b: Exercise) {
+  return a.pattern === b.pattern;
 }
 
 export interface GenerateOptions {
@@ -91,7 +91,7 @@ export function generateWorkout({ focus, count, owned, seed }: GenerateOptions):
   const pool = availableExercises(owned);
   const chosen: Exercise[] = [];
   const template = TEMPLATES[focus];
-  const isFresh = (exercise: Exercise) => !chosen.some((c) => c.id === exercise.id || sameMotion(c, exercise));
+  const isFresh = (exercise: Exercise) => !chosen.some((c) => c.id === exercise.id || samePattern(c, exercise));
 
   for (let i = 0; chosen.length < count && i < template.length * 2; i++) {
     const preferences = template[i % template.length];
@@ -134,7 +134,7 @@ export function swapExercise(ids: string[], index: number, owned: ReadonlySet<Eq
   const random = createRandom(seed);
   const others = ids.filter((_, i) => i !== index).map(getExercise).filter((e): e is Exercise => !!e);
   const pool = availableExercises(owned).filter(
-    (exercise) => exercise.id !== current.id && !others.some((o) => o.id === exercise.id || sameMotion(o, exercise)),
+    (exercise) => exercise.id !== current.id && !others.some((o) => o.id === exercise.id || samePattern(o, exercise)),
   );
 
   const sameSlot = pool.filter((exercise) => exercise.slots[0] === current.slots[0]);

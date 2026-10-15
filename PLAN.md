@@ -1,6 +1,6 @@
 # My Gym My Way: plan
 
-A free home-gym workout app with no paywall, no account and no backend. You pick the equipment you own, and the app builds workouts from it. During a session you tick off exercises. Each exercise has a short 3D demonstration.
+A free home-gym workout app with no paywall, no account and no backend. You pick the equipment you own, and the app builds workouts from it. During a session you tick off exercises. Each exercise has a short demonstration video from YouTube.
 
 ## Decisions
 
@@ -24,13 +24,13 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 4. **Session checklist.** Start a workout and tick off each exercise as you finish it. Reps and weights are not tracked. Finishing saves the session to history, with the date, duration and the exercises you completed.
 5. **History.** A list of past sessions, plus a simple count of sessions this week.
 6. **BMI calculator.** Height and weight in US or metric units. It shows the BMI value and the WHO category, with a "general wellness, not medical advice" line. It stays on the device.
-7. **3D demonstrations.** Tap an exercise to see a looping 3D figure performing it. The figure and equipment are built from simple shapes in code, so there are no model files or licenses to manage. Each movement pattern, such as squat, hinge, press or row, has its own keyframe animation. You can drag to rotate the view.
+7. **Video demonstrations.** Tap an exercise to watch a short demonstration by a real person. Each video is a curated public YouTube video, embedded with YouTube's player in privacy-enhanced mode and credited to its channel. It costs nothing, and the videos need an internet connection. The first version used procedural 3D figures, but they looked clunky, so videos replaced them.
 
 ## Open-source tools
 
 | Need | Tool |
 | --- | --- |
-| 3D rendering | `three` drawn straight onto `expo-gl`. Both work in Expo Go. |
+| Exercise videos | YouTube embeds (`youtube-nocookie.com`) in `react-native-webview`, which works in Expo Go. No API key. |
 | Navigation | `expo-router` with `NativeTabs` |
 | UI animation | `react-native-reanimated` 4: list entrances, checklist ticks, progress bar, press feedback |
 | Storage | `expo-sqlite/kv-store`, with versioned keys |
@@ -46,7 +46,7 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 - **Library tab:** all exercises, filtered by your equipment, with a search field.
 - **History tab:** past sessions.
 - **Me tab:** equipment, BMI calculator, units and an About section.
-- **Exercise detail:** the 3D demo, cues, muscles and equipment.
+- **Exercise detail:** the video, cues, muscles and equipment.
 - **Generate modal:** focus, length and a preview of the result.
 - **Session screen:** the checklist and an elapsed-time counter.
 
@@ -58,7 +58,7 @@ Pure logic lives in `src/lib` and has unit tests:
 - `equipment.ts`: the equipment list
 - `generator.ts`: workout generation, with a seeded random number generator so tests are stable
 - `bmi.ts`: BMI math and unit conversion
-- `motion/`: the forward-kinematics rig, the animation sampler and pose keyframes for each movement
+- `videos.ts`: the curated YouTube video for each exercise
 
 Screens stay thin and read from React context providers.
 
@@ -68,7 +68,7 @@ Screens stay thin and read from React context providers.
 2. Equipment, exercise catalog and the workout generator, with tests.
 3. Saved workouts, session checklist and history.
 4. BMI calculator.
-5. 3D demonstrations.
+5. Exercise videos.
 6. Typecheck, lint, tests, then run in the iOS Simulator.
 
 ## Later
@@ -77,13 +77,9 @@ Screens stay thin and read from React context providers.
 - Store listing, privacy policy and support pages, following sections 7 to 10 of the playbook.
 - Optional rest timer between exercises.
 
-## 3D notes from the build
+## Exercise video notes
 
-These cost time to find. Keep them for the next 3D feature.
-
-- React Three Fiber's native renderer rendered nothing on the iOS 27 simulator, so the demo drives Three.js directly. `src/components/exercise-demo.tsx` owns the GL view and the render loop. `src/components/demo/demo-scene.ts` builds the scene.
-- Three.js 0.186's CommonJS entry calls `process.emitWarning`, which React Native lacks. `metro.config.js` points `three` at its ES module build.
-- Hand Three.js a canvas stub whose `getContext` returns the `expo-gl` context. Passing `context` directly fails Three.js's WebGL 1 check.
-- Keep `msaaSamples={0}` on the `GLView`. With multisampling on, no Three.js frame showed.
-- Use matcap or basic materials. Any material that reads scene lights froze `expo-gl` after its first frame. `demo-scene.ts` generates the matcap texture in code.
-- `npm run preview-motions -- <outDir> [motionId…]` renders every pose to a PNG contact sheet, so you can check poses without a phone.
+- YouTube rejects embeds with no referring page. `exercise-video.tsx` loads the player inside a small HTML page whose base URL is the app's website.
+- Links that leave the player, such as the YouTube logo, open in the YouTube app or the browser instead of inside the embed.
+- Videos can be deleted or have embedding turned off at any time. Run `npm run check-videos` before each release. It asks YouTube's oEmbed endpoint about every video and lists any that need replacing.
+- Playing a video sends a request to YouTube. The privacy policy and `store/README.md` say so. Re-check the App Privacy answer before submitting.

@@ -2,16 +2,25 @@ import { describe, expect, it } from '@jest/globals';
 
 import { EQUIPMENT, EQUIPMENT_IDS, type EquipmentId } from '../equipment';
 import { availableExercises, canDo, EXERCISES, getExercise } from '../exercises';
-import { MOTIONS } from '../motion/motions';
+import { EXERCISE_VIDEOS } from '../videos';
 
 describe('exercise catalog', () => {
   it('has unique ids', () => {
     expect(new Set(EXERCISES.map((e) => e.id)).size).toBe(EXERCISES.length);
   });
 
-  it('points every exercise at a real motion and real equipment', () => {
+  it('gives every exercise a YouTube video with credit details', () => {
     for (const exercise of EXERCISES) {
-      expect(MOTIONS).toHaveProperty(exercise.motion);
+      const video = EXERCISE_VIDEOS[exercise.id];
+      expect(video).toBeDefined();
+      expect(video.videoId).toMatch(/^[\w-]{11}$/);
+      expect(video.channel.length).toBeGreaterThan(0);
+    }
+    expect(Object.keys(EXERCISE_VIDEOS).sort()).toEqual(EXERCISES.map((e) => e.id).sort());
+  });
+
+  it('points every exercise at real equipment', () => {
+    for (const exercise of EXERCISES) {
       for (const option of exercise.needs) {
         expect(option.length).toBeGreaterThan(0);
         for (const item of option) expect(EQUIPMENT_IDS).toContain(item);
