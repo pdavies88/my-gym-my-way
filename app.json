@@ -60,6 +60,9 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "permissions": [
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -92,6 +95,13 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#0A0B0A"
+    "backgroundColor": "#0A0B0A",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "810f158a-75bd-4479-919f-b1bc639edd17"
+      }
+    },
+    "owner": "preston5"
   }
 }
