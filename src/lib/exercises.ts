@@ -32,6 +32,8 @@ export interface Exercise {
    */
   pattern: string;
   cues: string[];
+  /** Shown in the library and builder, but never picked by the workout generator. */
+  libraryOnly?: boolean;
   /** A suggested starting point. The app doesn’t track sets or reps. */
   prescription: string;
 }
@@ -49,7 +51,7 @@ export const EXERCISES: readonly Exercise[] = [
     pattern: 'squat',
     cues: [
       'Stand with feet shoulder-width apart, toes turned out a little.',
-      'Sit your hips back and down. Push your knees out over your toes.',
+      'Sit your hips back and down. Keep your knees in line with your toes.',
       'Lower until your thighs are about level with the floor.',
       'Drive through your whole foot to stand tall.',
     ],
@@ -96,6 +98,7 @@ export const EXERCISES: readonly Exercise[] = [
       'Brace your core with a big breath before each rep.',
       'Sit down and back, keeping the bar over the middle of your foot.',
       'Drive up with your chest and hips rising together.',
+      'Training alone? Set the safety arms just below your lowest squat position.',
     ],
     prescription: '4 sets × 5–8 reps',
   },
@@ -110,6 +113,7 @@ export const EXERCISES: readonly Exercise[] = [
       'Rest the bar on the front of your shoulders with your elbows high and your fingertips under the bar.',
       'Brace and sit straight down between your heels, keeping your chest tall.',
       'Drive up while you keep your elbows pointing forward.',
+      'Set the safety arms just below your lowest position. If you miss a rep, push the bar forward and step back.',
     ],
     prescription: '4 sets × 5–8 reps',
   },
@@ -240,7 +244,7 @@ export const EXERCISES: readonly Exercise[] = [
     cues: [
       'Start light. Hold the bar on your upper back as you would for a squat.',
       'With soft knees, push your hips back and lean forward with a flat back.',
-      'Stop when your torso is close to level with the floor, then stand back up.',
+      'Stop when your hamstrings are tight or your back starts to round, then stand back up. For most people that is before your torso is level with the floor.',
     ],
     prescription: '3 sets × 8–10 reps',
   },
@@ -252,7 +256,7 @@ export const EXERCISES: readonly Exercise[] = [
     needs: [['kettlebell'], ['dumbbells']],
     pattern: 'single-leg-rdl',
     cues: [
-      'Hold the weight in the hand opposite your standing leg.',
+      'Hold the weight in the hand opposite your standing leg, or a dumbbell in each hand.',
       'Hinge forward as your free leg reaches straight back, hips square to the floor.',
       'Lower until you feel a stretch, then stand tall. Finish all reps, then switch legs.',
     ],
@@ -306,7 +310,7 @@ export const EXERCISES: readonly Exercise[] = [
     name: 'Bulgarian split squat',
     slots: ['lunge', 'squat'],
     muscles: ['Quads', 'Glutes'],
-    needs: [['bench']],
+    needs: [['bench'], ['box']],
     pattern: 'split-squat',
     cues: [
       'Rest the top of your back foot on a bench behind you.',
@@ -450,13 +454,13 @@ export const EXERCISES: readonly Exercise[] = [
     id: 'bench-dip',
     name: 'Bench dip',
     slots: ['triceps', 'hpush'],
-    muscles: ['Triceps', 'Chest'],
+    muscles: ['Triceps', 'Front shoulders'],
     needs: [['bench'], ['box']],
     pattern: 'bench-dip',
     cues: [
       'Sit on the edge of the bench, hands beside your hips, fingers forward.',
       'Slide forward off the bench with knees bent and feet flat.',
-      'Bend your elbows straight back and lower until your upper arms are level with the floor.',
+      'Bend your elbows straight back and lower until your upper arms are level with the floor. Stop higher if your shoulders hurt.',
       'Press back up.',
     ],
     prescription: '3 sets × 10–15 reps',
@@ -466,12 +470,12 @@ export const EXERCISES: readonly Exercise[] = [
     name: 'Incline dumbbell press',
     slots: ['hpush', 'vpush'],
     muscles: ['Upper chest', 'Shoulders', 'Triceps'],
-    needs: [['dumbbells', 'bench']],
+    needs: [['dumbbells', 'inclineBench']],
     pattern: 'incline-press',
     cues: [
-      'Set an adjustable bench to about 30 degrees.',
+      'You need a bench that adjusts to an incline. Set it to about 30 degrees.',
       'Press the dumbbells up over your upper chest.',
-      'Lower them to the sides of your chest, then press back up. Skip this one if your bench is flat only.',
+      'Lower them to the sides of your chest, then press back up.',
     ],
     prescription: '3 sets × 8–12 reps',
   },
@@ -514,6 +518,7 @@ export const EXERCISES: readonly Exercise[] = [
     pattern: 'barbell-overhead-press',
     cues: [
       'Hold the bar on the front of your shoulders, hands just outside them.',
+      'Brace your core and squeeze your glutes so your back doesn’t arch.',
       'Move your head back slightly and press the bar straight up.',
       'Push your head through once the bar passes your forehead.',
     ],
@@ -665,7 +670,7 @@ export const EXERCISES: readonly Exercise[] = [
     name: 'Chest-supported row',
     slots: ['hpull'],
     muscles: ['Upper back', 'Lats', 'Rear shoulders'],
-    needs: [['dumbbells', 'bench']],
+    needs: [['dumbbells', 'inclineBench']],
     pattern: 'chest-supported-row',
     cues: [
       'Set the bench to an incline and lie face down with your chest on the pad.',
@@ -686,7 +691,7 @@ export const EXERCISES: readonly Exercise[] = [
       'Hang with an overhand grip a little wider than your shoulders.',
       'Pull your elbows down toward your ribs until your chin passes the bar.',
       'Lower all the way down with control.',
-      'Too hard for now? Loop a band under your feet for help.',
+      'Too hard for now? Loop a band over the bar and put one foot or knee in it, or do negative pull-ups.',
     ],
     prescription: '3 sets × as many as you can',
   },
@@ -739,6 +744,7 @@ export const EXERCISES: readonly Exercise[] = [
     muscles: ['Grip', 'Shoulders', 'Lats'],
     needs: [['pullupBar']],
     pattern: 'dead-hang',
+    libraryOnly: true,
     cues: [
       'Grab the bar with an overhand grip, shoulder-width apart.',
       'Hang with straight arms and let your shoulders relax up toward your ears.',
@@ -797,9 +803,9 @@ export const EXERCISES: readonly Exercise[] = [
     needs: [['bands'], ['cable']],
     pattern: 'band-curl',
     cues: [
-      'Stand on the band and hold the ends, palms forward.',
+      'Stand on the band and hold the ends, palms forward. On a cable, set the pulley low and hold the bar or handles.',
       'Curl your hands up to your shoulders.',
-      'Lower slowly against the band.',
+      'Lower slowly against the resistance.',
     ],
     prescription: '3 sets × 12–15 reps',
   },
@@ -995,6 +1001,7 @@ export const EXERCISES: readonly Exercise[] = [
     needs: [['medicineBall']],
     pattern: 'medicine-ball-slam',
     cues: [
+      'Use a slam ball or a no-bounce medicine ball. A bouncy ball can rebound into your face.',
       'Lift the ball overhead and rise onto your toes.',
       'Slam it into the floor in front of you as hard as you can.',
       'Squat to pick it up and repeat.',
@@ -1061,7 +1068,7 @@ export const EXERCISES: readonly Exercise[] = [
     id: 'bag-slip-drill',
     name: 'Footwork and slips on the bag',
     slots: ['cardio'],
-    muscles: ['Legs', 'Core', 'Full body'],
+    muscles: ['Legs', 'Core', 'Shoulders'],
     needs: [['heavyBag']],
     pattern: 'bag-slip-drill',
     cues: [
@@ -1098,7 +1105,7 @@ export const EXERCISES: readonly Exercise[] = [
       'Face away from the anchor and hold the handles in front of your chest.',
       'Lean forward into a straight-body push-up position.',
       'Lower your chest between your hands, then press back up.',
-      'Step your feet back to make it easier, forward to make it harder.',
+      'Walk your feet back toward the anchor to make it harder, away from it to make it easier.',
     ],
     prescription: '3 sets × 8–12 reps',
   },
@@ -1124,7 +1131,7 @@ export const EXERCISES: readonly Exercise[] = [
     needs: [['suspension']],
     pattern: 'trx-lunge',
     cues: [
-      'Face away from the anchor and put one foot in both foot cradles behind you.',
+      'Face away from the anchor. Thread one foot cradle through the other and put one foot in it behind you.',
       'Lower your back knee toward the floor as the strap swings back.',
       'Push through your front heel to stand. Finish one side, then switch.',
     ],
@@ -1239,7 +1246,7 @@ export const EXERCISES: readonly Exercise[] = [
     pattern: 'bag-uppercuts',
     cues: [
       'Stand close to the bag and dip slightly at the knees.',
-      'Drive up through your legs and turn your hip as your fist rises palm-up under the bag.',
+      'Drive up through your legs and turn your hip as your fist rises palm-up into the lower half of the bag.',
       'Keep the punch short. Alternate hands and return to your guard each time.',
     ],
     prescription: '3 rounds × 1–2 minutes',
@@ -1339,7 +1346,7 @@ export const EXERCISES: readonly Exercise[] = [
     cues: [
       'Start with a few minutes of walking to warm up.',
       'Run tall with short, quick steps.',
-      'Pick a pace where you can still speak a few words.',
+      'Pick a pace where you can still talk in short sentences.',
     ],
     prescription: '10–20 minutes',
   },

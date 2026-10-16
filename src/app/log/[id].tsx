@@ -12,6 +12,7 @@ import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise } from '@/lib/exercises';
 import { formatDuration } from '@/lib/time';
+import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionLogScreen() {
   const theme = useTheme();
@@ -105,7 +106,7 @@ export default function SessionLogScreen() {
 
       <View style={styles.buttons}>
         {fresh ? (
-          <Button title="Done" onPress={() => router.dismissAll()} />
+          <Button title="Done" onPress={goHome} />
         ) : (
           <Button title="Do it again" icon={{ ios: 'arrow.clockwise', android: 'replay' }} onPress={repeat} />
         )}
@@ -119,7 +120,7 @@ export default function SessionLogScreen() {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: () => {
-                  router.back();
+                  goBackOrHome();
                   deleteSession(log.id);
                 },
               },

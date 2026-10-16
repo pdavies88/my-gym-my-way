@@ -24,5 +24,5 @@ npx tsc --noEmit && npx expo lint && npm test
 - `src/app`: screens (Expo Router)
 - `src/components`: UI pieces, including the YouTube video player
 - `src/context`: settings and training data providers
-- `src/lib`: pure logic with tests: equipment, exercises, videos, workout generator and BMI
+- `src/lib`: pure logic with tests: equipment, exercises, videos, workout generator, guided cardio, voice choice and BMI
 - `scripts/check-videos.mjs`: checks every exercise video still exists and allows embedding (`npm run check-videos`)

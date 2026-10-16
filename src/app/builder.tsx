@@ -51,6 +51,7 @@ export default function BuilderScreen() {
           value={name}
           onChangeText={setName}
           placeholder="Leg day, Morning burner…"
+          accessibilityLabel="Workout name"
           placeholderTextColor={theme.textSecondary}
           style={inputStyle}
           returnKeyType="done"
@@ -109,6 +110,7 @@ export default function BuilderScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder="Search by name or muscle"
+          accessibilityLabel="Search exercises"
           placeholderTextColor={theme.textSecondary}
           style={inputStyle}
           autoCorrect={false}

@@ -24,6 +24,7 @@ import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
 import { formatElapsed } from '@/lib/time';
+import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionScreen() {
   const { active, toggleExercise, finishSession, discardSession } = useTraining();
@@ -40,7 +41,7 @@ export default function SessionScreen() {
       <Screen tab={false}>
         <Stack.Screen options={{ headerBackVisible: true }} />
         <ThemedText themeColor="textSecondary">No session in progress.</ThemedText>
-        <Button title="Back to Train" variant="secondary" onPress={() => router.dismissAll()} />
+        <Button title="Back to Train" variant="secondary" onPress={goHome} />
       </Screen>
     );
   }
@@ -70,8 +71,9 @@ export default function SessionScreen() {
         text: 'Discard',
         style: 'destructive',
         onPress: () => {
+          feedback.warning();
           discardSession();
-          router.dismissAll();
+          goHome();
         },
       },
     ]);
@@ -84,7 +86,7 @@ export default function SessionScreen() {
             <IconButton
               icon={{ ios: 'chevron.down', android: 'expand_more' }}
               label="Minimize"
-              onPress={() => router.back()}
+              onPress={goBackOrHome}
             />
           ),
         }}
@@ -173,7 +175,7 @@ function CheckRow({
         </Animated.View>
       </PressableScale>
       <IconButton
-        icon={{ ios: 'cube.transparent', android: 'view_in_ar' }}
+        icon={{ ios: 'play.rectangle', android: 'smart_display' }}
         label={`Show ${exercise.name} demo`}
         onPress={() => router.push({ pathname: '/exercise/[id]', params: { id: exercise.id } })}
       />

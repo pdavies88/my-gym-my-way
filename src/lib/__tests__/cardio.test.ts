@@ -126,3 +126,22 @@ describe('stepAnnouncement', () => {
     expect(stepAnnouncement({ label: 'Warm up', seconds: 300, effort: 'warmup', cue: '' })).toBe('Warm up. 5 minutes.');
   });
 });
+
+describe('bag combos', () => {
+  it('link each combo to the video for its hardest punch', () => {
+    const session = getCardioSession('bag-power-rounds')!;
+    const linked = (label: string) => session.steps.find((s) => s.label === label)?.exerciseId;
+    expect(linked('Round 1: 1-2')).toBe('bag-jab-cross');
+    expect(linked('Round 3: 1-2-3')).toBe('bag-hooks');
+    expect(linked('Round 5: 1-2-5-2')).toBe('bag-uppercuts');
+  });
+
+  it('explain the punch numbers in every session that uses them', () => {
+    for (const session of CARDIO_SESSIONS) {
+      const usesNumbers = session.steps.some(
+        (s) => /\d-\d/.test(`${s.label} ${s.cue}`) && s.exerciseId?.startsWith('bag-'),
+      );
+      if (usesNumbers) expect(session.steps.some((s) => s.cue.includes('1 jab, 2 cross'))).toBe(true);
+    }
+  });
+});

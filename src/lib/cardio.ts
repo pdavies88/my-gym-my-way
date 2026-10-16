@@ -82,6 +82,13 @@ function rounds(count: number, make: (round: number) => CardioStep[]): CardioSte
 const PUNCH_KEY = '1 jab, 2 cross, 3 lead hook, 4 rear hook, 5 lead uppercut, 6 rear uppercut.';
 const COMBOS = ['1-2', '1-1-2', '1-2-3', '2-3-2', '1-2-5-2', '3-4-3', 'Freestyle: mix everything'];
 
+/** The library exercise whose video teaches the hardest punch in a combo. */
+function comboExercise(combo: string): string {
+  if (/[56]/.test(combo)) return 'bag-uppercuts';
+  if (/[34]/.test(combo)) return 'bag-hooks';
+  return 'bag-jab-cross';
+}
+
 export const CARDIO_SESSIONS: readonly CardioSession[] = [
   // Rower
   {
@@ -114,7 +121,12 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     steps: [
       step('Warm up', min(5), 'warmup', 'Easy rowing. Add three 10-stroke pushes in the last two minutes.'),
       ...rounds(8, (r) => [
-        step(`Hard ${r} of 8`, min(1), 'hard', 'Rate 26–28. Drive with the legs and hold the pace to the end.'),
+        step(
+          `Hard ${r} of 8`,
+          min(1),
+          'hard',
+          '26–28 strokes a minute. Drive with the legs and hold the pace to the end.',
+        ),
         step('Easy', min(1), 'easy', 'Paddle at rate 18–20. Keep moving.'),
       ]),
       step('Cool down', min(3), 'easy', 'Light rowing. Long, relaxed strokes.'),
@@ -135,10 +147,10 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Hard 2 min', min(2), 'hard', 'Rate 26. Keep every stroke the same length.'),
       step('Easy', min(1), 'easy', 'Paddle and breathe.'),
       step('Hard 3 min', min(3), 'hard', 'Rate 24–26. This is the top of the pyramid. Stay smooth.'),
-      step('Easy', min(2), 'easy', 'Paddle. Halfway done.'),
+      step('Easy', min(2), 'easy', 'Paddle. You’re over the top.'),
       step('Hard 2 min', min(2), 'hard', 'Rate 26. Match your first 2-minute piece.'),
       step('Easy', min(1), 'easy', 'Paddle and breathe.'),
-      step('Hard 1 min', min(1), 'max', 'Everything you have left.'),
+      step('All-out 1 min', min(1), 'max', 'Everything you have left.'),
       step('Cool down', min(3), 'easy', 'Light rowing until your breathing settles.'),
     ],
   },
@@ -152,7 +164,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     needs: ['treadmill'],
     techniqueExerciseId: 'treadmill-run',
     steps: [
-      step('Warm up', min(5), 'warmup', 'Brisk walk, about 5–6 km/h (3–3.5 mph).'),
+      step('Warm up', min(5), 'warmup', 'Brisk walk, about 5–6 km/h (3–3.7 mph).'),
       ...rounds(6, (r) => [
         step(`Jog ${r} of 6`, min(1), 'moderate', 'Easy jog, about 7–9 km/h (4.5–5.5 mph). Short, light steps.'),
         step('Walk', min(2), 'easy', 'Brisk walk. Let your breathing come back.'),
@@ -171,7 +183,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     steps: [
       step('Warm up', min(5), 'warmup', 'Walk flat at an easy pace.'),
       ...rounds(5, (r) => [
-        step(`Hill ${r} of 5`, min(2), 'hard', 'Raise the incline to 8–10%. Walk briskly. Don’t hold the rails.'),
+        step(`Hill ${r} of 5`, min(2), 'moderate', 'Raise the incline to 8–10%. Walk briskly. Don’t hold the rails.'),
         step('Flat', min(2), 'easy', 'Drop the incline to 1%. Keep walking.'),
       ]),
       step('Cool down', min(3), 'easy', 'Slow walk on the flat.'),
@@ -188,7 +200,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     steps: [
       step('Warm up', min(5), 'warmup', 'Walk for 2 minutes, then an easy jog.'),
       ...rounds(8, (r) => [
-        step(`Fast ${r} of 8`, 30, 'max', 'Run fast but in control, about 12–15 km/h (7.5–9 mph).'),
+        step(`Fast ${r} of 8`, 30, 'hard', 'Run fast but in control, about 12–15 km/h (7.5–9 mph).'),
         step('Easy jog', 90, 'easy', 'Slow right down to an easy jog or a walk.'),
       ]),
       step('Cool down', min(4), 'easy', 'Easy jog, then walk.'),
@@ -208,7 +220,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         'Warm up',
         min(3),
         'warmup',
-        'Shadowbox in front of the bag: light punches, bounce on your toes, roll your shoulders.',
+        `Shadowbox in front of the bag: light punches, bounce on your toes. Punch numbers: ${PUNCH_KEY}`,
       ),
       step('Round 1: jab-cross', min(3), 'moderate', 'Throw 1-2. Snap each punch back to your chin.', 'bag-jab-cross'),
       step('Rest', min(1), 'rest', 'Walk around. Hands down, breathe.'),
@@ -242,13 +254,13 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Warm up', min(3), 'warmup', `Shadowbox and learn the punch numbers: ${PUNCH_KEY}`),
       ...rounds(6, (r) => [
         step(
-          `Round ${r}: ${COMBOS[r - 1]}`,
+          r === 6 ? 'Round 6: freestyle' : `Round ${r}: ${COMBOS[r - 1]}`,
           min(2),
-          r === 6 ? 'max' : 'hard',
+          'hard',
           r === 6
             ? 'Last round. Mix every punch and keep your hands moving.'
             : `Throw ${COMBOS[r - 1]} on repeat. Reset your stance after each combo.`,
-          'bag-jab-cross',
+          r === 6 ? 'bag-body-shots' : comboExercise(COMBOS[r - 1]),
         ),
         ...(r < 6 ? [step('Rest', min(1), 'rest' as const, 'Breathe and shake out your arms.')] : []),
       ]),
@@ -264,7 +276,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     needs: ['heavyBag'],
     techniqueExerciseId: 'bag-jab-cross',
     steps: [
-      step('Warm up', min(3), 'warmup', 'Shadowbox, then a few light rounds of 1-2 on the bag.'),
+      step('Warm up', min(3), 'warmup', `Shadowbox, then light 1-2s on the bag. Punch numbers: ${PUNCH_KEY}`),
       ...rounds(8, (r) => [
         step(`Block 1 · ${r} of 8`, 20, 'max', 'Fast straight punches. 1-2-1-2 as quick as you can.', 'bag-jab-cross'),
         step('Rest', 10, 'rest', 'Hands up. Get ready.'),
@@ -316,7 +328,8 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
   {
     id: 'kettlebell-burner',
     name: 'Kettlebell burner',
-    summary: 'Five rounds of 40 seconds on, 20 off. Swings, cleans, squats and get-ups.',
+    summary:
+      'Five rounds of 40 seconds on, 20 off. Swings, cleans, squats and single-leg deadlifts, then a get-up finisher.',
     level: 'Advanced',
     category: 'kettlebell',
     needs: ['kettlebell'],
@@ -324,7 +337,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     steps: [
       step('Warm up', min(4), 'warmup', 'Halos, light swings and a slow get-up each side.', 'kettlebell-halo'),
       ...rounds(5, (r) => [
-        step(`Swings · round ${r}`, 40, 'max', 'Hard, fast hips. Keep your back flat.', 'kettlebell-swing'),
+        step(`Swings · round ${r}`, 40, 'hard', 'Hard, fast hips. Keep your back flat.', 'kettlebell-swing'),
         step('Rest', 20, 'rest', 'Next: cleans.'),
         step(`Cleans · round ${r}`, 40, 'hard', 'Left arm for 20 seconds, then right.', 'kettlebell-clean'),
         step('Rest', 20, 'rest', 'Next: goblet squats.'),
@@ -343,7 +356,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         'Get-up finisher',
         min(2),
         'moderate',
-        'One slow Turkish get-up on each side. Quality over speed.',
+        'One slow Turkish get-up on each side, with a lighter bell than your swing bell. Quality over speed.',
         'turkish-get-up',
       ),
       step('Cool down', min(2), 'easy', 'Walk, then stretch your hamstrings and shoulders.'),
@@ -372,7 +385,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
           'Deep and steady. Add a jump at the top to push harder.',
           'trx-squat',
         ),
-        step('Rest', 20, 'rest', 'Next: knee tucks. Feet in the cradles.'),
+        step('Rest', 20, 'rest', 'Next: knee tucks. Lengthen the straps to mid-calf, feet in the cradles.'),
         step(`Knee tucks · round ${r}`, 40, 'hard', 'Hips level, knees to chest.', 'trx-knee-tuck'),
         step('Rest', 20, 'rest', 'Next: suspended lunges.'),
         step(`Lunges · round ${r}`, 40, 'moderate', 'Switch legs halfway.', 'trx-lunge'),
@@ -453,7 +466,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     category: 'bodyweight',
     needs: [],
     steps: [
-      step('Warm up', min(3), 'warmup', 'March on the spot, then easy jumping jacks.', 'jumping-jack'),
+      step('Warm up', min(3), 'warmup', 'March in place, then easy jumping jacks.', 'jumping-jack'),
       ...rounds(4, (r) => [
         step(`Jumping jacks · round ${r}`, 40, 'hard', 'Arms all the way overhead.', 'jumping-jack'),
         step('Rest', 20, 'rest', 'Next: high knees.'),
@@ -461,7 +474,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         step('Rest', 20, 'rest', 'Next: mountain climbers.'),
         step(`Mountain climbers · round ${r}`, 40, 'hard', 'Hips low. Drive your knees in fast.', 'mountain-climber'),
         step('Rest', 20, 'rest', 'Next: burpees.'),
-        step(`Burpees · round ${r}`, 40, 'max', 'Steady pace. Step back instead of jumping if you need to.', 'burpee'),
+        step(`Burpees · round ${r}`, 40, 'hard', 'Steady pace. Step back instead of jumping if you need to.', 'burpee'),
         step('Rest', 20, 'rest', r < 4 ? 'Round done. Next: jumping jacks.' : 'Last rest. Nearly there.'),
       ]),
       step('Cool down', min(3), 'easy', 'Walk around, then stretch your legs and chest.'),
@@ -481,7 +494,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       ...rounds(4, (r) => [
         step(`Row · round ${r}`, min(2), 'hard', 'Rate 26–28. Then get straight to the bag.'),
         step(`Bag · round ${r}`, min(1), 'max', 'Freestyle on the bag. Keep your hands moving.', 'bag-jab-cross'),
-        step('Rest', min(1), 'rest', r < 4 ? 'Gloves off or on, then back to the rower.' : 'Last rest.'),
+        step('Rest', min(1), 'rest', r < 4 ? 'Take your gloves off, then back to the rower.' : 'Last rest.'),
       ]),
       step('Cool down', min(3), 'easy', 'Easy rowing, then stretch.'),
     ],
@@ -495,10 +508,10 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     needs: ['treadmill', 'heavyBag'],
     techniqueExerciseId: 'treadmill-run',
     steps: [
-      step('Warm up', min(5), 'warmup', 'Walk, then an easy jog.'),
+      step('Warm up', min(5), 'warmup', `Walk, then an easy jog. On the bag, punch numbers are: ${PUNCH_KEY}`),
       ...rounds(4, (r) => [
-        step(`Run · round ${r}`, min(3), 'hard', 'Comfortably hard pace. Then slow the belt and step off.'),
-        step(`Bag · round ${r}`, min(2), 'hard', `Throw ${COMBOS[r]} on repeat.`, 'bag-jab-cross'),
+        step(`Run · round ${r}`, min(3), 'hard', 'Comfortably hard pace. Then stop the belt before you step off.'),
+        step(`Bag · round ${r}`, min(2), 'hard', `Throw ${COMBOS[r - 1]} on repeat.`, comboExercise(COMBOS[r - 1])),
         step('Rest', min(1), 'rest', 'Breathe. Back on the treadmill next.'),
       ]),
       step('Cool down', min(3), 'easy', 'Walk on the treadmill.'),
@@ -518,8 +531,8 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         step(`Row · round ${r}`, min(3), 'hard', 'Rate 26. Strong and steady.'),
         step('Move', 45, 'rest', 'Walk to the treadmill and start the belt slowly.'),
         step(`Run · round ${r}`, min(3), 'hard', 'Comfortably hard pace.'),
-        step('Move', 45, 'rest', 'Slow the belt, step off and get your gloves on.'),
-        step(`Bag · round ${r}`, min(2), 'max', 'Freestyle. Empty the tank.', 'bag-jab-cross'),
+        step('Move', 45, 'rest', 'Stop the belt, step off and get your gloves on.'),
+        step(`Bag · round ${r}`, min(2), 'hard', 'Freestyle. Keep your hands moving.', 'bag-body-shots'),
         step('Rest', min(1), 'rest', r < 3 ? 'Back to the rower next.' : 'Done with the hard part.'),
       ]),
       step('Cool down', min(3), 'easy', 'Easy rowing or walking, then stretch.'),
@@ -556,9 +569,15 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Warm up', min(3), 'warmup', 'Shadowbox, then a few light swings.'),
       ...rounds(4, (r) => [
         step(`Bag · round ${r}`, min(1), 'hard', 'Freestyle. Mix head and body shots.', 'bag-body-shots'),
-        step(`Swings · round ${r}`, 45, 'max', 'Gloves off, straight to the bell.', 'kettlebell-swing'),
+        step(`Swings · round ${r}`, 45, 'hard', 'Gloves off, straight to the bell.', 'kettlebell-swing'),
         step(`TRX rows · round ${r}`, 45, 'hard', 'Squeeze your shoulder blades at the top.', 'trx-row'),
-        step(`Knee tucks · round ${r}`, 30, 'hard', 'Feet in the cradles, hips level.', 'trx-knee-tuck'),
+        step(
+          `Knee tucks · round ${r}`,
+          30,
+          'hard',
+          'Lengthen the straps, feet in the cradles, hips level.',
+          'trx-knee-tuck',
+        ),
         step('Rest', 90, 'rest', r < 4 ? 'Gloves back on. Bag next.' : 'Last rest.'),
       ]),
       step('Cool down', min(3), 'easy', 'Walk, then stretch your hips, back and shoulders.'),
@@ -576,13 +595,6 @@ export function canDoCardio(session: CardioSession, owned: ReadonlySet<Equipment
 
 export function totalSeconds(session: Pick<CardioSession, 'steps'>): number {
   return session.steps.reduce((sum, s) => sum + s.seconds, 0);
-}
-
-/** Seconds spent at each effort level, for the overview bar. */
-export function effortBreakdown(session: Pick<CardioSession, 'steps'>): Partial<Record<Effort, number>> {
-  const breakdown: Partial<Record<Effort, number>> = {};
-  for (const s of session.steps) breakdown[s.effort] = (breakdown[s.effort] ?? 0) + s.seconds;
-  return breakdown;
 }
 
 export interface Position {
@@ -637,15 +649,20 @@ export function formatCountdown(seconds: number): string {
 
 /**
  * How hard each effort level is, on the 1–10 rate of perceived exertion (RPE) scale, with a rough
- * heart-rate zone for people who wear a watch. Shown live during a session.
+ * heart-rate zone for people who wear a watch. Shown live during a session. Max heart rate is roughly
+ * 220 minus your age; the app says so on the session overview.
  */
 export const INTENSITY: Record<Effort, { rpe: [number, number]; heartRate: string; feel: string }> = {
   warmup: { rpe: [3, 4], heartRate: 'about 50–60% of max', feel: 'Light. Loosen up and let your breathing pick up.' },
   easy: { rpe: [3, 4], heartRate: 'about 60–70% of max', feel: 'Comfortable. You could chat the whole time.' },
   moderate: { rpe: [5, 6], heartRate: 'about 70–80% of max', feel: 'Working. Breathing deeper, short sentences only.' },
   hard: { rpe: [7, 8], heartRate: 'about 80–90% of max', feel: 'Tough. A few words at a time. Hold your form.' },
-  max: { rpe: [9, 10], heartRate: 'above 90% of max', feel: 'Everything you have. No talking. It’s short.' },
-  rest: { rpe: [1, 2], heartRate: 'coming down', feel: 'Recover. Slow, deep breaths through your nose.' },
+  max: {
+    rpe: [9, 10],
+    heartRate: 'heading above 90% of max. It lags in short intervals',
+    feel: 'Everything you have. No talking. It’s short.',
+  },
+  rest: { rpe: [1, 2], heartRate: 'coming down', feel: 'Recover. Slow, deep breaths.' },
 };
 
 export type Cue =

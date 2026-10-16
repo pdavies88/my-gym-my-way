@@ -103,6 +103,11 @@ export default function CardioOverviewScreen() {
               </ThemedText>
             </View>
           ))}
+          <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
+            Heart rates are a percent of your max, which is roughly 220 minus your age. If you take medicine that
+            affects your heart rate, go by feel instead. This is general fitness guidance, not medical advice. Stop if
+            you feel chest pain or pressure, dizziness, or shortness of breath that’s unusual for you.
+          </ThemedText>
         </Card>
       </View>
 
@@ -151,4 +156,5 @@ const styles = StyleSheet.create({
   },
   bar: { width: 4, height: 18, borderRadius: 1 },
   flex: { flex: 1 },
+  note: { marginTop: Spacing.two, fontSize: 12, lineHeight: 17 },
 });

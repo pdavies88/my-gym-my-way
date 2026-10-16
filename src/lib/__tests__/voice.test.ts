@@ -27,6 +27,22 @@ describe('pickVoice', () => {
     expect(pickVoice(voices.slice(0, 2))?.name).toBe('Samantha');
   });
 
+  it('prefers an enhanced Ava or Zoe over other premium voices', () => {
+    const voices = [
+      v('Evan', 'Enhanced', 'en-US', 'com.apple.voice.premium.en-US.Evan'),
+      v('Ava', 'Enhanced', 'en-US', 'com.apple.voice.enhanced.en-US.Ava'),
+    ];
+    expect(pickVoice(voices)?.name).toBe('Ava');
+  });
+
+  it('does not let a basic Ava beat a better-quality voice', () => {
+    const voices = [
+      v('Ava', 'Default', 'en-US'),
+      v('Samantha', 'Enhanced', 'en-US', 'com.apple.voice.enhanced.en-US.Samantha'),
+    ];
+    expect(pickVoice(voices)?.name).toBe('Samantha');
+  });
+
   it('never picks novelty or Eloquence voices', () => {
     expect(
       pickVoice([v('Zarvox', 'Default', 'en-US'), v('Eddy', 'Default', 'en-US', 'com.apple.eloquence.en-US.Eddy')]),

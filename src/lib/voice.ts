@@ -40,6 +40,9 @@ const ROBOTIC = [
   'eddy',
 ];
 
+/** Apple's most natural English voices. When one is downloaded in Enhanced or Premium quality, it wins. */
+const PREFERRED = ['ava', 'zoe'];
+
 /** Voices that sound natural even at standard quality. */
 const NATURAL = [
   'ava',
@@ -65,6 +68,7 @@ function score(voice: VoiceInfo, locale: string): number {
   let points = 0;
   if (id.includes('premium')) points += 4;
   else if (voice.quality === 'Enhanced' || id.includes('enhanced')) points += 3;
+  if (PREFERRED.some((n) => name.startsWith(n))) points += 1.5;
   if (NATURAL.some((n) => name.startsWith(n))) points += 1;
   if (voice.language.toLowerCase() === locale.toLowerCase()) points += 0.5;
   return points;

@@ -60,16 +60,16 @@ My Gym My Way builds home workouts from the equipment you actually own.
 Tick off your gear once: dumbbells, a barbell, a rack, a bench, kettlebells, bands, a pull-up bar, a cable machine, a suspension trainer, a boxing bag or cardio machines. Bodyweight is always included. Every workout and every exercise in the library fits what you have.
 
 GENERATE A WORKOUT IN SECONDS
-Pick a focus (full body, upper, lower, push, pull or core) and a length. The app picks exercises you can do and balances them across movement patterns. Swap any move you don't like, shuffle for a new mix, and save the ones you love.
+Pick a focus (full body, upper, lower, push, pull, core or conditioning) and a length. The app picks exercises you can do and balances them across movement patterns. Swap any move you don't like, shuffle for a new mix, and save the ones you love.
 
 OR BUILD YOUR OWN
-Hand-pick every exercise from a library of over 60 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
+Hand-pick every exercise from a library of over 90 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
 
 WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
 
 GUIDED CARDIO
-Timed sessions for the rower, treadmill, boxing bag, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go and what's next, with a buzz at every change.
+Timed sessions for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
 A SIMPLE SESSION CHECKLIST
 Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. Finish, and the session goes into your history.
@@ -144,7 +144,7 @@ These notes also answer the six questions in Apple's "Guideline 2.1 - Informatio
 
 ```
 1. SCREEN RECORDING
-Attached: a recording on a physical iPhone running the latest iOS, starting from launch. It shows choosing equipment, generating a workout, an exercise video, completing a session, the history and the BMI calculator. The app has no account registration or login, no user-generated content shared with other users, and no paid content or in-app purchases.
+Attached: a recording on a physical iPhone running the latest iOS, starting from launch. It shows choosing equipment, generating a workout, an exercise video, completing a session, a guided cardio session, the history and the BMI calculator. The app has no account registration or login, no user-generated content shared with other users, and no paid content or in-app purchases.
 
 2. PURPOSE AND AUDIENCE
 My Gym My Way helps adults who train at home plan workouts with the equipment they own. Most workout apps assume a full commercial gym or hide plans behind a subscription. This app asks which equipment the user has, then generates or lets them build workouts that use only that equipment. Each exercise has form cues and a demonstration video embedded from YouTube. The app is free, with no paywall, ads, account or analytics, and everything except the videos works offline.
@@ -155,9 +155,10 @@ a. Launch the app. On the Train tab, tap "Choose equipment", tick a few items (f
 b. Tap "Generate". Pick a focus and a length. Tap "Shuffle" to get a new mix, or swap a single exercise. Tap "Save workout".
 c. Tap any exercise to open its detail page with its YouTube demonstration video. Tap play. The credit line under the video opens it on YouTube.
 d. From the saved workout, tap "Start workout". Tick off each exercise, then tap "Finish workout".
-e. Open the History tab to see the session. Open it and tap "Delete from history" to remove it.
-f. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.
-g. Me > About links to the privacy policy and support page.
+e. Open the Cardio tab, choose any session ("No-equipment HIIT" needs no gear) and tap "Start session". The timer shows each step with chimes and a spoken cue. Tap the skip button to move through steps, then the X and "Save and end".
+f. Open the History tab to see the sessions. Open it and tap "Delete from history" to remove it.
+g. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.
+h. Me > Feedback has switches for sounds, voice and haptics. Me > About links to the privacy policy and support page.
 
 4. EXTERNAL SERVICES
 YouTube, for exercise demonstration videos. Each exercise embeds one public YouTube video with YouTube's own embedded player, in privacy-enhanced mode (youtube-nocookie.com). The app has no backend server, authentication service, payment processor, analytics, crash reporting or advertising SDK. It also opens its own privacy policy and support pages in an in-app browser when the user taps them. All user data is stored on the device.
@@ -185,8 +186,9 @@ Apple asks for a recording on a physical iPhone running the latest iOS, starting
    3. Tap **Generate**, pick a focus and length, tap **Shuffle** once, then **Save workout**.
    4. Tap an exercise and play its video.
    5. Tap **Start workout**, tick off every exercise and tap **Finish workout**.
-   6. History tab: open the session, then tap **Delete from history** and confirm.
-   7. Me tab: enter a height and weight to show the BMI, then **About → Privacy policy**.
+   6. Cardio tab: open **No-equipment HIIT**, tap **Start session**, let one step change happen, then tap the X and **Save and end**.
+   7. History tab: open the session, then tap **Delete from history** and confirm.
+   8. Me tab: enter a height and weight to show the BMI, then **About → Privacy policy**.
 4. Stop recording from the red status indicator. The video is saved to Photos.
 5. AirDrop it to your Mac. Attach it to your reply in App Store Connect. If the upload is too large, export a smaller copy with QuickTime (File → Export As → 1080p) and try again.
 

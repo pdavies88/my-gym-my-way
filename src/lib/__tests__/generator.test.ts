@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { EQUIPMENT_IDS, type EquipmentId } from '../equipment';
+import { EQUIPMENT_IDS, expandOwned, type EquipmentId } from '../equipment';
 import { canDo, getExercise } from '../exercises';
 import { generateWorkout, swapExercise, type Focus } from '../generator';
 
@@ -64,6 +64,24 @@ describe('swapExercise', () => {
       if (replacement === null) continue;
       expect(ids).not.toContain(replacement);
       expect(canDo(getExercise(replacement)!, dumbbellsOnly)).toBe(true);
+    }
+  });
+});
+
+describe('equipment rules', () => {
+  it('treats an adjustable bench as a flat bench too', () => {
+    const owned = expandOwned(['dumbbells', 'inclineBench']);
+    expect(canDo(getExercise('dumbbell-bench-press')!, owned)).toBe(true);
+    expect(canDo(getExercise('incline-dumbbell-press')!, owned)).toBe(true);
+    expect(canDo(getExercise('incline-dumbbell-press')!, expandOwned(['dumbbells', 'bench']))).toBe(false);
+  });
+
+  it('never generates library-only exercises', () => {
+    for (let seed = 0; seed < 100; seed++) {
+      for (const focus of FOCUSES) {
+        const ids = generateWorkout({ focus, count: 8, owned: everything, seed });
+        expect(ids.some((id) => getExercise(id)!.libraryOnly)).toBe(false);
+      }
     }
   });
 });

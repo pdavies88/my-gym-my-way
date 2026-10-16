@@ -9,7 +9,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { SLOT_LABELS, type Exercise } from '@/lib/exercises';
 
-/** One exercise in a list. Tapping it opens the 3D demonstration. */
+/** One exercise in a list. Tapping it opens its video and form cues. */
 export function ExerciseRow({
   exercise,
   index,
@@ -25,7 +25,7 @@ export function ExerciseRow({
       <Link href={{ pathname: '/exercise/[id]', params: { id: exercise.id } }} asChild>
         <PressableScale
           accessibilityRole="button"
-          accessibilityHint="Shows a 3D demonstration"
+          accessibilityHint="Shows a demonstration video and form cues"
           style={styles.main}>
           {index !== undefined && (
             <ThemedText type="mono" themeColor="tint" style={styles.index}>
@@ -40,7 +40,7 @@ export function ExerciseRow({
               {SLOT_LABELS[exercise.slots[0]]} · {exercise.muscles.join(', ')}
             </ThemedText>
           </View>
-          {!trailing && <Icon name={{ ios: 'cube.transparent', android: 'view_in_ar' }} size={18} color={theme.textSecondary} />}
+          {!trailing && <Icon name={{ ios: 'play.rectangle', android: 'smart_display' }} size={18} color={theme.textSecondary} />}
         </PressableScale>
       </Link>
       {trailing}

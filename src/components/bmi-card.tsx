@@ -59,7 +59,8 @@ export function BmiCard() {
   };
 
   const { heightCm, bmi } = measure(feet, inches, cm, weight);
-  const category = bmi === null ? null : bmiCategory(bmi);
+  // Use the same rounded value the card shows, so 24.96 can't read "25.0" next to the wrong category.
+  const category = bmi === null ? null : bmiCategory(Math.round(bmi * 10) / 10);
 
   /** Applies one field change and saves the measurements when they make a valid BMI. */
   const change = (setter: (t: string) => void, key: 'feet' | 'inches' | 'cm' | 'weight') => (text: string) => {
@@ -72,10 +73,12 @@ export function BmiCard() {
   const marker = useSharedValue(0);
   useEffect(() => {
     if (bmi !== null) {
-      marker.set(withSpring((Math.min(SCALE_MAX, Math.max(SCALE_MIN, bmi)) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN), {
-        damping: 16,
-        stiffness: 120,
-      }));
+      marker.set(
+        withSpring((Math.min(SCALE_MAX, Math.max(SCALE_MIN, bmi)) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN), {
+          damping: 16,
+          stiffness: 120,
+        }),
+      );
     }
   }, [bmi, marker]);
   const markerStyle = useAnimatedStyle(() => ({ left: `${marker.get() * 100}%` }));
@@ -87,8 +90,18 @@ export function BmiCard() {
       : `${range.min.toFixed(1)}–${range.max.toFixed(1)} kg`
     : '';
 
-  const input = [styles.input, { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.border }];
-  const field = (label: string, value: string, onChange: (t: string) => void, id: string, unit: string, maxLength = 5) => (
+  const input = [
+    styles.input,
+    { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.border },
+  ];
+  const field = (
+    label: string,
+    value: string,
+    onChange: (t: string) => void,
+    id: string,
+    unit: string,
+    maxLength = 5,
+  ) => (
     <View style={styles.field}>
       <ThemedText type="eyebrow" themeColor="textSecondary" style={styles.fieldLabel}>
         {label}
@@ -163,8 +176,8 @@ export function BmiCard() {
         </ThemedText>
       )}
       <ThemedText type="small" themeColor="textSecondary" style={styles.disclaimer}>
-        BMI is a rough screening number for adults. It doesn’t account for muscle, age or body shape. This is
-        general wellness information, not medical advice. Talk to a doctor about your health.
+        BMI is a rough screening number for adults. It doesn’t account for muscle, age or body shape. This is general
+        wellness information, not medical advice. Talk to a doctor about your health.
       </ThemedText>
     </Card>
   );

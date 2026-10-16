@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
@@ -34,7 +34,7 @@ const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 
 export default function GenerateScreen() {
   const { owned, settings } = useSettings();
-  const { saveWorkout, startSession } = useTraining();
+  const { saveWorkout, startSession, active } = useTraining();
   const feedback = useFeedback();
   const [focus, setFocus] = useState<Focus>('full');
   const [length, setLength] = useState<Length>('medium');
@@ -146,9 +146,16 @@ export default function GenerateScreen() {
           icon={{ ios: 'play.fill', android: 'play_arrow' }}
           disabled={exercises.length === 0}
           onPress={() => {
-            startSession({ name, exerciseIds: ids });
-            router.back();
-            router.push('/session');
+            const begin = () => {
+              startSession({ name, exerciseIds: ids });
+              router.back();
+              router.push('/session');
+            };
+            if (!active) return begin();
+            Alert.alert('Replace the current session?', `“${active.name}” is still in progress.`, [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Replace', style: 'destructive', onPress: begin },
+            ]);
           }}
         />
         <Button

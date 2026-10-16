@@ -26,6 +26,12 @@ function playerHtml(video: Video, background: string): string {
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <style>html,body{margin:0;height:100%;background:${background};overflow:hidden}iframe{border:0;width:100%;height:100%}</style>
 </head><body>
+<script>
+  // The page itself always loads, even offline, so tell the app when the network is missing.
+  function report() { if (!navigator.onLine) window.ReactNativeWebView.postMessage('offline'); }
+  window.addEventListener('offline', report);
+  report();
+</script>
 <iframe src="${src}" title="${video.title.replace(/"/g, '&quot;')}"
   allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen
   referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -47,7 +53,7 @@ export function ExerciseVideo({ video }: { video: Video }) {
     const { url } = request;
     if (url.startsWith('about:') || url.startsWith(PLAYER_ORIGIN)) return true;
     if (request.isTopFrame === false) return true;
-    void Linking.openURL(url);
+    Linking.openURL(url).catch(() => {});
     return false;
   };
 
@@ -74,13 +80,14 @@ export function ExerciseVideo({ video }: { video: Video }) {
             setSupportMultipleWindows={false}
             onShouldStartLoadWithRequest={onNavigate}
             onError={() => setFailed(true)}
+            onMessage={(event) => event.nativeEvent.data === 'offline' && setFailed(true)}
           />
         )}
       </View>
       <PressableScale
         accessibilityRole="link"
         accessibilityLabel={`Video by ${video.channel}. Open on YouTube`}
-        onPress={() => void Linking.openURL(watchUrl(video))}
+        onPress={() => Linking.openURL(watchUrl(video)).catch(() => {})}
         style={styles.credit}>
         <Icon name={{ ios: 'play.rectangle.fill', android: 'smart_display' }} size={16} color={theme.accent} />
         <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={styles.creditText}>

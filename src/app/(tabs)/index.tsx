@@ -19,7 +19,7 @@ import { FOCUS_LABELS } from '@/lib/generator';
 
 export default function TrainScreen() {
   const theme = useTheme();
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { workouts, active } = useTraining();
 
   return (
@@ -35,7 +35,30 @@ export default function TrainScreen() {
             <ThemedText type="small" themeColor="textSecondary">
               {active.completedIds.length} of {active.exerciseIds.length} exercises done
             </ThemedText>
-            <Button title="Resume" icon={{ ios: 'play.fill', android: 'play_arrow' }} onPress={() => router.push('/session')} />
+            <Button
+              title="Resume"
+              icon={{ ios: 'play.fill', android: 'play_arrow' }}
+              onPress={() => router.push('/session')}
+            />
+          </Card>
+        </Animated.View>
+      )}
+
+      {!settings.healthNoteSeen && (
+        <Animated.View entering={FadeInDown.delay(30).duration(350)}>
+          <Card>
+            <ThemedText type="heading">Before you start</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              My Gym My Way gives general fitness guidance for adults. It isn’t medical advice. Check with a doctor
+              before you start a new program, especially if you have a health condition, an injury or are pregnant. Stop
+              if you feel chest pain or pressure, dizziness, or shortness of breath that’s unusual for you.
+            </ThemedText>
+            <Button
+              title="Got it"
+              variant="secondary"
+              compact
+              onPress={() => updateSettings({ healthNoteSeen: true })}
+            />
           </Card>
         </Animated.View>
       )}
@@ -80,7 +103,10 @@ export default function TrainScreen() {
               <Link href={{ pathname: '/workout/[id]', params: { id: workout.id } }} asChild>
                 {/* Link's asChild slot rejects style arrays, so pass a flat style. */}
                 <PressableScale
-                  style={StyleSheet.flatten([styles.workout, { backgroundColor: theme.card, borderColor: theme.border }])}>
+                  style={StyleSheet.flatten([
+                    styles.workout,
+                    { backgroundColor: theme.card, borderColor: theme.border },
+                  ])}>
                   <View style={styles.workoutText}>
                     <ThemedText type="heading" numberOfLines={1}>
                       {workout.name}
@@ -90,7 +116,11 @@ export default function TrainScreen() {
                       <Tag label={`${workout.exerciseIds.length} moves`} />
                     </View>
                   </View>
-                  <Icon name={{ ios: 'chevron.right', android: 'chevron_right' }} size={16} color={theme.textSecondary} />
+                  <Icon
+                    name={{ ios: 'chevron.right', android: 'chevron_right' }}
+                    size={16}
+                    color={theme.textSecondary}
+                  />
                 </PressableScale>
               </Link>
             </Animated.View>
@@ -123,7 +153,9 @@ function ActionTile({
       onPress={onPress}
       style={[
         styles.tile,
-        primary ? { backgroundColor: theme.tint } : { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 },
+        primary
+          ? { backgroundColor: theme.tint }
+          : { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 },
       ]}>
       <Icon name={icon} size={26} color={primary ? theme.onTint : theme.tint} />
       <View>

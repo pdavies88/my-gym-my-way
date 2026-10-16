@@ -1,9 +1,9 @@
-import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { useTheme } from '@/hooks/use-theme';
+import { goBackOrHome } from '@/lib/navigation';
 
 /**
  * The top-left button on every stacked screen: a back chevron, or a close X on modals.
@@ -14,14 +14,13 @@ import { useTheme } from '@/hooks/use-theme';
  */
 export function HeaderButton({ variant = 'back' }: { variant?: 'back' | 'close' }) {
   const theme = useTheme();
-  const leave = () => (router.canGoBack() ? router.back() : router.replace('/'));
   return (
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={variant === 'close' ? 'Close' : 'Back'}
       hitSlop={10}
       scaleTo={0.88}
-      onPress={leave}
+      onPress={goBackOrHome}
       style={styles.button}>
       <Icon
         name={variant === 'close' ? { ios: 'xmark', android: 'close' } : { ios: 'chevron.left', android: 'arrow_back' }}

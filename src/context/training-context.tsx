@@ -1,9 +1,8 @@
 import { createContext, use, useState, type ReactNode } from 'react';
-import { z } from 'zod';
 
 import type { Focus } from '@/lib/generator';
 import { newId } from '@/lib/id';
-import { readJson, writeJson } from '@/lib/storage/kv';
+import { readJson, readList, writeJson } from '@/lib/storage/kv';
 import {
   ActiveSessionSchema,
   KEYS,
@@ -25,7 +24,14 @@ type TrainingContextValue = {
   startSession: (session: { name: string; exerciseIds: string[]; workoutId?: string }) => void;
   toggleExercise: (exerciseId: string) => void;
   finishSession: () => SessionLog | null;
-  logCardio: (entry: { cardioId: string; name: string; startedAt: number; exerciseIds: string[] }) => SessionLog;
+  logCardio: (entry: {
+    cardioId: string;
+    name: string;
+    startedAt: number;
+    /** Time actually trained, without pauses. */
+    durationMs: number;
+    exerciseIds: string[];
+  }) => SessionLog;
   discardSession: () => void;
   deleteSession: (id: string) => void;
 };
@@ -35,8 +41,8 @@ const TrainingContext = createContext<TrainingContextValue | null>(null);
 const MAX_SESSIONS = 500;
 
 export function TrainingProvider({ children }: { children: ReactNode }) {
-  const [workouts, setWorkouts] = useState(() => readJson(KEYS.workouts, z.array(SavedWorkoutSchema), []));
-  const [sessions, setSessions] = useState(() => readJson(KEYS.sessions, z.array(SessionLogSchema), []));
+  const [workouts, setWorkouts] = useState(() => readList(KEYS.workouts, SavedWorkoutSchema));
+  const [sessions, setSessions] = useState(() => readList(KEYS.sessions, SessionLogSchema));
   const [active, setActive] = useState(() => readJson(KEYS.activeSession, ActiveSessionSchema.nullable(), null));
 
   const persistWorkouts = (next: SavedWorkout[]) => {
@@ -92,14 +98,15 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     return log;
   };
 
-  const logCardio: TrainingContextValue['logCardio'] = ({ cardioId, name, startedAt, exerciseIds }) => {
+  const logCardio: TrainingContextValue['logCardio'] = ({ cardioId, name, startedAt, durationMs, exerciseIds }) => {
     const log: SessionLog = {
       id: newId(),
       kind: 'cardio',
       cardioId,
       name,
       startedAt,
-      finishedAt: Date.now(),
+      // History shows finishedAt - startedAt, so store the time actually trained, not wall-clock time.
+      finishedAt: startedAt + Math.max(0, durationMs),
       exerciseIds,
       completedIds: exerciseIds,
     };

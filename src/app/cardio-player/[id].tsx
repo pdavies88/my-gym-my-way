@@ -1,6 +1,6 @@
 import { useKeepAwake } from 'expo-keep-awake';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withTiming, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '@/components/button';
 import { EFFORT_COLORS, EffortChip } from '@/components/effort';
 import { HeaderButton } from '@/components/header-button';
+import { HowToSheet } from '@/components/how-to-sheet';
 import { Icon } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { ProgressBar } from '@/components/progress-bar';
@@ -29,6 +30,7 @@ import {
 } from '@/lib/cardio';
 import { getExercise } from '@/lib/exercises';
 import { formatDuration } from '@/lib/time';
+import { goBackOrHome } from '@/lib/navigation';
 
 export default function CardioPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -61,11 +63,8 @@ function Player({ sessionId }: { sessionId: string }) {
   const [pausedMs, setPausedMs] = useState(0);
   const [offset, setOffset] = useState(0);
   const logged = useRef(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 200);
-    return () => clearInterval(timer);
-  }, []);
+  const [howTo, setHowTo] = useState<string | null>(null);
+  const cues = useCardioCues();
 
   const elapsed = Math.min(total, ((pausedAt ?? now) - startedAt - pausedMs) / 1000 + offset);
   const pos = positionAt(steps, elapsed);
@@ -73,11 +72,32 @@ function Player({ sessionId }: { sessionId: string }) {
   const next = steps[pos.index + 1];
   const secondsLeft = Math.ceil(pos.stepRemaining);
   const paused = pausedAt !== null;
+  // Tick five times a second until the session ends. Stopping then freezes the clock for the done screen.
+  useEffect(() => {
+    if (pos.done) return;
+    const timer = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(timer);
+  }, [pos.done]);
+
+  /** Time actually spent training: wall-clock time minus pauses. Skipping ahead doesn't add to it. */
+  const activeMs = (at: number) => at - startedAt - pausedMs - (pausedAt === null ? 0 : at - pausedAt);
+
+  // Pause whenever another screen covers the player, such as a "How to" video, and stop any speech.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        setPausedAt((p) => p ?? Date.now());
+        cues.silence();
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [],
+    ),
+  );
+
   const finalCount = !paused && !pos.done && current.seconds > 4 && secondsLeft >= 1 && secondsLeft <= 3;
 
   const { settings, updateSettings } = useSettings();
   const muted = settings.sounds === false && settings.voice === false;
-  const cues = useCardioCues();
 
   // Beeps, voice and haptics. Each clock reading plays whatever cues the clock just passed.
   const lastElapsed = useRef<number | null>(null);
@@ -91,20 +111,22 @@ function Player({ sessionId }: { sessionId: string }) {
   });
 
   const exerciseIds = [...new Set(steps.map((s) => s.exerciseId).filter((e): e is string => !!e))];
-  const save = () => {
+  /** Saves the session to history once. `at` is when it ended, for the time trained. */
+  const save = (at: number) => {
     if (logged.current) return;
     logged.current = true;
     logCardio({
       cardioId: session.id,
       name: session.name,
       startedAt,
+      durationMs: activeMs(at),
       exerciseIds,
     });
   };
 
   // Save to history once, the moment the last step ends.
   useEffect(() => {
-    if (pos.done && !logged.current) save();
+    if (pos.done && !logged.current) save(now);
   });
 
   const togglePause = () => {
@@ -126,27 +148,44 @@ function Player({ sessionId }: { sessionId: string }) {
   };
 
   const end = () => {
-    if (pos.done) return router.back();
-    const activeMs = Date.now() - startedAt - pausedMs - (pausedAt === null ? 0 : Date.now() - pausedAt);
-    Alert.alert('End this session?', `You’ve trained for ${formatDuration(activeMs)}. Skipped steps don’t count.`, [
-      { text: 'Keep going', style: 'cancel' },
-      {
-        text: 'Discard',
-        style: 'destructive',
-        onPress: () => {
-          cues.silence();
-          router.back();
+    if (pos.done) return goBackOrHome();
+    // Hold the clock while the question is open, so nothing ends or speaks behind the alert.
+    const pauseStart = Date.now();
+    const wasRunning = pausedAt === null;
+    if (wasRunning) setPausedAt(pauseStart);
+    cues.silence();
+    Alert.alert(
+      'End this session?',
+      `You’ve trained for ${formatDuration(activeMs(pauseStart))}. Skipped steps don’t count.`,
+      [
+        {
+          text: 'Keep going',
+          style: 'cancel',
+          onPress: () => {
+            if (!wasRunning) return;
+            const time = Date.now();
+            setPausedMs((ms) => ms + (time - pauseStart));
+            setPausedAt(null);
+            setNow(time);
+          },
         },
-      },
-      {
-        text: 'Save and end',
-        onPress: () => {
-          cues.silence();
-          save();
-          router.back();
+        {
+          text: 'Discard',
+          style: 'destructive',
+          onPress: () => {
+            logged.current = true;
+            goBackOrHome();
+          },
         },
-      },
-    ]);
+        {
+          text: 'Save and end',
+          onPress: () => {
+            save(pauseStart);
+            goBackOrHome();
+          },
+        },
+      ],
+    );
   };
 
   const effortColor = EFFORT_COLORS[current?.effort ?? 'rest'];
@@ -174,9 +213,9 @@ function Player({ sessionId }: { sessionId: string }) {
             {session.name}
           </ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.center}>
-            {formatDuration(total * 1000)} of guided cardio. It’s saved to your history.
+            {formatDuration(activeMs(now))} of guided cardio. It’s saved to your history.
           </ThemedText>
-          <Button title="Done" style={styles.doneButton} onPress={() => router.back()} />
+          <Button title="Done" style={styles.doneButton} onPress={goBackOrHome} />
         </View>
       </View>
     );
@@ -185,6 +224,7 @@ function Player({ sessionId }: { sessionId: string }) {
   return (
     <View style={[styles.fill, { backgroundColor: theme.background }]}>
       <Animated.View style={[styles.glow, glowStyle]} />
+      <HowToSheet exerciseId={howTo} onClose={() => setHowTo(null)} />
       <View style={[styles.fill, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.topBar}>
           <PressableScale
@@ -265,12 +305,12 @@ function Player({ sessionId }: { sessionId: string }) {
           {current.exerciseId && (
             <PressableScale
               accessibilityRole="link"
-              onPress={() =>
-                router.push({
-                  pathname: '/exercise/[id]',
-                  params: { id: current.exerciseId! },
-                })
-              }
+              hitSlop={12}
+              onPress={() => {
+                setPausedAt((p) => p ?? Date.now());
+                cues.silence();
+                setHowTo(current.exerciseId!);
+              }}
               style={styles.howTo}>
               <Icon name={{ ios: 'play.rectangle.fill', android: 'smart_display' }} size={16} color={theme.accent} />
               <ThemedText type="smallBold" themeColor="textSecondary">

@@ -35,7 +35,7 @@ export function calculateBmi(heightCm: number, weightKg: number): number | null 
   return weightKg / (meters * meters);
 }
 
-/** WHO adult categories. */
+/** World Health Organization adult categories. */
 export function bmiCategory(bmi: number): BmiCategory {
   if (bmi < 18.5) return 'underweight';
   if (bmi < 25) return 'healthy';
@@ -45,7 +45,7 @@ export function bmiCategory(bmi: number): BmiCategory {
 
 export const BMI_CATEGORY_LABELS: Record<BmiCategory, string> = {
   underweight: 'Underweight',
-  healthy: 'Healthy weight',
+  healthy: 'Normal weight',
   overweight: 'Overweight',
   obese: 'Obesity',
 };

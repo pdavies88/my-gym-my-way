@@ -1,6 +1,6 @@
 import { createContext, use, useState, type ReactNode } from 'react';
 
-import type { EquipmentId } from '@/lib/equipment';
+import { expandOwned, type EquipmentId } from '@/lib/equipment';
 import { readJson, writeJson } from '@/lib/storage/kv';
 import { DEFAULT_SETTINGS, KEYS, SettingsSchema, type Settings } from '@/lib/storage/schemas';
 
@@ -38,7 +38,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const owned = new Set(settings.equipment);
+  const owned = expandOwned(settings.equipment);
 
   return <SettingsContext value={{ settings, owned, updateSettings, toggleEquipment }}>{children}</SettingsContext>;
 }

@@ -1,9 +1,4 @@
-import {
-  Archivo_600SemiBold,
-  Archivo_700Bold,
-  Archivo_800ExtraBold,
-  useFonts,
-} from '@expo-google-fonts/archivo';
+import { Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold, useFonts } from '@expo-google-fonts/archivo';
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -16,6 +11,9 @@ import { SettingsProvider } from '@/context/settings-context';
 import { TrainingProvider } from '@/context/training-context';
 
 SplashScreen.preventAutoHideAsync();
+
+// Screens opened from a link get the tabs underneath, so there is always somewhere to go back to.
+export const unstable_settings = { anchor: '(tabs)' };
 
 const colors = Colors.dark;
 

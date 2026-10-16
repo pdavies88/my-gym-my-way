@@ -10,7 +10,21 @@ import { useSettings } from '@/context/settings-context';
 import { useTheme } from '@/hooks/use-theme';
 import { canDo, EXERCISES, SLOT_LABELS, type Slot } from '@/lib/exercises';
 
-const SLOT_ORDER: Slot[] = ['squat', 'hinge', 'lunge', 'calves', 'hpush', 'vpush', 'hpull', 'vpull', 'biceps', 'triceps', 'shoulders', 'core', 'cardio'];
+const SLOT_ORDER: Slot[] = [
+  'squat',
+  'hinge',
+  'lunge',
+  'calves',
+  'hpush',
+  'vpush',
+  'hpull',
+  'vpull',
+  'biceps',
+  'triceps',
+  'shoulders',
+  'core',
+  'cardio',
+];
 
 export default function LibraryScreen() {
   const theme = useTheme();
@@ -32,6 +46,7 @@ export default function LibraryScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder="Search by name or muscle"
+          accessibilityLabel="Search exercises"
           placeholderTextColor={theme.textSecondary}
           style={[styles.input, { color: theme.text, backgroundColor: theme.card, borderColor: theme.border }]}
           autoCorrect={false}

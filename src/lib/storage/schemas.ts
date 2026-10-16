@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-import { EQUIPMENT_IDS } from '@/lib/equipment';
+import { EQUIPMENT_IDS, type EquipmentId } from '@/lib/equipment';
 
-// Every stored key carries a version. Bump it and add a migration when a shape changes.
+// Every stored key carries a version. Prefer adding optional fields. If a shape must change, bump
+// the key and read the old one once to migrate it.
 export const KEYS = {
   settings: 'settings.v1',
   workouts: 'workouts.v1',
@@ -14,7 +15,10 @@ const FocusSchema = z.enum(['full', 'upper', 'lower', 'push', 'pull', 'core', 'c
 
 export const SettingsSchema = z.object({
   units: z.enum(['us', 'metric']),
-  equipment: z.array(z.enum(EQUIPMENT_IDS)),
+  // Unknown ids (for example equipment removed in an update) are dropped instead of failing the whole read.
+  equipment: z
+    .array(z.string())
+    .transform((ids) => ids.filter((id): id is EquipmentId => (EQUIPMENT_IDS as readonly string[]).includes(id))),
   /** False until the person has looked at the equipment screen once. */
   equipmentChosen: z.boolean(),
   /** Body measurements for the BMI calculator. They stay on this device. */
@@ -24,6 +28,8 @@ export const SettingsSchema = z.object({
   sounds: z.boolean().optional(),
   voice: z.boolean().optional(),
   haptics: z.boolean().optional(),
+  /** True once the person has read and closed the "before you start" health note. */
+  healthNoteSeen: z.boolean().optional(),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
 

@@ -12,6 +12,7 @@ import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { canDo, getExercise } from '@/lib/exercises';
 import { FOCUS_LABELS } from '@/lib/generator';
+import { goBackOrHome } from '@/lib/navigation';
 
 export default function WorkoutScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -52,7 +53,7 @@ export default function WorkoutScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          router.back();
+          goBackOrHome();
           deleteWorkout(workout.id);
         },
       },

@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Platform, StyleSheet, Switch, View } from 'react-native';
 
 import { AboutLink } from '@/components/about-link';
 import { BmiCard } from '@/components/bmi-card';
@@ -73,11 +73,11 @@ export default function MeScreen() {
           />
           <ToggleRow
             label="Haptics"
-            detail="Taps when you tick, pick or finish something"
+            detail="Taps when you tick, pick or finish something, and at each cardio step change"
             value={settings.haptics !== false}
             onChange={(haptics) => updateSettings({ haptics })}
           />
-          {loaded && couldUpgradeVoice(voice) && (
+          {loaded && couldUpgradeVoice(voice) && Platform.OS === 'ios' && (
             <ThemedText type="small" themeColor="textSecondary">
               For a more natural voice, download an Enhanced or Premium English voice, such as Ava or Zoe: iPhone
               Settings → Accessibility → Read & Speak → Voices. The app picks it up next time.

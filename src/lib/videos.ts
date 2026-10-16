@@ -120,9 +120,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'dumbbell-shoulder-press': {
-    videoId: 'MMjBnEBnZKM',
-    title: 'How to do a Dumbbell Overhead Press',
-    channel: 'National Academy of Sports Medicine (NASM)',
+    videoId: 'Raemd3qWgJc',
+    title: 'Standing Dumbbell Shoulder Press',
+    channel: 'Renaissance Periodization',
   },
   'barbell-overhead-press': {
     videoId: 'cGnhixvC8uA',
@@ -185,19 +185,19 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'National Academy of Sports Medicine (NASM)',
   },
   'chin-up': {
-    videoId: 'mRy9m2Q9_1I',
-    title: 'Proper Chin-Up Form',
-    channel: 'KILO Personal Trainer & Strength Coach Education',
+    videoId: 'QGSYnup3-u4',
+    title: 'Supinated Pull Up',
+    channel: 'OPEX Fitness',
   },
   'lat-pulldown': {
-    videoId: 'AOpi-p0cJkc',
-    title: "Beginner's Guide: Lat Pulldown",
-    channel: 'SilverSneakers',
+    videoId: 'RdT8bs2nKNM',
+    title: 'Tall-Kneeling Band Pulldown',
+    channel: 'Summit Performance and Therapy',
   },
   'dumbbell-curl': {
-    videoId: 'cBSD6mQIPQk',
-    title: 'Dumbbell Bicep Curl | Nuffield Health',
-    channel: 'Nuffield Health',
+    videoId: 'MtXdEcW3Eog',
+    title: 'How To Double Arm Curl (Dumbbell Bicep Curl)',
+    channel: 'PureGym',
   },
   'hammer-curl': {
     videoId: 'CFBZ4jN1CMI',
@@ -215,9 +215,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'FitnessBlender',
   },
   'overhead-triceps-extension': {
-    videoId: '-Vyt2QdsR7E',
-    title: 'How To: Standing Overhead Dumbbell Tricep Extension',
-    channel: 'ScottHermanFitness',
+    videoId: '4--u52sHZPs',
+    title: 'Dumbbell Overhead Tricep Extension',
+    channel: 'Functional Bodybuilding',
   },
   'triceps-pushdown': {
     videoId: '2-LAMcpzODU',
@@ -230,14 +230,14 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'National Academy of Sports Medicine (NASM)',
   },
   'band-lateral-raise': {
-    videoId: 'yfNg5sFndbw',
-    title: 'Band Lateral Raise',
-    channel: "Men's Health",
+    videoId: 'rpF-YciHeIQ',
+    title: 'How to | Resistance Band Standing Lateral Raises',
+    channel: 'OMNI Strength and Performance',
   },
   plank: {
-    videoId: 'mH5Sfb_KTGg',
-    title: 'How to do a Forearm Plank | The Right Way | Well+Good',
-    channel: 'Well+Good',
+    videoId: 'q4rDeHYMcIg',
+    title: 'How To Do A Plank',
+    channel: 'PureGym',
   },
   'dead-bug': {
     videoId: 'GbSC02oU3To',
@@ -280,9 +280,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'medicine-ball-slam': {
-    videoId: '6vXHh-Lhb2o',
-    title: 'How to Do Medicine Ball Slams | Sleek/Strong With Rachel Cosgrove',
-    channel: 'LivestrongWoman',
+    videoId: 'DMrxbUgoZTg',
+    title: 'How To Do Medicine Ball Slams',
+    channel: 'PureGym',
   },
   'jumping-jack': {
     videoId: 'uLVt6u15L98',
@@ -315,9 +315,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'treadmill-run': {
-    videoId: 'HxsFneJFM2c',
-    title: 'How To Use The Treadmill',
-    channel: 'PureGym',
+    videoId: 'LsswRe8_I3g',
+    title: 'Treadmill Slow Jogging Technique — Quick Technique Demo',
+    channel: 'Fitness By Physio',
   },
   'farmer-carry': {
     videoId: 'lLAw6fUccKA',
@@ -370,14 +370,14 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'Strongher Programming',
   },
   'bag-jab-cross': {
-    videoId: 'JyuiDu2llOY',
-    title: 'How to throw the 1-2 on the Heavy bag { Beginner video }',
-    channel: 'Coach Anthony',
+    videoId: 'LfItPlW1sRY',
+    title: 'Jab / Cross Demo on The Heavy Bag',
+    channel: 'DWIGHT SMITH',
   },
   'bag-hooks': {
-    videoId: '_0TFCUP8LB0',
-    title: 'How to Throw a Lead Hook on the Heavy Bag | Boxing For Beginners',
-    channel: 'Final Round Training',
+    videoId: 'Bv2EI-DhcoM',
+    title: '4 Drills To Improve Your Left Hook, with just a heavy bag',
+    channel: 'LOGAN BROWN BOXING',
   },
   'bag-uppercuts': {
     videoId: 'V_aL6T_yiFM',
@@ -420,9 +420,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'National Academy of Sports Medicine (NASM)',
   },
   'single-leg-rdl': {
-    videoId: 'c99gkgaAWYw',
-    title: 'Kettlebell Single Leg Romanian Deadlift | Girls Gone Strong',
-    channel: "Women's Health & Fitness",
+    videoId: 'hk80eAoQshc',
+    title: 'How To Do A Single Leg Deadlift',
+    channel: 'PureGym',
   },
   'kettlebell-halo': {
     videoId: 'wJcmanVh5EE',
@@ -430,9 +430,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'Onnit Academy',
   },
   'dead-hang': {
-    videoId: '3CEmHJXbNpc',
-    title: 'How to dead hang',
-    channel: 'Adam McCubbin',
+    videoId: '0Bx_Ap7-EwU',
+    title: 'Dead Hang',
+    channel: 'OPEX Fitness',
   },
   'negative-pull-up': {
     videoId: 'jBSMDqs7OzM',
@@ -445,9 +445,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'bench-hip-thrust': {
-    videoId: 'pUdIL5x0fWg',
-    title: 'Hip Thrust | Nuffield Health',
-    channel: 'Nuffield Health',
+    videoId: '7XuNzi5rcj4',
+    title: 'How To Do A Bodyweight Hip Thrust',
+    channel: 'PureGym',
   },
   'chest-supported-row': {
     videoId: 'Nx0TzjgsI-0',
@@ -455,9 +455,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'dumbbell-fly': {
-    videoId: 'eozdVDA78K0',
-    title: 'How To: Dumbbell Flys On A Flat Bench',
-    channel: 'ScottHermanFitness',
+    videoId: 'Nhvz9EzdJ4U',
+    title: 'How To Do A Dumbbell Chest Fly',
+    channel: 'PureGym',
   },
   'incline-dumbbell-press': {
     videoId: 'oZVCBM9f8Eo',
@@ -465,9 +465,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     channel: 'PureGym',
   },
   'bag-body-shots': {
-    videoId: 'GCHUhzY86AU',
-    title: 'How To Throw Lead Body Punch on the Heavy Bag | Boxing For Beginners',
-    channel: 'Final Round Training',
+    videoId: 'JHoBC9y2DAM',
+    title: 'Body Shot Placement on the Heavy Bag',
+    channel: 'Coach Pillow Fists',
   },
   'bag-slip-drill': {
     videoId: 'OPuWhgYzvHU',

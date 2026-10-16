@@ -25,15 +25,28 @@ export function useCardioCues() {
   const haptics = useFeedback();
   const { voice: bestVoice } = useBestVoice();
   const players = useRef<Partial<Record<SoundName, AudioPlayer>>>({});
+  const pending = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Delayed lines check the voice setting when they play, so muting stops a line already queued.
+  const latest = useRef({ voice: true, voiceId: undefined as string | undefined });
   const sounds = settings.sounds !== false;
-  const voice = settings.voice !== false;
+  useEffect(() => {
+    latest.current = { voice: settings.voice !== false, voiceId: bestVoice?.identifier };
+  });
+
+  const cancelPending = () => {
+    for (const id of pending.current) clearTimeout(id);
+    pending.current = [];
+  };
 
   useEffect(() => {
     // Chimes still play with the ring/silent switch on, and other apps' audio ducks instead of stopping.
     void setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'duckOthers' }).catch(() => {});
     const loaded = players.current;
     for (const name of Object.keys(SOUNDS) as SoundName[]) loaded[name] = createAudioPlayer(SOUNDS[name]);
+    const queued = pending;
     return () => {
+      for (const id of queued.current) clearTimeout(id);
+      queued.current = [];
       Speech.stop();
       for (const player of Object.values(loaded)) player?.remove();
       players.current = {};
@@ -47,9 +60,15 @@ export function useCardioCues() {
   };
 
   const say = (text: string) => {
+    const { voice, voiceId } = latest.current;
     if (!voice) return;
     Speech.stop();
-    Speech.speak(text, { rate: SPEECH_RATE, ...(bestVoice ? { voice: bestVoice.identifier } : {}) });
+    Speech.speak(text, { rate: SPEECH_RATE, ...(voiceId ? { voice: voiceId } : {}) });
+  };
+
+  /** Speaks after a short delay, so the voice doesn't talk over the chime. */
+  const sayLater = (text: string, delayMs: number) => {
+    pending.current.push(setTimeout(() => say(text), delayMs));
   };
 
   return {
@@ -65,13 +84,12 @@ export function useCardioCues() {
         case 'step':
           chime('go');
           haptics.thump();
-          // Speak just after the chime so the two don't talk over each other.
-          setTimeout(() => say(stepAnnouncement(cue.step)), 450);
+          sayLater(stepAnnouncement(cue.step), 450);
           break;
         case 'done':
           chime('done');
           haptics.success();
-          setTimeout(() => say('Session complete. Great work.'), 700);
+          sayLater('Session complete. Great work.', 700);
           break;
       }
     },
@@ -79,9 +97,10 @@ export function useCardioCues() {
     start(firstStepSeconds: number, firstStepLabel: string) {
       chime('go');
       haptics.thump();
-      setTimeout(() => say(`Starting. ${firstStepLabel}. ${spokenDuration(firstStepSeconds)}.`), 450);
+      sayLater(`Starting. ${firstStepLabel}. ${spokenDuration(firstStepSeconds)}.`, 450);
     },
     silence() {
+      cancelPending();
       Speech.stop();
     },
   };
