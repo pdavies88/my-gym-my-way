@@ -35,12 +35,25 @@ export default function SessionLogScreen() {
     day: 'numeric',
   });
 
+  const isCardio = log.kind === 'cardio';
+
   const repeat = () => {
+    if (isCardio && log.cardioId) {
+      router.replace({
+        pathname: '/cardio/[id]',
+        params: { id: log.cardioId },
+      });
+      return;
+    }
     if (active) {
       Alert.alert('A session is already in progress', 'Finish or discard it first.');
       return;
     }
-    startSession({ name: log.name, exerciseIds: log.exerciseIds, workoutId: log.workoutId });
+    startSession({
+      name: log.name,
+      exerciseIds: log.exerciseIds,
+      workoutId: log.workoutId,
+    });
     router.replace('/session');
   };
 
@@ -48,39 +61,47 @@ export default function SessionLogScreen() {
     <Screen tab={false}>
       <View style={styles.header}>
         {fresh && (
-          <Animated.View entering={ZoomIn.springify().damping(12)} style={[styles.badge, { backgroundColor: theme.tint }]}>
+          <Animated.View
+            entering={ZoomIn.springify().damping(12)}
+            style={[styles.badge, { backgroundColor: theme.tint }]}>
             <Icon name={{ ios: 'checkmark', android: 'check' }} size={30} color={theme.onTint} />
           </Animated.View>
         )}
         <ThemedText type="eyebrow" themeColor="tint">
-          {fresh ? 'Workout complete' : date}
+          {fresh ? 'Workout complete' : isCardio ? `Cardio · ${date}` : date}
         </ThemedText>
         <ThemedText type="title">{log.name}</ThemedText>
       </View>
 
       <Animated.View entering={FadeInDown.delay(80).duration(320)} style={styles.stats}>
         <Stat label="Time" value={formatDuration(log.finishedAt - log.startedAt)} />
-        <Stat label="Done" value={`${done}/${exercises.length}`} />
+        {isCardio ? <Stat label="Type" value="Cardio" /> : <Stat label="Done" value={`${done}/${exercises.length}`} />}
       </Animated.View>
 
-      <View style={styles.list}>
-        <SectionHeader title="Exercises" />
-        {exercises.map((exercise) => {
-          const completed = log.completedIds.includes(exercise.id);
-          return (
-            <View key={exercise.id} style={[styles.item, { borderColor: theme.border }]}>
-              <Icon
-                name={completed ? { ios: 'checkmark.square.fill', android: 'check_box' } : { ios: 'square', android: 'check_box_outline_blank' }}
-                size={20}
-                color={completed ? theme.tint : theme.textSecondary}
-              />
-              <ThemedText type="smallBold" themeColor={completed ? 'text' : 'textSecondary'} style={styles.itemText}>
-                {exercise.name}
-              </ThemedText>
-            </View>
-          );
-        })}
-      </View>
+      {exercises.length > 0 && (
+        <View style={styles.list}>
+          <SectionHeader title={isCardio ? 'Moves in this session' : 'Exercises'} />
+          {exercises.map((exercise) => {
+            const completed = log.completedIds.includes(exercise.id);
+            return (
+              <View key={exercise.id} style={[styles.item, { borderColor: theme.border }]}>
+                <Icon
+                  name={
+                    completed
+                      ? { ios: 'checkmark.square.fill', android: 'check_box' }
+                      : { ios: 'square', android: 'check_box_outline_blank' }
+                  }
+                  size={20}
+                  color={completed ? theme.tint : theme.textSecondary}
+                />
+                <ThemedText type="smallBold" themeColor={completed ? 'text' : 'textSecondary'} style={styles.itemText}>
+                  {exercise.name}
+                </ThemedText>
+              </View>
+            );
+          })}
+        </View>
+      )}
 
       <View style={styles.buttons}>
         {fresh ? (

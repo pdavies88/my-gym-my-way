@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { HeaderButton } from '@/components/header-button';
 import { Colors, DisplayFont } from '@/constants/theme';
 import { SettingsProvider } from '@/context/settings-context';
 import { TrainingProvider } from '@/context/training-context';
@@ -17,6 +18,9 @@ import { TrainingProvider } from '@/context/training-context';
 SplashScreen.preventAutoHideAsync();
 
 const colors = Colors.dark;
+
+const back = { headerLeft: () => <HeaderButton /> };
+const close = { presentation: 'modal' as const, headerLeft: () => <HeaderButton variant="close" /> };
 
 const navigationTheme = {
   ...DarkTheme,
@@ -57,12 +61,17 @@ export default function RootLayout() {
                 contentStyle: { backgroundColor: colors.background },
               }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="exercise/[id]" options={{ title: '' }} />
-              <Stack.Screen name="workout/[id]" options={{ title: '' }} />
-              <Stack.Screen name="log/[id]" options={{ title: '' }} />
-              <Stack.Screen name="equipment" options={{ title: 'Your equipment' }} />
-              <Stack.Screen name="generate" options={{ title: 'Generate', presentation: 'modal' }} />
-              <Stack.Screen name="builder" options={{ title: 'Build a workout', presentation: 'modal' }} />
+              <Stack.Screen name="exercise/[id]" options={{ title: '', ...back }} />
+              <Stack.Screen name="workout/[id]" options={{ title: '', ...back }} />
+              <Stack.Screen name="log/[id]" options={{ title: '', ...back }} />
+              <Stack.Screen name="equipment" options={{ title: 'Your equipment', ...back }} />
+              <Stack.Screen name="cardio/[id]" options={{ title: '', ...back }} />
+              <Stack.Screen
+                name="cardio-player/[id]"
+                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+              />
+              <Stack.Screen name="generate" options={{ title: 'Generate', ...close }} />
+              <Stack.Screen name="builder" options={{ title: 'Build a workout', ...close }} />
               <Stack.Screen name="session" options={{ title: '', gestureEnabled: false, headerBackVisible: false }} />
             </Stack>
           </TrainingProvider>

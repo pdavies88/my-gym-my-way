@@ -15,6 +15,10 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Label>Train</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'bolt', selected: 'bolt.fill' }} md="bolt" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="cardio">
+        <NativeTabs.Trigger.Label>Cardio</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'flame', selected: 'flame.fill' }} md="local_fire_department" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="library">
         <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="square.grid.2x2" md="grid_view" />

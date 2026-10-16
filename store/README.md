@@ -57,7 +57,7 @@ Tell it what gear you own and get a workout you can actually do. Free for real: 
 ```
 My Gym My Way builds home workouts from the equipment you actually own.
 
-Tick off your gear once: dumbbells, a barbell, a rack, a bench, kettlebells, bands, a pull-up bar, a cable machine or cardio machines. Bodyweight is always included. Every workout and every exercise in the library fits what you have.
+Tick off your gear once: dumbbells, a barbell, a rack, a bench, kettlebells, bands, a pull-up bar, a cable machine, a suspension trainer, a boxing bag or cardio machines. Bodyweight is always included. Every workout and every exercise in the library fits what you have.
 
 GENERATE A WORKOUT IN SECONDS
 Pick a focus (full body, upper, lower, push, pull or core) and a length. The app picks exercises you can do and balances them across movement patterns. Swap any move you don't like, shuffle for a new mix, and save the ones you love.
@@ -67,6 +67,9 @@ Hand-pick every exercise from a library of over 60 moves. Each one lists the mus
 
 WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
+
+GUIDED CARDIO
+Timed sessions for the rower, treadmill, boxing bag, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go and what's next, with a buzz at every change.
 
 A SIMPLE SESSION CHECKLIST
 Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. Finish, and the session goes into your history.

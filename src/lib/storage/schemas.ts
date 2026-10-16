@@ -51,5 +51,9 @@ export type ActiveSession = z.infer<typeof ActiveSessionSchema>;
 export const SessionLogSchema = ActiveSessionSchema.extend({
   id: z.string(),
   finishedAt: z.number(),
+  /** Strength sessions are checklists. Cardio sessions are guided timers. Older logs are strength. */
+  kind: z.enum(['strength', 'cardio']).optional(),
+  /** The guided cardio session this log came from. */
+  cardioId: z.string().optional(),
 });
 export type SessionLog = z.infer<typeof SessionLogSchema>;

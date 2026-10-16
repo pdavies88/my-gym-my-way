@@ -22,7 +22,7 @@ export default function HistoryScreen() {
 
   const weekStart = startOfWeek(now);
   const thisWeek = sessions.filter((s) => s.startedAt >= weekStart).length;
-  const exercisesDone = sessions.reduce((sum, s) => sum + s.completedIds.length, 0);
+  const exercisesDone = sessions.reduce((sum, s) => sum + (s.kind === 'cardio' ? 0 : s.completedIds.length), 0);
 
   return (
     <Screen eyebrow="Your log" title="History">
@@ -45,17 +45,36 @@ export default function HistoryScreen() {
                 {/* Link's asChild slot rejects style arrays, so pass a flat style. */}
                 <PressableScale
                   style={StyleSheet.flatten([styles.row, { backgroundColor: theme.card, borderColor: theme.border }])}>
-                  <View style={[styles.dot, { backgroundColor: session.completedIds.length === session.exerciseIds.length ? theme.tint : theme.accent }]} />
+                  <View
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor:
+                          session.kind === 'cardio'
+                            ? '#5CC8FF'
+                            : session.completedIds.length === session.exerciseIds.length
+                              ? theme.tint
+                              : theme.accent,
+                      },
+                    ]}
+                  />
                   <View style={styles.rowText}>
                     <ThemedText type="smallBold" style={styles.name}>
                       {session.name}
                     </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
-                      {formatSessionDate(session.startedAt, now)} · {formatDuration(session.finishedAt - session.startedAt)} ·{' '}
-                      {session.completedIds.length}/{session.exerciseIds.length}
+                      {formatSessionDate(session.startedAt, now)} ·{' '}
+                      {formatDuration(session.finishedAt - session.startedAt)} ·{' '}
+                      {session.kind === 'cardio'
+                        ? 'Cardio'
+                        : `${session.completedIds.length}/${session.exerciseIds.length}`}
                     </ThemedText>
                   </View>
-                  <Icon name={{ ios: 'chevron.right', android: 'chevron_right' }} size={14} color={theme.textSecondary} />
+                  <Icon
+                    name={{ ios: 'chevron.right', android: 'chevron_right' }}
+                    size={14}
+                    color={theme.textSecondary}
+                  />
                 </PressableScale>
               </Link>
             </Animated.View>

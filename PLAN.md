@@ -15,7 +15,7 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 
 ## Features
 
-1. **Equipment.** A checklist of common home-gym equipment, such as dumbbells, barbell, rack, bench, kettlebell, pull-up bar, bands, cable machine and cardio machines. Bodyweight is always available.
+1. **Equipment.** A checklist of common home-gym equipment, such as dumbbells, barbell, rack, bench, kettlebell, pull-up bar, bands, cable machine, suspension trainer (TRX), boxing bag and cardio machines. Bodyweight is always available.
 2. **Exercise library.** About 60 curated exercises. Each one lists the equipment it needs, the muscles it works, step-by-step cues and a movement pattern. The library filters to what your equipment allows.
 3. **Workout builder.**
    - Generate: pick a focus (full body, upper, lower, push, pull, core) and a length. The generator picks exercises you can do, balanced across movement patterns. You can swap any exercise or regenerate.
@@ -25,6 +25,8 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 5. **History.** A list of past sessions, plus a simple count of sessions this week.
 6. **BMI calculator.** Height and weight in US or metric units. It shows the BMI value and the WHO category, with a "general wellness, not medical advice" line. It stays on the device.
 7. **Video demonstrations.** Tap an exercise to watch a short demonstration by a real person. Each video is a curated public YouTube video, embedded with YouTube's player in privacy-enhanced mode and credited to its channel. It costs nothing, and the videos need an internet connection. The first version used procedural 3D figures, but they looked clunky, so videos replaced them.
+8. **Guided cardio.** A Cardio tab of timed sessions for the rower, treadmill, boxing bag, bike, jump rope and no equipment, plus circuits that mix them. A full-screen timer shows each step, how hard to go, a cue and what comes next. Haptics mark each step change, and the screen stays awake. Finished sessions go into History.
+9. **Navigation.** Every stacked screen has a back button, and every modal has a close button. If there is nothing to go back to, the button goes home.
 
 ## Open-source tools
 
@@ -43,6 +45,7 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 ## Screens
 
 - **Workouts tab:** saved workouts, a "Generate a workout" button and a "Build your own" button.
+- **Cardio tab:** guided sessions, filtered by your equipment.
 - **Library tab:** all exercises, filtered by your equipment, with a search field.
 - **History tab:** past sessions.
 - **Me tab:** equipment, BMI calculator, units and an About section.

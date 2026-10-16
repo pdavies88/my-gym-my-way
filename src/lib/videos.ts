@@ -324,6 +324,66 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     title: 'Farmer\'s Carry Tutorial - Proper Form and Technique',
     channel: 'Runna',
   },
+  'trx-row': {
+    videoId: '7d8SbPUdHR0',
+    title: 'TRX Mid Row',
+    channel: 'TRXtraining',
+  },
+  'trx-chest-press': {
+    videoId: '-vPgHzuRI7I',
+    title: 'TRX® Chest Press with Chris Frankel',
+    channel: 'TRXtraining',
+  },
+  'trx-squat': {
+    videoId: 'DTXphTGYd0g',
+    title: 'TRX Squat',
+    channel: 'TRXtraining',
+  },
+  'trx-lunge': {
+    videoId: '3lxfMuEI5CY',
+    title: 'TRX Move of the Month: TRX Suspended Lunge',
+    channel: 'TRXtraining',
+  },
+  'trx-hamstring-curl': {
+    videoId: 'RkEHyudfkyM',
+    title: 'TRX Hamstring Curl',
+    channel: 'TRXtraining',
+  },
+  'trx-y-raise': {
+    videoId: '32SsJD-9UeQ',
+    title: 'TRX Y-Fly',
+    channel: 'TRXtraining',
+  },
+  'trx-biceps-curl': {
+    videoId: 'xG57S0fgXAk',
+    title: 'TRX Bicep Curl',
+    channel: 'Kyle Arsenault',
+  },
+  'trx-triceps-extension': {
+    videoId: 'VKqhVPiLh00',
+    title: 'TRX Tricep Extension',
+    channel: 'Kyle Arsenault',
+  },
+  'trx-knee-tuck': {
+    videoId: 'Nr8pgtq2oDc',
+    title: 'TRX Knee Tucks',
+    channel: 'Strongher Programming',
+  },
+  'bag-jab-cross': {
+    videoId: 'JyuiDu2llOY',
+    title: 'How to throw the 1-2 on the Heavy bag { Beginner video }',
+    channel: 'Coach Anthony',
+  },
+  'bag-hooks': {
+    videoId: '_0TFCUP8LB0',
+    title: 'How to Throw a Lead Hook on the Heavy Bag | Boxing For Beginners',
+    channel: 'Final Round Training',
+  },
+  'bag-uppercuts': {
+    videoId: 'V_aL6T_yiFM',
+    title: 'Best Way to Uppercut the Heavy Bag',
+    channel: 'Coach Pillow Fists',
+  },
 };
 
 export function getVideo(exerciseId: string): ExerciseVideo | undefined {

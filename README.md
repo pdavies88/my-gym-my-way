@@ -1,6 +1,6 @@
 # My Gym My Way
 
-A free home-gym workout app. Pick the equipment you own, generate or build workouts from it, tick off exercises as you go, check your BMI, and watch a demo video of every exercise. No paywall, no account, no backend. Your data stays on the phone.
+A free home-gym workout app. Pick the equipment you own, generate or build workouts from it, tick off exercises as you go, follow guided cardio sessions, check your BMI, and watch a demo video of every exercise. No paywall, no account, no backend. Your data stays on the phone.
 
 Built with Expo SDK 57, Expo Router and Reanimated. Exercise videos are YouTube embeds. See [PLAN.md](PLAN.md) for the plan and the decisions behind it.
 

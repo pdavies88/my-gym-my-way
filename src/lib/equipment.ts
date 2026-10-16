@@ -7,6 +7,7 @@ export const EQUIPMENT_IDS = [
   'pullupBar',
   'bands',
   'cable',
+  'suspension',
   'medicineBall',
   'abWheel',
   'box',
@@ -14,6 +15,7 @@ export const EQUIPMENT_IDS = [
   'rower',
   'bike',
   'treadmill',
+  'heavyBag',
 ] as const;
 
 export type EquipmentId = (typeof EQUIPMENT_IDS)[number];
@@ -37,6 +39,7 @@ export const EQUIPMENT: readonly Equipment[] = [
   { id: 'bench', name: 'Weight bench', group: 'Stations', icon: { ios: 'rectangle.fill', android: 'chair' } },
   { id: 'pullupBar', name: 'Pull-up bar', group: 'Stations', icon: { ios: 'figure.climbing', android: 'sports_gymnastics' } },
   { id: 'cable', name: 'Cable machine', group: 'Stations', icon: { ios: 'cable.connector', android: 'cable' } },
+  { id: 'suspension', name: 'Suspension trainer (TRX)', group: 'Stations', icon: { ios: 'figure.strengthtraining.functional', android: 'sports_gymnastics' } },
   { id: 'bands', name: 'Resistance bands', group: 'Accessories', icon: { ios: 'lasso', android: 'gesture' } },
   { id: 'abWheel', name: 'Ab wheel', group: 'Accessories', icon: { ios: 'circle.circle', android: 'trip_origin' } },
   { id: 'box', name: 'Plyo box or step', group: 'Accessories', icon: { ios: 'shippingbox', android: 'inventory_2' } },
@@ -44,6 +47,7 @@ export const EQUIPMENT: readonly Equipment[] = [
   { id: 'rower', name: 'Rowing machine', group: 'Cardio', icon: { ios: 'figure.rower', android: 'rowing' } },
   { id: 'bike', name: 'Exercise bike', group: 'Cardio', icon: { ios: 'figure.indoor.cycle', android: 'directions_bike' } },
   { id: 'treadmill', name: 'Treadmill', group: 'Cardio', icon: { ios: 'figure.run', android: 'directions_run' } },
+  { id: 'heavyBag', name: 'Boxing bag and gloves', group: 'Cardio', icon: { ios: 'figure.boxing', android: 'sports_mma' } },
 ];
 
 export const EQUIPMENT_GROUPS: readonly EquipmentGroup[] = ['Free weights', 'Stations', 'Accessories', 'Cardio'];

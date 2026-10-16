@@ -25,6 +25,7 @@ type TrainingContextValue = {
   startSession: (session: { name: string; exerciseIds: string[]; workoutId?: string }) => void;
   toggleExercise: (exerciseId: string) => void;
   finishSession: () => SessionLog | null;
+  logCardio: (entry: { cardioId: string; name: string; startedAt: number; exerciseIds: string[] }) => SessionLog;
   discardSession: () => void;
   deleteSession: (id: string) => void;
 };
@@ -91,6 +92,21 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     return log;
   };
 
+  const logCardio: TrainingContextValue['logCardio'] = ({ cardioId, name, startedAt, exerciseIds }) => {
+    const log: SessionLog = {
+      id: newId(),
+      kind: 'cardio',
+      cardioId,
+      name,
+      startedAt,
+      finishedAt: Date.now(),
+      exerciseIds,
+      completedIds: exerciseIds,
+    };
+    persistSessions([log, ...sessions].slice(0, MAX_SESSIONS));
+    return log;
+  };
+
   const discardSession = () => persistActive(null);
   const deleteSession = (id: string) => persistSessions(sessions.filter((s) => s.id !== id));
 
@@ -105,6 +121,7 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         startSession,
         toggleExercise,
         finishSession,
+        logCardio,
         discardSession,
         deleteSession,
       }}>
