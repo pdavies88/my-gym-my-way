@@ -3,9 +3,11 @@ import { describe, expect, it } from '@jest/globals';
 import {
   CARDIO_SESSIONS,
   canDoCardio,
+  cuesBetween,
   formatCountdown,
   getCardioSession,
   positionAt,
+  stepAnnouncement,
   stepStart,
   totalSeconds,
 } from '../cardio';
@@ -27,6 +29,9 @@ describe('cardio sessions', () => {
     }
     for (const item of session.needs) expect(EQUIPMENT_IDS).toContain(item);
     if (session.techniqueExerciseId) expect(getExercise(session.techniqueExerciseId)).toBeDefined();
+    // A summary that names a length must match the real length to within a minute.
+    const stated = session.summary.match(/about (\d+) minutes/i);
+    if (stated) expect(Math.abs(Number(stated[1]) - totalSeconds(session) / 60)).toBeLessThanOrEqual(1);
     // Every session lasts between 10 minutes and an hour.
     expect(totalSeconds(session)).toBeGreaterThanOrEqual(600);
     expect(totalSeconds(session)).toBeLessThanOrEqual(3600);
@@ -75,5 +80,49 @@ describe('formatCountdown', () => {
     expect(formatCountdown(65)).toBe('1:05');
     expect(formatCountdown(0.2)).toBe('0:01');
     expect(formatCountdown(0)).toBe('0:00');
+  });
+});
+
+describe('cuesBetween', () => {
+  const steps = [
+    { label: 'Warm up', seconds: 60, effort: 'warmup' as const, cue: 'Easy.' },
+    { label: 'Hard 1 of 2', seconds: 30, effort: 'hard' as const, cue: 'Go.' },
+    { label: 'Rest', seconds: 10, effort: 'rest' as const, cue: 'Breathe.' },
+  ];
+  /** Runs the clock forward in small ticks, like the timer does, and collects the cues. */
+  const play = (from: number, to: number, tick = 0.2) => {
+    const cues = [];
+    for (let t = from; t < to; t += tick) cues.push(...cuesBetween(steps, t, Math.min(to, t + tick)));
+    return cues;
+  };
+
+  it('gives a heads-up, then 3-2-1, then the new step', () => {
+    const kinds = play(45, 61).map((c) => (c.kind === 'tick' ? `tick${c.secondsLeft}` : c.kind));
+    expect(kinds).toEqual(['heads-up', 'tick3', 'tick2', 'tick1', 'step']);
+  });
+
+  it('plays each cue only once', () => {
+    expect(play(0, 100).filter((c) => c.kind === 'step')).toHaveLength(2);
+    expect(play(0, 100).filter((c) => c.kind === 'tick')).toHaveLength(9);
+    expect(play(0, 100).filter((c) => c.kind === 'done')).toHaveLength(1);
+  });
+
+  it('skips the heads-up on short steps', () => {
+    expect(play(60, 100).filter((c) => c.kind === 'heads-up')).toHaveLength(1);
+  });
+
+  it('only announces the new step when you skip ahead', () => {
+    expect(cuesBetween(steps, 5, 60)).toEqual([{ kind: 'step', index: 1, step: steps[1] }]);
+    expect(cuesBetween(steps, 5, 20)).toEqual([]);
+  });
+});
+
+describe('stepAnnouncement', () => {
+  it('reads combos and durations naturally', () => {
+    expect(stepAnnouncement({ label: 'Round 3: 1-2-3', seconds: 120, effort: 'hard', cue: '' })).toBe(
+      'Hard. Round 3: 1, 2, 3. 2 minutes.',
+    );
+    expect(stepAnnouncement({ label: 'Rest', seconds: 90, effort: 'rest', cue: '' })).toBe('Rest. 1 minute 30.');
+    expect(stepAnnouncement({ label: 'Warm up', seconds: 300, effort: 'warmup', cue: '' })).toBe('Warm up. 5 minutes.');
   });
 });

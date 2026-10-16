@@ -31,12 +31,15 @@ export interface CardioStep {
   exerciseId?: string;
 }
 
-export type CardioCategory = 'rower' | 'treadmill' | 'bag' | 'bike' | 'rope' | 'bodyweight' | 'circuit';
+export type CardioCategory =
+  'rower' | 'treadmill' | 'bag' | 'kettlebell' | 'trx' | 'bike' | 'rope' | 'bodyweight' | 'circuit';
 
 export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   rower: 'Rower',
   treadmill: 'Treadmill',
   bag: 'Boxing bag',
+  kettlebell: 'Kettlebell conditioning',
+  trx: 'TRX conditioning',
   bike: 'Bike',
   rope: 'Jump rope',
   bodyweight: 'No equipment',
@@ -255,7 +258,7 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
   {
     id: 'bag-tabata',
     name: 'Bag Tabata',
-    summary: 'Two blocks of 20 seconds all out, 10 seconds rest. About 15 minutes.',
+    summary: 'Two blocks of 20 seconds all out, 10 seconds rest. About 14 minutes.',
     level: 'Advanced',
     category: 'bag',
     needs: ['heavyBag'],
@@ -272,6 +275,137 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         step('Rest', 10, 'rest', 'Hands up. Get ready.'),
       ]),
       step('Cool down', min(2), 'easy', 'Walk, then stretch your shoulders.'),
+    ],
+  },
+  // Kettlebell conditioning
+  {
+    id: 'kettlebell-basics',
+    name: 'Kettlebell basics',
+    summary: 'Four moves, 30 seconds on and 30 off. Learn the patterns while your heart rate climbs.',
+    level: 'Beginner',
+    category: 'kettlebell',
+    needs: ['kettlebell'],
+    techniqueExerciseId: 'kettlebell-swing',
+    steps: [
+      step('Warm up', min(3), 'warmup', 'Halos, bodyweight squats and a few light hip hinges.', 'kettlebell-halo'),
+      ...rounds(4, (r) => [
+        step(`Swings · round ${r}`, 30, 'hard', 'Snap your hips. The bell floats to chest height.', 'kettlebell-swing'),
+        step('Rest', 30, 'rest', 'Next: goblet squats.'),
+        step(
+          `Goblet squats · round ${r}`,
+          30,
+          'moderate',
+          'Bell at your chest, sit between your knees.',
+          'goblet-squat',
+        ),
+        step('Rest', 30, 'rest', 'Next: rows.'),
+        step(`Rows · round ${r}`, 30, 'moderate', 'Switch arms halfway through.', 'kettlebell-row'),
+        step('Rest', 30, 'rest', 'Next: presses.'),
+        step(
+          `Presses · round ${r}`,
+          30,
+          'moderate',
+          'Switch arms halfway through. Brace your core.',
+          'kettlebell-press',
+        ),
+        step('Rest', 30, 'rest', r < 4 ? 'Round done. Next: swings.' : 'Last rest.'),
+      ]),
+      step('Cool down', min(2), 'easy', 'Walk around, then stretch your hips and shoulders.'),
+    ],
+  },
+  {
+    id: 'kettlebell-burner',
+    name: 'Kettlebell burner',
+    summary: 'Five rounds of 40 seconds on, 20 off. Swings, cleans, squats and get-ups.',
+    level: 'Advanced',
+    category: 'kettlebell',
+    needs: ['kettlebell'],
+    techniqueExerciseId: 'kettlebell-swing',
+    steps: [
+      step('Warm up', min(4), 'warmup', 'Halos, light swings and a slow get-up each side.', 'kettlebell-halo'),
+      ...rounds(5, (r) => [
+        step(`Swings · round ${r}`, 40, 'max', 'Hard, fast hips. Keep your back flat.', 'kettlebell-swing'),
+        step('Rest', 20, 'rest', 'Next: cleans.'),
+        step(`Cleans · round ${r}`, 40, 'hard', 'Left arm for 20 seconds, then right.', 'kettlebell-clean'),
+        step('Rest', 20, 'rest', 'Next: goblet squats.'),
+        step(`Goblet squats · round ${r}`, 40, 'hard', 'Steady reps, full depth.', 'goblet-squat'),
+        step('Rest', 20, 'rest', 'Next: single-leg deadlifts.'),
+        step(
+          `Single-leg deadlifts · round ${r}`,
+          40,
+          'moderate',
+          'Switch legs halfway. Slow and balanced.',
+          'single-leg-rdl',
+        ),
+        step('Rest', 20, 'rest', r < 5 ? 'Round done. Back to swings.' : 'Last rest. One get-up each side next.'),
+      ]),
+      step(
+        'Get-up finisher',
+        min(2),
+        'moderate',
+        'One slow Turkish get-up on each side. Quality over speed.',
+        'turkish-get-up',
+      ),
+      step('Cool down', min(2), 'easy', 'Walk, then stretch your hamstrings and shoulders.'),
+    ],
+  },
+  // TRX conditioning
+  {
+    id: 'trx-circuit',
+    name: 'TRX total body',
+    summary: 'Four rounds of five suspension moves, 40 seconds on and 20 off.',
+    level: 'Intermediate',
+    category: 'trx',
+    needs: ['suspension'],
+    techniqueExerciseId: 'trx-row',
+    steps: [
+      step('Warm up', min(3), 'warmup', 'Easy TRX squats and rows. Find your foot position for each.', 'trx-squat'),
+      ...rounds(4, (r) => [
+        step(`Rows · round ${r}`, 40, 'hard', 'Walk your feet forward to make it harder.', 'trx-row'),
+        step('Rest', 20, 'rest', 'Next: chest press. Turn around.'),
+        step(`Chest press · round ${r}`, 40, 'hard', 'Body straight like a plank.', 'trx-chest-press'),
+        step('Rest', 20, 'rest', 'Next: squats.'),
+        step(
+          `Squats · round ${r}`,
+          40,
+          'moderate',
+          'Deep and steady. Add a jump at the top to push harder.',
+          'trx-squat',
+        ),
+        step('Rest', 20, 'rest', 'Next: knee tucks. Feet in the cradles.'),
+        step(`Knee tucks · round ${r}`, 40, 'hard', 'Hips level, knees to chest.', 'trx-knee-tuck'),
+        step('Rest', 20, 'rest', 'Next: suspended lunges.'),
+        step(`Lunges · round ${r}`, 40, 'moderate', 'Switch legs halfway.', 'trx-lunge'),
+        step('Rest', 20, 'rest', r < 4 ? 'Round done. Next: rows.' : 'Last rest.'),
+      ]),
+      step('Cool down', min(2), 'easy', 'Stretch your chest and shoulders using the straps.'),
+    ],
+  },
+  {
+    id: 'trx-tabata',
+    name: 'TRX Tabata',
+    summary: 'Three Tabata blocks: 20 seconds all out, 10 seconds rest. About 19 minutes.',
+    level: 'Advanced',
+    category: 'trx',
+    needs: ['suspension'],
+    techniqueExerciseId: 'trx-row',
+    steps: [
+      step('Warm up', min(3), 'warmup', 'Easy squats, rows and arm circles.', 'trx-squat'),
+      ...rounds(8, (r) => [
+        step(`Squat jumps · ${r} of 8`, 20, 'max', 'Hold the straps, sit back, jump.', 'trx-squat'),
+        step('Rest', 10, 'rest', 'Breathe.'),
+      ]),
+      step('Rest', min(1), 'rest', 'Next block: rows.'),
+      ...rounds(8, (r) => [
+        step(`Fast rows · ${r} of 8`, 20, 'max', 'Quick, controlled pulls.', 'trx-row'),
+        step('Rest', 10, 'rest', 'Breathe.'),
+      ]),
+      step('Rest', min(1), 'rest', 'Last block: knee tucks.'),
+      ...rounds(8, (r) => [
+        step(`Knee tucks · ${r} of 8`, 20, 'max', 'Hips level. Stop early if your back sags.', 'trx-knee-tuck'),
+        step('Rest', 10, 'rest', 'Breathe.'),
+      ]),
+      step('Cool down', min(2), 'easy', 'Walk, then stretch.'),
     ],
   },
   // Bike
@@ -410,6 +544,26 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Cool down', min(3), 'easy', 'Easy rowing, then stretch.'),
     ],
   },
+  {
+    id: 'circuit-home-gym',
+    name: 'Home gym finisher',
+    summary: 'Bag, kettlebell and TRX back to back. Four rounds, about 25 minutes.',
+    level: 'Advanced',
+    category: 'circuit',
+    needs: ['heavyBag', 'kettlebell', 'suspension'],
+    techniqueExerciseId: 'kettlebell-swing',
+    steps: [
+      step('Warm up', min(3), 'warmup', 'Shadowbox, then a few light swings.'),
+      ...rounds(4, (r) => [
+        step(`Bag · round ${r}`, min(1), 'hard', 'Freestyle. Mix head and body shots.', 'bag-body-shots'),
+        step(`Swings · round ${r}`, 45, 'max', 'Gloves off, straight to the bell.', 'kettlebell-swing'),
+        step(`TRX rows · round ${r}`, 45, 'hard', 'Squeeze your shoulder blades at the top.', 'trx-row'),
+        step(`Knee tucks · round ${r}`, 30, 'hard', 'Feet in the cradles, hips level.', 'trx-knee-tuck'),
+        step('Rest', 90, 'rest', r < 4 ? 'Gloves back on. Bag next.' : 'Last rest.'),
+      ]),
+      step('Cool down', min(3), 'easy', 'Walk, then stretch your hips, back and shoulders.'),
+    ],
+  },
 ];
 
 export function getCardioSession(id: string): CardioSession | undefined {
@@ -479,4 +633,80 @@ export function stepStart(steps: readonly CardioStep[], index: number): number {
 export function formatCountdown(seconds: number): string {
   const whole = Math.max(0, Math.ceil(seconds));
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+/**
+ * How hard each effort level is, on the 1–10 rate of perceived exertion (RPE) scale, with a rough
+ * heart-rate zone for people who wear a watch. Shown live during a session.
+ */
+export const INTENSITY: Record<Effort, { rpe: [number, number]; heartRate: string; feel: string }> = {
+  warmup: { rpe: [3, 4], heartRate: 'about 50–60% of max', feel: 'Light. Loosen up and let your breathing pick up.' },
+  easy: { rpe: [3, 4], heartRate: 'about 60–70% of max', feel: 'Comfortable. You could chat the whole time.' },
+  moderate: { rpe: [5, 6], heartRate: 'about 70–80% of max', feel: 'Working. Breathing deeper, short sentences only.' },
+  hard: { rpe: [7, 8], heartRate: 'about 80–90% of max', feel: 'Tough. A few words at a time. Hold your form.' },
+  max: { rpe: [9, 10], heartRate: 'above 90% of max', feel: 'Everything you have. No talking. It’s short.' },
+  rest: { rpe: [1, 2], heartRate: 'coming down', feel: 'Recover. Slow, deep breaths through your nose.' },
+};
+
+export type Cue =
+  /** A short beep at 3, 2 and 1 seconds before a step ends. */
+  | { kind: 'tick'; secondsLeft: number }
+  /** Spoken heads-up 10 seconds before a step ends. */
+  | { kind: 'heads-up'; next: CardioStep }
+  /** A new step has started. */
+  | { kind: 'step'; index: number; step: CardioStep }
+  /** The session is over. */
+  | { kind: 'done' };
+
+const HEADS_UP_SECONDS = 10;
+/** A jump bigger than this between two clock readings is a skip or a seek, not normal time passing. */
+const MAX_TICK_GAP = 1.5;
+
+/**
+ * The cues to play when the clock moves from `from` to `to` seconds. The timer calls this a few
+ * times a second. Skips and seeks only announce the new step, so they never trigger a burst of beeps.
+ */
+export function cuesBetween(steps: readonly CardioStep[], from: number, to: number): Cue[] {
+  if (to <= from) return [];
+  const before = positionAt(steps, from);
+  const after = positionAt(steps, to);
+  const changed = after.index !== before.index;
+  const end = (): Cue[] =>
+    after.done ? [{ kind: 'done' }] : [{ kind: 'step', index: after.index, step: steps[after.index] }];
+
+  if (to - from > MAX_TICK_GAP) return changed ? end() : [];
+
+  const cues: Cue[] = [];
+  const left = before.stepRemaining;
+  const leftAfter = left - (to - from);
+  const current = steps[before.index];
+  const next = steps[before.index + 1];
+  if (current && next && current.seconds > 20 && left > HEADS_UP_SECONDS && leftAfter <= HEADS_UP_SECONDS) {
+    cues.push({ kind: 'heads-up', next });
+  }
+  for (const mark of [3, 2, 1]) {
+    if (left > mark && leftAfter <= mark && current.seconds > mark + 1) cues.push({ kind: 'tick', secondsLeft: mark });
+  }
+  if (changed) cues.push(...end());
+  return cues;
+}
+
+/** Plain-language duration for the voice: "2 minutes", "45 seconds", "1 minute 30". */
+export function spokenDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m === 0) return `${s} seconds`;
+  const minutes = `${m} minute${m === 1 ? '' : 's'}`;
+  return s ? `${minutes} ${s}` : minutes;
+}
+
+/** What the voice says when a step starts, for example "Hard. Round 1: 1-2. 2 minutes." */
+export function stepAnnouncement(step: CardioStep): string {
+  // Spell out combos so the voice says "one, two" instead of "one minus two".
+  const label = step.label.replace(/(\d)-(?=\d)/g, '$1, ');
+  // Skip the effort word when the label already says it, so a rest step isn't "Rest. Rest."
+  const letters = (text: string) => text.toLowerCase().replace(/[^a-z]/g, '');
+  const effort = EFFORT_LABELS[step.effort];
+  const prefix = letters(label).startsWith(letters(effort)) ? '' : `${effort}. `;
+  return `${prefix}${label}. ${spokenDuration(step.seconds)}.`;
 }

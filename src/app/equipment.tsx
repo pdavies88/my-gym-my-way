@@ -9,6 +9,7 @@ import { Screen, SectionHeader } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
+import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { EQUIPMENT, EQUIPMENT_GROUPS, type Equipment } from '@/lib/equipment';
 import { availableExercises } from '@/lib/exercises';
@@ -51,6 +52,7 @@ export default function EquipmentScreen() {
 function EquipmentTile({ item }: { item: Equipment }) {
   const theme = useTheme();
   const { owned, toggleEquipment } = useSettings();
+  const feedback = useFeedback();
   const selected = owned.has(item.id);
 
   const checkStyle = useAnimatedStyle(() => ({
@@ -63,7 +65,10 @@ function EquipmentTile({ item }: { item: Equipment }) {
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
       accessibilityLabel={item.name}
-      onPress={() => toggleEquipment(item.id)}
+      onPress={() => {
+        feedback.select();
+        toggleEquipment(item.id);
+      }}
       style={[
         styles.tile,
         {

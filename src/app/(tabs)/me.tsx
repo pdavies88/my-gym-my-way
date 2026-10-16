@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
 
 import { AboutLink } from '@/components/about-link';
 import { BmiCard } from '@/components/bmi-card';
@@ -13,11 +13,16 @@ import { ThemedText } from '@/components/themed-text';
 import { AppName } from '@/constants/brand';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
+import { useBestVoice } from '@/hooks/use-best-voice';
+import { useFeedback } from '@/hooks/use-feedback';
+import { useTheme } from '@/hooks/use-theme';
 import { equipmentName } from '@/lib/equipment';
 import { availableExercises } from '@/lib/exercises';
+import { couldUpgradeVoice } from '@/lib/voice';
 
 export default function MeScreen() {
   const { settings, owned, updateSettings } = useSettings();
+  const { voice, loaded } = useBestVoice();
 
   return (
     <Screen eyebrow="Settings and body" title="Me">
@@ -49,6 +54,36 @@ export default function MeScreen() {
           value={settings.units}
           onChange={(units) => updateSettings({ units })}
         />
+      </View>
+
+      <View style={styles.group}>
+        <SectionHeader title="Feedback" />
+        <Card style={styles.toggles}>
+          <ToggleRow
+            label="Sounds"
+            detail="Soft chimes for the 3-2-1 countdown and step changes in cardio"
+            value={settings.sounds !== false}
+            onChange={(sounds) => updateSettings({ sounds })}
+          />
+          <ToggleRow
+            label="Voice"
+            detail={`Announces each cardio step and a 10-second heads-up${loaded ? `. Using ${voice ? voice.name : 'the system voice'}.` : ''}`}
+            value={settings.voice !== false}
+            onChange={(voice) => updateSettings({ voice })}
+          />
+          <ToggleRow
+            label="Haptics"
+            detail="Taps when you tick, pick or finish something"
+            value={settings.haptics !== false}
+            onChange={(haptics) => updateSettings({ haptics })}
+          />
+          {loaded && couldUpgradeVoice(voice) && (
+            <ThemedText type="small" themeColor="textSecondary">
+              For a more natural voice, download an Enhanced or Premium English voice, such as Ava or Zoe: iPhone
+              Settings → Accessibility → Read & Speak → Voices. The app picks it up next time.
+            </ThemedText>
+          )}
+        </Card>
       </View>
 
       <View style={styles.group}>
@@ -91,7 +126,49 @@ export default function MeScreen() {
   );
 }
 
+function ToggleRow({
+  label,
+  detail,
+  value,
+  onChange,
+}: {
+  label: string;
+  detail: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const theme = useTheme();
+  const feedback = useFeedback();
+  return (
+    <View style={styles.toggleRow}>
+      <View style={styles.toggleText}>
+        <ThemedText type="smallBold" style={styles.toggleLabel}>
+          {label}
+        </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {detail}
+        </ThemedText>
+      </View>
+      <Switch
+        accessibilityLabel={label}
+        value={value}
+        onValueChange={(next) => {
+          feedback.select();
+          onChange(next);
+        }}
+        trackColor={{ true: theme.tint, false: theme.backgroundSelected }}
+        thumbColor={value ? theme.onTint : theme.textSecondary}
+        ios_backgroundColor={theme.backgroundSelected}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  toggles: { gap: Spacing.three },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  toggleText: { flex: 1, gap: 2 },
+  toggleLabel: { fontSize: 16 },
   group: { gap: Spacing.three },
   links: { marginVertical: Spacing.one },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },

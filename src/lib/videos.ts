@@ -82,7 +82,7 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
   'calf-raise': {
     videoId: 'k8ipHzKeAkQ',
     title: 'Exercises with an Athletic Trainer: Standing Calf Raises',
-    channel: 'Children\'s Hospital Colorado',
+    channel: "Children's Hospital Colorado",
   },
   'push-up': {
     videoId: 'Env8gAr_QnE',
@@ -191,7 +191,7 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
   },
   'lat-pulldown': {
     videoId: 'AOpi-p0cJkc',
-    title: 'Beginner\'s Guide: Lat Pulldown',
+    title: "Beginner's Guide: Lat Pulldown",
     channel: 'SilverSneakers',
   },
   'dumbbell-curl': {
@@ -232,9 +232,9 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
   'band-lateral-raise': {
     videoId: 'yfNg5sFndbw',
     title: 'Band Lateral Raise',
-    channel: 'Men\'s Health',
+    channel: "Men's Health",
   },
-  'plank': {
+  plank: {
     videoId: 'mH5Sfb_KTGg',
     title: 'How to do a Forearm Plank | The Right Way | Well+Good',
     channel: 'Well+Good',
@@ -244,7 +244,7 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     title: 'How to Do a Dead Bug: A Guide from Physical Therapists',
     channel: 'Hinge Health',
   },
-  'crunch': {
+  crunch: {
     videoId: '0t4t3IpiEao',
     title: 'How To Do Crunches | The Right Way | Well+Good',
     channel: 'Well+Good',
@@ -294,7 +294,7 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     title: 'How to perform HIGH Knees',
     channel: 'Get Healthy U - with Chris Freytag',
   },
-  'burpee': {
+  burpee: {
     videoId: 'NCqbpkoiyXE',
     title: 'How To Burpee | Nuffield Health',
     channel: 'Nuffield Health',
@@ -321,7 +321,7 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
   },
   'farmer-carry': {
     videoId: 'lLAw6fUccKA',
-    title: 'Farmer\'s Carry Tutorial - Proper Form and Technique',
+    title: "Farmer's Carry Tutorial - Proper Form and Technique",
     channel: 'Runna',
   },
   'trx-row': {
@@ -383,6 +383,96 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     videoId: 'V_aL6T_yiFM',
     title: 'Best Way to Uppercut the Heavy Bag',
     channel: 'Coach Pillow Fists',
+  },
+  'barbell-front-squat': {
+    videoId: '0dpU0WNiPvo',
+    title: 'Barbell Front Squat | Nuffield Health',
+    channel: 'Nuffield Health',
+  },
+  'barbell-hip-thrust': {
+    videoId: 'aweBS7K71l8',
+    title: 'How To Do A Barbell Hip Thrust',
+    channel: 'PureGym',
+  },
+  'barbell-rdl': {
+    videoId: 'xgusDooVfKU',
+    title: 'How to do a Romanian Deadlift (Barbell) | Proper Form & Technique | NASM',
+    channel: 'National Academy of Sports Medicine (NASM)',
+  },
+  'good-morning': {
+    videoId: 'nWyx81AfTos',
+    title: 'How To Do A Barbell Good Morning',
+    channel: 'PureGym',
+  },
+  'barbell-split-squat': {
+    videoId: 'iHkBjcx9CiQ',
+    title: 'Barbell Split Squat - OPEX Exercise Library',
+    channel: 'OPEX Fitness',
+  },
+  'turkish-get-up': {
+    videoId: '0bWRPC49-KI',
+    title: 'Turkish Get-Up Basics',
+    channel: 'StrongFirst',
+  },
+  'kettlebell-clean': {
+    videoId: 'aoCikYYQ6pI',
+    title: 'How to do a Kettlebell Clean',
+    channel: 'National Academy of Sports Medicine (NASM)',
+  },
+  'single-leg-rdl': {
+    videoId: 'c99gkgaAWYw',
+    title: 'Kettlebell Single Leg Romanian Deadlift | Girls Gone Strong',
+    channel: "Women's Health & Fitness",
+  },
+  'kettlebell-halo': {
+    videoId: 'wJcmanVh5EE',
+    title: 'Kettlebell Halo',
+    channel: 'Onnit Academy',
+  },
+  'dead-hang': {
+    videoId: '3CEmHJXbNpc',
+    title: 'How to dead hang',
+    channel: 'Adam McCubbin',
+  },
+  'negative-pull-up': {
+    videoId: 'jBSMDqs7OzM',
+    title: 'How To Do Negative Pull Ups',
+    channel: 'PureGym',
+  },
+  'hanging-leg-raise': {
+    videoId: 'Yrtvs-nEnk0',
+    title: 'How To Do Hanging Leg Raises',
+    channel: 'PureGym',
+  },
+  'bench-hip-thrust': {
+    videoId: 'pUdIL5x0fWg',
+    title: 'Hip Thrust | Nuffield Health',
+    channel: 'Nuffield Health',
+  },
+  'chest-supported-row': {
+    videoId: 'Nx0TzjgsI-0',
+    title: 'How To Do An Incline Dumbbell Row',
+    channel: 'PureGym',
+  },
+  'dumbbell-fly': {
+    videoId: 'eozdVDA78K0',
+    title: 'How To: Dumbbell Flys On A Flat Bench',
+    channel: 'ScottHermanFitness',
+  },
+  'incline-dumbbell-press': {
+    videoId: 'oZVCBM9f8Eo',
+    title: 'How To Do A Dumbbell Incline Press',
+    channel: 'PureGym',
+  },
+  'bag-body-shots': {
+    videoId: 'GCHUhzY86AU',
+    title: 'How To Throw Lead Body Punch on the Heavy Bag | Boxing For Beginners',
+    channel: 'Final Round Training',
+  },
+  'bag-slip-drill': {
+    videoId: 'OPuWhgYzvHU',
+    title: 'Heavy Bag Boxing Defense Drills (No Partner NEEDED!!)',
+    channel: 'Tony Jeffries',
   },
 };
 

@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -13,10 +12,21 @@ import { Icon } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { ProgressBar } from '@/components/progress-bar';
 import { ThemedText } from '@/components/themed-text';
-import { Radius, Spacing } from '@/constants/theme';
+import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
+import { useCardioCues } from '@/hooks/use-cardio-cues';
 import { useTheme } from '@/hooks/use-theme';
-import { formatCountdown, getCardioSession, positionAt, stepStart, totalSeconds } from '@/lib/cardio';
+import {
+  cuesBetween,
+  formatCountdown,
+  getCardioSession,
+  INTENSITY,
+  positionAt,
+  stepStart,
+  totalSeconds,
+  type Effort,
+} from '@/lib/cardio';
 import { getExercise } from '@/lib/exercises';
 import { formatDuration } from '@/lib/time';
 
@@ -63,16 +73,22 @@ function Player({ sessionId }: { sessionId: string }) {
   const next = steps[pos.index + 1];
   const secondsLeft = Math.ceil(pos.stepRemaining);
   const paused = pausedAt !== null;
+  const finalCount = !paused && !pos.done && current.seconds > 4 && secondsLeft >= 1 && secondsLeft <= 3;
 
-  // A firm tap when a new step starts, and light ticks for the last three seconds of each step.
+  const { settings, updateSettings } = useSettings();
+  const muted = settings.sounds === false && settings.voice === false;
+  const cues = useCardioCues();
+
+  // Beeps, voice and haptics. Each clock reading plays whatever cues the clock just passed.
+  const lastElapsed = useRef<number | null>(null);
   useEffect(() => {
-    if (pos.index > 0) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, [pos.index]);
-  useEffect(() => {
-    if (!paused && !pos.done && secondsLeft >= 1 && secondsLeft <= 3) {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (lastElapsed.current === null) {
+      cues.start(steps[0].seconds, steps[0].label);
+    } else {
+      for (const cue of cuesBetween(steps, lastElapsed.current, elapsed)) cues.play(cue);
     }
-  }, [secondsLeft, paused, pos.done]);
+    lastElapsed.current = elapsed;
+  });
 
   const exerciseIds = [...new Set(steps.map((s) => s.exerciseId).filter((e): e is string => !!e))];
   const save = () => {
@@ -88,10 +104,7 @@ function Player({ sessionId }: { sessionId: string }) {
 
   // Save to history once, the moment the last step ends.
   useEffect(() => {
-    if (pos.done && !logged.current) {
-      save();
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    if (pos.done && !logged.current) save();
   });
 
   const togglePause = () => {
@@ -107,8 +120,9 @@ function Player({ sessionId }: { sessionId: string }) {
   const skip = () => setOffset((o) => o + pos.stepRemaining);
   const previous = () => {
     // Within the first 3 seconds of a step, go back a whole step. Otherwise restart this one.
-    const target = pos.stepElapsed < 3 && pos.index > 0 ? stepStart(steps, pos.index - 1) : stepStart(steps, pos.index);
-    setOffset((o) => o - (elapsed - target));
+    const index = pos.stepElapsed < 3 && pos.index > 0 ? pos.index - 1 : pos.index;
+    setOffset((o) => o - (elapsed - stepStart(steps, index)));
+    cues.play({ kind: 'step', index, step: steps[index] });
   };
 
   const end = () => {
@@ -116,10 +130,18 @@ function Player({ sessionId }: { sessionId: string }) {
     const activeMs = Date.now() - startedAt - pausedMs - (pausedAt === null ? 0 : Date.now() - pausedAt);
     Alert.alert('End this session?', `You’ve trained for ${formatDuration(activeMs)}. Skipped steps don’t count.`, [
       { text: 'Keep going', style: 'cancel' },
-      { text: 'Discard', style: 'destructive', onPress: () => router.back() },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => {
+          cues.silence();
+          router.back();
+        },
+      },
       {
         text: 'Save and end',
         onPress: () => {
+          cues.silence();
           save();
           router.back();
         },
@@ -181,7 +203,25 @@ function Player({ sessionId }: { sessionId: string }) {
               {formatCountdown(pos.totalRemaining)} left · step {pos.index + 1} of {steps.length}
             </ThemedText>
           </View>
-          <View style={styles.topButton} />
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={muted ? 'Turn sound and voice on' : 'Mute sound and voice'}
+            onPress={() => {
+              if (!muted) cues.silence();
+              updateSettings({ sounds: muted, voice: muted });
+            }}
+            hitSlop={10}
+            style={styles.topButton}>
+            <Icon
+              name={
+                muted
+                  ? { ios: 'speaker.slash.fill', android: 'volume_off' }
+                  : { ios: 'speaker.wave.2.fill', android: 'volume_up' }
+              }
+              size={18}
+              color={muted ? theme.textSecondary : theme.text}
+            />
+          </PressableScale>
         </View>
 
         <View style={styles.main}>
@@ -192,13 +232,31 @@ function Player({ sessionId }: { sessionId: string }) {
             </ThemedText>
           </Animated.View>
 
-          <ThemedText
-            type="display"
-            style={[styles.countdown, paused && { color: theme.textSecondary }]}
-            accessibilityLabel={`${secondsLeft} seconds left in this step`}>
-            {formatCountdown(pos.stepRemaining)}
-          </ThemedText>
+          {finalCount ? (
+            // The last three seconds of a step become a big 3-2-1 in the next step's color.
+            <View style={styles.countdownRow}>
+              <Animated.Text
+                key={secondsLeft}
+                entering={ZoomIn.duration(220)}
+                accessibilityLabel={`${secondsLeft}`}
+                style={[styles.finalCount, { color: EFFORT_COLORS[next?.effort ?? 'easy'] }]}>
+                {secondsLeft}
+              </Animated.Text>
+              <ThemedText type="eyebrow" themeColor="textSecondary" style={styles.finalLabel}>
+                {next ? `Next: ${next.label}` : 'Last one'}
+              </ThemedText>
+            </View>
+          ) : (
+            <ThemedText
+              type="display"
+              style={[styles.countdown, paused && { color: theme.textSecondary }]}
+              accessibilityLabel={`${secondsLeft} seconds left in this step`}>
+              {formatCountdown(pos.stepRemaining)}
+            </ThemedText>
+          )}
           <ProgressBar progress={pos.stepElapsed / current.seconds} />
+
+          <IntensityMeter effort={current.effort} />
 
           <Animated.View key={`cue-${pos.index}`} entering={FadeIn.duration(400)}>
             <ThemedText style={styles.cue}>{current.cue}</ThemedText>
@@ -268,6 +326,49 @@ function Player({ sessionId }: { sessionId: string }) {
   );
 }
 
+/**
+ * How hard to go right now: a 1–10 effort scale with the target range lit up, plus what it should
+ * feel like and a rough heart-rate zone for watch wearers.
+ */
+function IntensityMeter({ effort }: { effort: Effort }) {
+  const theme = useTheme();
+  const { rpe, heartRate, feel } = INTENSITY[effort];
+  const color = EFFORT_COLORS[effort];
+  return (
+    <View
+      style={styles.meter}
+      accessible
+      accessibilityLabel={`Effort ${rpe[0]} to ${rpe[1]} out of 10. ${feel} Heart rate ${heartRate}.`}>
+      <View style={styles.meterHeader}>
+        <ThemedText type="eyebrow" themeColor="textSecondary">
+          Effort
+        </ThemedText>
+        <ThemedText type="mono" style={{ color }}>
+          {rpe[0]}–{rpe[1]} / 10
+        </ThemedText>
+      </View>
+      <View style={styles.meterBar}>
+        {Array.from({ length: 10 }, (_, i) => {
+          const level = i + 1;
+          const lit = level >= rpe[0] && level <= rpe[1];
+          return (
+            <View
+              key={level}
+              style={[
+                styles.meterCell,
+                { backgroundColor: lit ? color : theme.backgroundElement, height: 6 + i * 1.6 },
+              ]}
+            />
+          );
+        })}
+      </View>
+      <ThemedText type="small" themeColor="textSecondary">
+        {feel} Heart rate {heartRate}.
+      </ThemedText>
+    </View>
+  );
+}
+
 function ControlButton({
   icon,
   label,
@@ -316,8 +417,15 @@ const styles = StyleSheet.create({
   },
   stepBlock: { gap: Spacing.two },
   stepTitle: { fontSize: 34, lineHeight: 38 },
-  countdown: { fontSize: 104, lineHeight: 112, letterSpacing: -3 },
-  cue: { fontSize: 19, lineHeight: 27 },
+  countdownRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, height: 104 },
+  finalCount: { fontFamily: DisplayFont.bold, fontWeight: 'normal', fontSize: 104, lineHeight: 108 },
+  finalLabel: { flex: 1 },
+  meter: { gap: Spacing.two },
+  meterHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  meterBar: { flexDirection: 'row', alignItems: 'flex-end', gap: 4 },
+  meterCell: { flex: 1, borderRadius: 1 },
+  countdown: { fontSize: 96, lineHeight: 104, letterSpacing: -3 },
+  cue: { fontSize: 18, lineHeight: 25 },
   howTo: {
     flexDirection: 'row',
     alignItems: 'center',

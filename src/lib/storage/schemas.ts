@@ -20,6 +20,10 @@ export const SettingsSchema = z.object({
   /** Body measurements for the BMI calculator. They stay on this device. */
   heightCm: z.number().min(50).max(272).optional(),
   weightKg: z.number().min(20).max(400).optional(),
+  /** Feedback preferences. Missing means on. */
+  sounds: z.boolean().optional(),
+  voice: z.boolean().optional(),
+  haptics: z.boolean().optional(),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
 

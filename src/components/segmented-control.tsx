@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
+import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 
 export function SegmentedControl<T extends string>({
@@ -16,6 +17,7 @@ export function SegmentedControl<T extends string>({
   accessibilityLabel: string;
 }) {
   const theme = useTheme();
+  const feedback = useFeedback();
   return (
     <View
       accessibilityRole="radiogroup"
@@ -28,7 +30,10 @@ export function SegmentedControl<T extends string>({
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            onPress={() => onChange(option.value)}
+            onPress={() => {
+              if (!selected) feedback.select();
+              onChange(option.value);
+            }}
             style={[styles.segment, selected && { backgroundColor: theme.tint }]}>
             <ThemedText
               type="eyebrow"

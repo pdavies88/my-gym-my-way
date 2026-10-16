@@ -13,8 +13,17 @@ import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { equipmentName } from '@/lib/equipment';
+import { useFeedback } from '@/hooks/use-feedback';
 import { getExercise } from '@/lib/exercises';
-import { FOCUS_LABELS, FOCUS_SHORT_LABELS, generateWorkout, LENGTHS, swapExercise, type Focus, type Length } from '@/lib/generator';
+import {
+  FOCUS_LABELS,
+  FOCUS_SHORT_LABELS,
+  generateWorkout,
+  LENGTHS,
+  swapExercise,
+  type Focus,
+  type Length,
+} from '@/lib/generator';
 
 const FOCUS_ROWS: Focus[][] = [
   ['full', 'upper', 'lower'],
@@ -26,6 +35,7 @@ const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 export default function GenerateScreen() {
   const { owned, settings } = useSettings();
   const { saveWorkout, startSession } = useTraining();
+  const feedback = useFeedback();
   const [focus, setFocus] = useState<Focus>('full');
   const [length, setLength] = useState<Length>('medium');
   const [batch, setBatch] = useState(0);
@@ -45,9 +55,7 @@ export default function GenerateScreen() {
 
   const name = FOCUS_LABELS[focus];
   const exercises = ids.map(getExercise).filter((e) => !!e);
-  const gear = settings.equipment.length
-    ? settings.equipment.map(equipmentName).join(', ')
-    : 'Bodyweight only';
+  const gear = settings.equipment.length ? settings.equipment.map(equipmentName).join(', ') : 'Bodyweight only';
 
   return (
     <Screen tab={false}>
@@ -92,7 +100,10 @@ export default function GenerateScreen() {
               compact
               variant="ghost"
               icon={{ ios: 'shuffle', android: 'shuffle' }}
-              onPress={() => regenerate()}
+              onPress={() => {
+                feedback.tap();
+                regenerate();
+              }}
             />
           }
         />
@@ -109,7 +120,10 @@ export default function GenerateScreen() {
                   <IconButton
                     icon={{ ios: 'arrow.triangle.2.circlepath', android: 'swap_horiz' }}
                     label={`Swap ${exercise.name}`}
-                    onPress={() => swap(i)}
+                    onPress={() => {
+                      feedback.tap();
+                      swap(i);
+                    }}
                   />
                 }
               />

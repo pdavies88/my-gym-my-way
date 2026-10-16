@@ -11,11 +11,13 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
+import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { availableExercises, getExercise } from '@/lib/exercises';
 
 export default function BuilderScreen() {
   const theme = useTheme();
+  const feedback = useFeedback();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { workouts, saveWorkout } = useTraining();
   const { owned } = useSettings();
@@ -72,7 +74,12 @@ export default function BuilderScreen() {
                 index={i}
                 trailing={
                   <View style={styles.rowActions}>
-                    <IconButton icon={{ ios: 'chevron.up', android: 'keyboard_arrow_up' }} label="Move up" disabled={i === 0} onPress={() => move(i, -1)} />
+                    <IconButton
+                      icon={{ ios: 'chevron.up', android: 'keyboard_arrow_up' }}
+                      label="Move up"
+                      disabled={i === 0}
+                      onPress={() => move(i, -1)}
+                    />
                     <IconButton
                       icon={{ ios: 'xmark', android: 'close' }}
                       label={`Remove ${exercise.name}`}
@@ -116,7 +123,10 @@ export default function BuilderScreen() {
                   icon={{ ios: 'plus', android: 'add' }}
                   label={`Add ${exercise.name}`}
                   tone="tint"
-                  onPress={() => setIds([...ids, exercise.id])}
+                  onPress={() => {
+                    feedback.select();
+                    setIds([...ids, exercise.id]);
+                  }}
                 />
               }
             />

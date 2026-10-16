@@ -20,12 +20,14 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
+import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
 import { formatElapsed } from '@/lib/time';
 
 export default function SessionScreen() {
   const { active, toggleExercise, finishSession, discardSession } = useTraining();
+  const feedback = useFeedback();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function SessionScreen() {
   const finish = () => {
     const save = () => {
       const log = finishSession();
+      feedback.success();
       if (log) router.replace({ pathname: '/log/[id]', params: { id: log.id, fresh: '1' } });
     };
     if (allDone) return save();
@@ -78,7 +81,11 @@ export default function SessionScreen() {
       <Stack.Screen
         options={{
           headerLeft: () => (
-            <IconButton icon={{ ios: 'chevron.down', android: 'expand_more' }} label="Minimize" onPress={() => router.back()} />
+            <IconButton
+              icon={{ ios: 'chevron.down', android: 'expand_more' }}
+              label="Minimize"
+              onPress={() => router.back()}
+            />
           ),
         }}
       />
@@ -102,7 +109,10 @@ export default function SessionScreen() {
               exercise={exercise}
               index={i}
               checked={active.completedIds.includes(exercise.id)}
-              onToggle={() => toggleExercise(exercise.id)}
+              onToggle={() => {
+                feedback.tap();
+                toggleExercise(exercise.id);
+              }}
             />
           </Animated.View>
         ))}

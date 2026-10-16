@@ -23,7 +23,17 @@ import {
 } from '@/lib/cardio';
 import { equipmentName } from '@/lib/equipment';
 
-const CATEGORY_ORDER: CardioCategory[] = ['rower', 'treadmill', 'bag', 'bike', 'rope', 'bodyweight', 'circuit'];
+const CATEGORY_ORDER: CardioCategory[] = [
+  'rower',
+  'treadmill',
+  'bag',
+  'kettlebell',
+  'trx',
+  'bike',
+  'rope',
+  'bodyweight',
+  'circuit',
+];
 
 export default function CardioScreen() {
   const { owned } = useSettings();
