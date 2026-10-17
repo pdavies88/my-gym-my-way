@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Card } from '@/components/card';
 import { KeyboardDoneBar } from '@/components/keyboard-done-bar';
@@ -74,9 +74,9 @@ export function BmiCard() {
   useEffect(() => {
     if (bmi !== null) {
       marker.set(
-        withSpring((Math.min(SCALE_MAX, Math.max(SCALE_MIN, bmi)) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN), {
-          damping: 16,
-          stiffness: 120,
+        withTiming((Math.min(SCALE_MAX, Math.max(SCALE_MIN, bmi)) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN), {
+          duration: 220,
+          easing: Easing.out(Easing.cubic),
         }),
       );
     }

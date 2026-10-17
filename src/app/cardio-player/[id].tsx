@@ -1,8 +1,8 @@
 import { useKeepAwake } from 'expo-keep-awake';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withTiming, ZoomIn } from 'react-native-reanimated';
+import { Alert, AppState, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -25,16 +25,29 @@ import {
   INTENSITY,
   positionAt,
   stepStart,
+  suggestStretchAfterCardio,
   totalSeconds,
+  type CardioSession,
   type Effort,
 } from '@/lib/cardio';
+import { buildCircuit, parseCircuitParams, type CircuitSettings } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import { formatDuration } from '@/lib/time';
 import { goBackOrHome } from '@/lib/navigation';
 
+/**
+ * The time when a button is pressed. The React Compiler lint can mistake these press handlers for
+ * render code, so read the clock through this helper. It only runs inside handlers.
+ */
+const currentTime = () => Date.now();
+
 export default function CardioPlayerScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const session = getCardioSession(id);
+  const params = useLocalSearchParams<Record<string, string>>();
+  // A weight circuit is built from its route parameters. Every other session comes from the catalog.
+  const circuit = params.id === 'circuit' ? parseCircuitParams(params) : null;
+  const session = circuit
+    ? buildCircuit(circuit.name, circuit.exerciseIds, circuit.settings)
+    : getCardioSession(params.id);
   if (!session) {
     return (
       <SafeAreaView style={styles.fill}>
@@ -43,21 +56,22 @@ export default function CardioPlayerScreen() {
       </SafeAreaView>
     );
   }
-  return <Player sessionId={session.id} />;
+  return <Player session={session} circuit={circuit?.settings} />;
 }
 
-function Player({ sessionId }: { sessionId: string }) {
+function Player({ session, circuit }: { session: CardioSession; circuit?: CircuitSettings }) {
   useKeepAwake();
   const theme = useTheme();
   // Full-screen modals don't get safe-area padding from SafeAreaView here, so pad from the insets directly.
   const insets = useSafeAreaInsets();
   const { logCardio } = useTraining();
-  const session = getCardioSession(sessionId)!;
   const { steps } = session;
   const total = totalSeconds(session);
+  const stretchId = suggestStretchAfterCardio(session);
+  const stretchAfter = stretchId ? getCardioSession(stretchId) : undefined;
 
   // The clock is built from timestamps, so it stays right if the phone locks or the app is backgrounded.
-  const [startedAt] = useState(() => Date.now());
+  const [startedAt, setStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
   const [pausedAt, setPausedAt] = useState<number | null>(null);
   const [pausedMs, setPausedMs] = useState(0);
@@ -94,6 +108,28 @@ function Player({ sessionId }: { sessionId: string }) {
     ),
   );
 
+  // Leaving the app (switching away, locking the phone or closing it) pauses too. Cues can't play
+  // in the background, so a running clock would only skip steps you never heard.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') return;
+      setPausedAt((p) => p ?? Date.now());
+      cues.silence();
+    });
+    return () => subscription.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Back to the first step at 0:00, as if the session had just started. */
+  const restartSession = (time: number) => {
+    setStartedAt(time);
+    setPausedMs(0);
+    setPausedAt(null);
+    setOffset(0);
+    setNow(time);
+    lastElapsed.current = null;
+  };
+
   const finalCount = !paused && !pos.done && current.seconds > 4 && secondsLeft >= 1 && secondsLeft <= 3;
 
   const { settings, updateSettings } = useSettings();
@@ -121,6 +157,8 @@ function Player({ sessionId }: { sessionId: string }) {
       startedAt,
       durationMs: activeMs(at),
       exerciseIds,
+      kind: circuit ? 'circuit' : session.category === 'stretch' ? 'stretch' : 'cardio',
+      circuit,
     });
   };
 
@@ -147,16 +185,15 @@ function Player({ sessionId }: { sessionId: string }) {
     cues.play({ kind: 'step', index, step: steps[index] });
   };
 
-  const end = () => {
+  const end = (pauseStart: number) => {
     if (pos.done) return goBackOrHome();
     // Hold the clock while the question is open, so nothing ends or speaks behind the alert.
-    const pauseStart = Date.now();
     const wasRunning = pausedAt === null;
     if (wasRunning) setPausedAt(pauseStart);
     cues.silence();
     Alert.alert(
       'End this session?',
-      `You’ve trained for ${formatDuration(activeMs(pauseStart))}. Skipped steps don’t count.`,
+      `You’ve trained for ${activeMs(pauseStart) < 60000 ? 'under a minute' : formatDuration(activeMs(pauseStart))}. Skipped steps don’t count.`,
       [
         {
           text: 'Keep going',
@@ -169,6 +206,7 @@ function Player({ sessionId }: { sessionId: string }) {
             setNow(time);
           },
         },
+        { text: 'Restart from the beginning', onPress: () => restartSession(currentTime()) },
         {
           text: 'Discard',
           style: 'destructive',
@@ -201,9 +239,7 @@ function Player({ sessionId }: { sessionId: string }) {
           { backgroundColor: theme.background, paddingTop: insets.top, paddingBottom: insets.bottom },
         ]}>
         <View style={styles.doneWrap}>
-          <Animated.View
-            entering={ZoomIn.springify().damping(12)}
-            style={[styles.badge, { backgroundColor: theme.tint }]}>
+          <Animated.View entering={FadeIn.duration(250)} style={[styles.badge, { backgroundColor: theme.tint }]}>
             <Icon name={{ ios: 'checkmark', android: 'check' }} size={36} color={theme.onTint} />
           </Animated.View>
           <ThemedText type="eyebrow" themeColor="tint">
@@ -213,9 +249,27 @@ function Player({ sessionId }: { sessionId: string }) {
             {session.name}
           </ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.center}>
-            {formatDuration(activeMs(now))} of guided cardio. It’s saved to your history.
+            {formatDuration(activeMs(now))} of{' '}
+            {circuit ? 'circuit training' : session.category === 'stretch' ? 'stretching' : 'guided cardio'}. It’s saved
+            to your history.
           </ThemedText>
-          <Button title="Done" style={styles.doneButton} onPress={goBackOrHome} />
+          {stretchAfter && (
+            <Button
+              title={`Stretch now · ${Math.round(totalSeconds(stretchAfter) / 60)} min`}
+              icon={{ ios: 'figure.flexibility', android: 'self_improvement' }}
+              style={styles.doneButton}
+              onPress={() => {
+                goBackOrHome();
+                router.push({ pathname: '/cardio/[id]', params: { id: stretchAfter.id } });
+              }}
+            />
+          )}
+          <Button
+            title="Done"
+            variant={stretchAfter ? 'secondary' : 'primary'}
+            style={stretchAfter ? styles.doneSecondary : styles.doneButton}
+            onPress={goBackOrHome}
+          />
         </View>
       </View>
     );
@@ -230,7 +284,7 @@ function Player({ sessionId }: { sessionId: string }) {
           <PressableScale
             accessibilityRole="button"
             accessibilityLabel="End session"
-            onPress={end}
+            onPress={() => end(currentTime())}
             hitSlop={10}
             style={styles.topButton}>
             <Icon name={{ ios: 'xmark', android: 'close' }} size={18} color={theme.text} />
@@ -277,7 +331,7 @@ function Player({ sessionId }: { sessionId: string }) {
             <View style={styles.countdownRow}>
               <Animated.Text
                 key={secondsLeft}
-                entering={ZoomIn.duration(220)}
+                entering={FadeIn.duration(150)}
                 accessibilityLabel={`${secondsLeft}`}
                 style={[styles.finalCount, { color: EFFORT_COLORS[next?.effort ?? 'easy'] }]}>
                 {secondsLeft}
@@ -522,4 +576,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   doneButton: { alignSelf: 'stretch', marginTop: Spacing.three },
+  doneSecondary: { alignSelf: 'stretch' },
 });

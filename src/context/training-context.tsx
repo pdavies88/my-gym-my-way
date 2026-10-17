@@ -1,7 +1,10 @@
-import { createContext, use, useState, type ReactNode } from 'react';
+import { createContext, use, useEffect, useState, type ReactNode } from 'react';
+import { AppState } from 'react-native';
 
 import type { Focus } from '@/lib/generator';
+import type { CircuitPresetId, CircuitSettings } from '@/lib/circuit';
 import { newId } from '@/lib/id';
+import { activeMs, pause, restart, resume } from '@/lib/session-clock';
 import { readJson, readList, writeJson } from '@/lib/storage/kv';
 import {
   ActiveSessionSchema,
@@ -13,7 +16,7 @@ import {
   type SessionLog,
 } from '@/lib/storage/schemas';
 
-type NewWorkout = { name: string; exerciseIds: string[]; focus?: Focus };
+type NewWorkout = { name: string; exerciseIds: string[]; focus?: Focus; circuit?: CircuitPresetId };
 
 type TrainingContextValue = {
   workouts: SavedWorkout[];
@@ -31,8 +34,15 @@ type TrainingContextValue = {
     /** Time actually trained, without pauses. */
     durationMs: number;
     exerciseIds: string[];
+    kind?: 'cardio' | 'circuit' | 'stretch';
+    circuit?: CircuitSettings;
   }) => SessionLog;
   discardSession: () => void;
+  /** Stop the session timer. Safe to call when it is already paused. */
+  pauseSession: () => void;
+  resumeSession: () => void;
+  /** Set the session timer back to 0:00. Ticked exercises stay ticked. */
+  restartSessionTimer: () => void;
   deleteSession: (id: string) => void;
 };
 
@@ -70,6 +80,7 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       name: input.name.trim() || 'Untitled workout',
       exerciseIds: input.exerciseIds,
       focus: input.focus ?? existing?.focus,
+      circuit: input.circuit ?? existing?.circuit,
     };
     persistWorkouts(existing ? workouts.map((w) => (w.id === workout.id ? workout : w)) : [workout, ...workouts]);
     return workout;
@@ -92,16 +103,27 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
 
   const finishSession = (): SessionLog | null => {
     if (!active) return null;
-    const log: SessionLog = { ...active, id: newId(), finishedAt: Date.now() };
+    // History shows finishedAt - startedAt, so store the time actually trained, without pauses.
+    const { pausedAt: _pausedAt, pausedMs: _pausedMs, ...rest } = active;
+    const log: SessionLog = { ...rest, id: newId(), finishedAt: active.startedAt + activeMs(active, Date.now()) };
     persistSessions([log, ...sessions].slice(0, MAX_SESSIONS));
     persistActive(null);
     return log;
   };
 
-  const logCardio: TrainingContextValue['logCardio'] = ({ cardioId, name, startedAt, durationMs, exerciseIds }) => {
+  const logCardio: TrainingContextValue['logCardio'] = ({
+    cardioId,
+    name,
+    startedAt,
+    durationMs,
+    exerciseIds,
+    kind = 'cardio',
+    circuit,
+  }) => {
     const log: SessionLog = {
       id: newId(),
-      kind: 'cardio',
+      kind,
+      ...(circuit ? { circuit } : {}),
       cardioId,
       name,
       startedAt,
@@ -115,6 +137,25 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
   };
 
   const discardSession = () => persistActive(null);
+  // Functional updates, so a pause from a screen closing never acts on a stale copy of the session.
+  const updateActive = (change: (session: ActiveSession) => ActiveSession) =>
+    setActive((current) => {
+      if (!current) return current;
+      const next = change(current);
+      if (next !== current) void writeJson(KEYS.activeSession, next);
+      return next;
+    });
+  const pauseSession = () => updateActive((session) => pause(session, Date.now()));
+
+  // Leaving the app (switching away, locking the phone or closing it) pauses a workout in progress.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') updateActive((session) => pause(session, Date.now()));
+    });
+    return () => subscription.remove();
+  }, []);
+  const resumeSession = () => updateActive((session) => resume(session, Date.now()));
+  const restartSessionTimer = () => updateActive((session) => restart(session, Date.now()));
   const deleteSession = (id: string) => persistSessions(sessions.filter((s) => s.id !== id));
 
   return (
@@ -130,6 +171,9 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         finishSession,
         logCardio,
         discardSession,
+        pauseSession,
+        resumeSession,
+        restartSessionTimer,
         deleteSession,
       }}>
       {children}

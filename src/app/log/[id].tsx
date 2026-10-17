@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -10,7 +10,10 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
+import { getCardioSession, suggestStretch, totalSeconds } from '@/lib/cardio';
+import { circuitParams, normalizeSettings } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
+import { SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
 import { formatDuration } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
@@ -36,9 +39,20 @@ export default function SessionLogScreen() {
     day: 'numeric',
   });
 
-  const isCardio = log.kind === 'cardio';
+  const kind = sessionKind(log);
+  // After a workout, offer the stretch session that suits it.
+  const stretch =
+    kind === 'strength' || kind === 'circuit' ? getCardioSession(suggestStretch(log.exerciseIds)) : undefined;
+  const isCardio = kind !== 'strength';
 
   const repeat = () => {
+    if (kind === 'circuit') {
+      router.replace({
+        pathname: '/cardio-player/[id]',
+        params: circuitParams(log.name.replace(/ circuit$/, ''), log.exerciseIds, normalizeSettings(log.circuit ?? {})),
+      });
+      return;
+    }
     if (isCardio && log.cardioId) {
       router.replace({
         pathname: '/cardio/[id]',
@@ -62,21 +76,23 @@ export default function SessionLogScreen() {
     <Screen tab={false}>
       <View style={styles.header}>
         {fresh && (
-          <Animated.View
-            entering={ZoomIn.springify().damping(12)}
-            style={[styles.badge, { backgroundColor: theme.tint }]}>
+          <Animated.View entering={FadeIn.duration(250)} style={[styles.badge, { backgroundColor: theme.tint }]}>
             <Icon name={{ ios: 'checkmark', android: 'check' }} size={30} color={theme.onTint} />
           </Animated.View>
         )}
         <ThemedText type="eyebrow" themeColor="tint">
-          {fresh ? 'Workout complete' : isCardio ? `Cardio · ${date}` : date}
+          {fresh ? 'Workout complete' : isCardio ? `${SESSION_KIND_LABELS[kind]} · ${date}` : date}
         </ThemedText>
         <ThemedText type="title">{log.name}</ThemedText>
       </View>
 
       <Animated.View entering={FadeInDown.delay(80).duration(320)} style={styles.stats}>
         <Stat label="Time" value={formatDuration(log.finishedAt - log.startedAt)} />
-        {isCardio ? <Stat label="Type" value="Cardio" /> : <Stat label="Done" value={`${done}/${exercises.length}`} />}
+        {isCardio ? (
+          <Stat label="Type" value={SESSION_KIND_LABELS[kind]} />
+        ) : (
+          <Stat label="Done" value={`${done}/${exercises.length}`} />
+        )}
       </Animated.View>
 
       {exercises.length > 0 && (
@@ -105,8 +121,15 @@ export default function SessionLogScreen() {
       )}
 
       <View style={styles.buttons}>
+        {fresh && stretch && (
+          <Button
+            title={`Stretch now · ${Math.round(totalSeconds(stretch) / 60)} min`}
+            icon={{ ios: 'figure.flexibility', android: 'self_improvement' }}
+            onPress={() => router.replace({ pathname: '/cardio/[id]', params: { id: stretch.id } })}
+          />
+        )}
         {fresh ? (
-          <Button title="Done" onPress={goHome} />
+          <Button title="Done" variant={stretch ? 'secondary' : 'primary'} onPress={goHome} />
         ) : (
           <Button title="Do it again" icon={{ ios: 'arrow.clockwise', android: 'replay' }} onPress={repeat} />
         )}

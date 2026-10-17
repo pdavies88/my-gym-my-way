@@ -1,7 +1,8 @@
 import type { EquipmentId } from './equipment';
+import { getExercise } from './exercises';
 
 /** How hard to work during a step. */
-export type Effort = 'warmup' | 'easy' | 'moderate' | 'hard' | 'max' | 'rest';
+export type Effort = 'warmup' | 'easy' | 'moderate' | 'hard' | 'max' | 'rest' | 'stretch';
 
 export const EFFORT_LABELS: Record<Effort, string> = {
   warmup: 'Warm-up',
@@ -10,6 +11,7 @@ export const EFFORT_LABELS: Record<Effort, string> = {
   hard: 'Hard',
   max: 'All out',
   rest: 'Rest',
+  stretch: 'Stretch',
 };
 
 /** What each effort feels like, using the talk test. Shown on the session overview. */
@@ -19,6 +21,7 @@ export const EFFORT_GUIDE: Record<Exclude<Effort, 'warmup'>, string> = {
   hard: 'You can say a few words at a time.',
   max: 'You can’t talk. Hold it only for the short interval.',
   rest: 'Stop, breathe and shake it out.',
+  stretch: 'A gentle pull, never pain. Breathe slowly and relax into it.',
 };
 
 export interface CardioStep {
@@ -32,7 +35,17 @@ export interface CardioStep {
 }
 
 export type CardioCategory =
-  'rower' | 'treadmill' | 'bag' | 'kettlebell' | 'trx' | 'bike' | 'rope' | 'bodyweight' | 'circuit';
+  | 'rower'
+  | 'treadmill'
+  | 'bag'
+  | 'kettlebell'
+  | 'trx'
+  | 'bike'
+  | 'rope'
+  | 'bodyweight'
+  | 'circuit'
+  | 'stretch'
+  | 'weights';
 
 export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   rower: 'Rower',
@@ -44,6 +57,8 @@ export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   rope: 'Jump rope',
   bodyweight: 'No equipment',
   circuit: 'Mixed circuits',
+  stretch: 'Stretch and cool-down',
+  weights: 'Weight circuits',
 };
 
 export type CardioLevel = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -74,6 +89,15 @@ const step = (label: string, seconds: number, effort: Effort, cue: string, exerc
 /** Repeats a block `count` times. `make` gets the 1-based round number. */
 function rounds(count: number, make: (round: number) => CardioStep[]): CardioStep[] {
   return Array.from({ length: count }, (_, i) => make(i + 1)).flat();
+}
+
+/** A static stretch held for `seconds`, once or on each side. */
+function hold(exerciseId: string, name: string, seconds: number, cue: string, sides = true): CardioStep[] {
+  if (!sides) return [step(name, seconds, 'stretch', cue, exerciseId)];
+  return [
+    step(`${name} · left`, seconds, 'stretch', cue, exerciseId),
+    step(`${name} · right`, seconds, 'stretch', `Switch sides. ${cue}`, exerciseId),
+  ];
 }
 
 /**
@@ -583,6 +607,65 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Cool down', min(3), 'easy', 'Walk, then stretch your hips, back and shoulders.'),
     ],
   },
+  // Stretch and cool-down
+  {
+    id: 'stretch-full-body',
+    name: 'Full-body stretch',
+    summary: 'A slow cool-down for after any workout. About 11 minutes.',
+    level: 'Beginner',
+    category: 'stretch',
+    needs: [],
+    techniqueExerciseId: 'stretch-hamstring',
+    steps: [
+      step('Cat-cow', 60, 'stretch', 'Slow rounds. Breathe out as you round, in as you arch.', 'stretch-cat-cow'),
+      step('Child’s pose', 60, 'stretch', 'Sink your hips back and breathe into your back.', 'stretch-childs-pose'),
+      ...hold('stretch-hamstring', 'Hamstring stretch', 30, 'Lift the leg until you feel a gentle pull.'),
+      ...hold('stretch-quad', 'Quad stretch', 30, 'Knees together, hips tucked under.'),
+      ...hold('stretch-hip-flexor', 'Hip flexor stretch', 30, 'Squeeze the back glute and shift forward a little.'),
+      ...hold('stretch-figure-four', 'Figure-four stretch', 30, 'Pull the bottom thigh toward your chest.'),
+      step('Chest stretch', 45, 'stretch', 'Forearms on a doorway or wall. Lean in gently.', 'stretch-chest'),
+      ...hold('stretch-cross-body-shoulder', 'Shoulder stretch', 30, 'Arm across your chest, shoulder down.'),
+      ...hold('stretch-triceps', 'Triceps stretch', 30, 'Ease the elbow back behind your head.'),
+      ...hold('stretch-seated-twist', 'Spinal twist', 30, 'Both shoulders stay on the floor.'),
+      step('Breathe', 45, 'stretch', 'Lie on your back. Slow breaths in through your nose and out through your mouth.'),
+    ],
+  },
+  {
+    id: 'stretch-lower-body',
+    name: 'Lower-body stretch',
+    summary: 'Calves, hamstrings, quads and hips, for after leg days, runs and rides. About 8 minutes.',
+    level: 'Beginner',
+    category: 'stretch',
+    needs: [],
+    techniqueExerciseId: 'stretch-hip-flexor',
+    steps: [
+      ...hold('stretch-calf', 'Calf stretch', 30, 'Back leg straight, heel pressed down.'),
+      ...hold('stretch-hamstring', 'Hamstring stretch', 30, 'Lift the leg until you feel a gentle pull.'),
+      ...hold('stretch-quad', 'Quad stretch', 30, 'Knees together, hips tucked under.'),
+      ...hold('stretch-hip-flexor', 'Hip flexor stretch', 30, 'Squeeze the back glute and shift forward a little.'),
+      ...hold('stretch-figure-four', 'Figure-four stretch', 30, 'Pull the bottom thigh toward your chest.'),
+      step('Butterfly stretch', 45, 'stretch', 'Sit tall, soles together, let your knees relax.', 'stretch-butterfly'),
+      ...hold('stretch-seated-twist', 'Spinal twist', 30, 'Both shoulders stay on the floor.'),
+      step('Child’s pose', 60, 'stretch', 'Sink your hips back and breathe slowly.', 'stretch-childs-pose'),
+    ],
+  },
+  {
+    id: 'stretch-upper-body',
+    name: 'Upper-body stretch',
+    summary: 'Chest, shoulders, arms and back, for after push, pull and bag work. About 6 minutes.',
+    level: 'Beginner',
+    category: 'stretch',
+    needs: [],
+    techniqueExerciseId: 'stretch-chest',
+    steps: [
+      step('Cat-cow', 60, 'stretch', 'Slow rounds. Breathe out as you round, in as you arch.', 'stretch-cat-cow'),
+      step('Chest stretch', 45, 'stretch', 'Forearms on a doorway or wall. Lean in gently.', 'stretch-chest'),
+      ...hold('stretch-cross-body-shoulder', 'Shoulder stretch', 30, 'Arm across your chest, shoulder down.'),
+      ...hold('stretch-triceps', 'Triceps stretch', 30, 'Ease the elbow back behind your head.'),
+      step('Child’s pose', 60, 'stretch', 'Reach your arms long to stretch your lats.', 'stretch-childs-pose'),
+      ...hold('stretch-seated-twist', 'Spinal twist', 30, 'Both shoulders stay on the floor.'),
+    ],
+  },
 ];
 
 export function getCardioSession(id: string): CardioSession | undefined {
@@ -657,6 +740,11 @@ export const INTENSITY: Record<Effort, { rpe: [number, number]; heartRate: strin
   easy: { rpe: [3, 4], heartRate: 'about 60–70% of max', feel: 'Comfortable. You could chat the whole time.' },
   moderate: { rpe: [5, 6], heartRate: 'about 70–80% of max', feel: 'Working. Breathing deeper, short sentences only.' },
   hard: { rpe: [7, 8], heartRate: 'about 80–90% of max', feel: 'Tough. A few words at a time. Hold your form.' },
+  stretch: {
+    rpe: [1, 2],
+    heartRate: 'settling back to normal',
+    feel: 'Ease in to a gentle pull. Never bounce, never push into pain.',
+  },
   max: {
     rpe: [9, 10],
     heartRate: 'heading above 90% of max. It lags in short intervals',
@@ -720,10 +808,45 @@ export function spokenDuration(seconds: number): string {
 /** What the voice says when a step starts, for example "Hard. Round 1: 1-2. 2 minutes." */
 export function stepAnnouncement(step: CardioStep): string {
   // Spell out combos so the voice says "one, two" instead of "one minus two".
-  const label = step.label.replace(/(\d)-(?=\d)/g, '$1, ');
+  // Drop a duration already in the label ("Hard 1 min"), since the time is spoken at the end anyway.
+  const label = step.label
+    .replace(/\s*\b\d+\s*(min|mins|minutes?|sec|secs|seconds?)\b/gi, '')
+    .replace(/(\d)-(?=\d)/g, '$1, ')
+    .trim();
   // Skip the effort word when the label already says it, so a rest step isn't "Rest. Rest."
   const letters = (text: string) => text.toLowerCase().replace(/[^a-z]/g, '');
   const effort = EFFORT_LABELS[step.effort];
   const prefix = letters(label).startsWith(letters(effort)) ? '' : `${effort}. `;
   return `${prefix}${label}. ${spokenDuration(step.seconds)}.`;
+}
+
+const LOWER_SLOTS = ['squat', 'hinge', 'lunge', 'calves'];
+const UPPER_SLOTS = ['hpush', 'vpush', 'hpull', 'vpull', 'biceps', 'triceps', 'shoulders'];
+
+/**
+ * The stretch session to suggest after a workout: lower body after mostly leg work, upper body after
+ * mostly upper work, full body otherwise.
+ */
+export function suggestStretch(exerciseIds: readonly string[]): string {
+  let lower = 0;
+  let upper = 0;
+  for (const id of exerciseIds) {
+    const slot = getExercise(id)?.slots[0];
+    if (!slot) continue;
+    if (LOWER_SLOTS.includes(slot)) lower += 1;
+    if (UPPER_SLOTS.includes(slot)) upper += 1;
+  }
+  if (lower >= 2 * Math.max(1, upper)) return 'stretch-lower-body';
+  if (upper >= 2 * Math.max(1, lower)) return 'stretch-upper-body';
+  return 'stretch-full-body';
+}
+
+/** The stretch session to suggest after a cardio session, or null after a stretch. */
+export function suggestStretchAfterCardio(session: Pick<CardioSession, 'category' | 'steps'>): string | null {
+  if (session.category === 'stretch') return null;
+  if (session.category === 'weights') {
+    return suggestStretch(session.steps.map((s) => s.exerciseId).filter((id): id is string => !!id));
+  }
+  if (['treadmill', 'bike', 'rope'].includes(session.category)) return 'stretch-lower-body';
+  return 'stretch-full-body';
 }

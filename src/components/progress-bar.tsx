@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useTheme } from '@/hooks/use-theme';
 
-/** A thin bar that springs to the new value whenever `progress` (0 to 1) changes. */
+/** A thin bar that eases to the new value whenever `progress` (0 to 1) changes. */
 export function ProgressBar({ progress }: { progress: number }) {
   const theme = useTheme();
   const value = useSharedValue(progress);
 
   useEffect(() => {
-    value.set(withSpring(progress, { damping: 18, stiffness: 140 }));
+    // Ease straight to the new value. No spring, so the bar never overshoots and bounces back.
+    value.set(withTiming(progress, { duration: 220, easing: Easing.out(Easing.cubic) }));
   }, [progress, value]);
 
   const fillStyle = useAnimatedStyle(() => ({ width: `${Math.min(1, Math.max(0, value.get())) * 100}%` }));

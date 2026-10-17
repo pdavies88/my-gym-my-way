@@ -1,13 +1,11 @@
-import { router, Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, Stack, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import Animated, {
   FadeInDown,
   interpolateColor,
   useAnimatedStyle,
   useDerivedValue,
-  withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -23,11 +21,13 @@ import { useTraining } from '@/context/training-context';
 import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
+import { activeMs } from '@/lib/session-clock';
 import { formatElapsed } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionScreen() {
-  const { active, toggleExercise, finishSession, discardSession } = useTraining();
+  const { active, toggleExercise, finishSession, discardSession, pauseSession, resumeSession, restartSessionTimer } =
+    useTraining();
   const feedback = useFeedback();
   const [now, setNow] = useState(() => Date.now());
 
@@ -35,6 +35,15 @@ export default function SessionScreen() {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Leaving this screen (minimizing it, or opening another tab) pauses the timer.
+  useFocusEffect(
+    useCallback(
+      () => () => pauseSession(),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [],
+    ),
+  );
 
   if (!active) {
     return (
@@ -50,6 +59,14 @@ export default function SessionScreen() {
   const done = active.completedIds.length;
   const total = exercises.length;
   const allDone = done === total && total > 0;
+  const paused = active.pausedAt !== undefined;
+  const elapsed = formatElapsed(activeMs(active, now));
+
+  const confirmRestart = () =>
+    Alert.alert('Restart the timer?', 'The clock goes back to 0:00. Your ticked exercises stay ticked.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Restart', onPress: restartSessionTimer },
+    ]);
 
   const finish = () => {
     const save = () => {
@@ -92,12 +109,37 @@ export default function SessionScreen() {
         }}
       />
       <View style={styles.header}>
-        <ThemedText type="eyebrow" themeColor="tint">
-          In progress · {active.name}
+        <ThemedText type="eyebrow" themeColor={paused ? 'textSecondary' : 'tint'}>
+          {paused ? 'Paused' : 'In progress'} · {active.name}
         </ThemedText>
-        <ThemedText type="display" accessibilityLabel={`Elapsed time ${formatElapsed(now - active.startedAt)}`}>
-          {formatElapsed(now - active.startedAt)}
+        <ThemedText
+          type="display"
+          themeColor={paused ? 'textSecondary' : 'text'}
+          accessibilityLabel={`${paused ? 'Paused at' : 'Elapsed time'} ${elapsed}`}>
+          {elapsed}
         </ThemedText>
+        <View style={styles.timerButtons}>
+          <Button
+            compact
+            title={paused ? 'Resume' : 'Pause'}
+            variant={paused ? 'primary' : 'secondary'}
+            icon={paused ? { ios: 'play.fill', android: 'play_arrow' } : { ios: 'pause.fill', android: 'pause' }}
+            onPress={() => {
+              feedback.select();
+              if (paused) resumeSession();
+              else pauseSession();
+            }}
+            style={styles.flex}
+          />
+          <Button
+            compact
+            title="Restart timer"
+            variant="ghost"
+            icon={{ ios: 'arrow.counterclockwise', android: 'restart_alt' }}
+            onPress={confirmRestart}
+            style={styles.flex}
+          />
+        </View>
         <ProgressBar progress={total ? done / total : 0} />
         <ThemedText type="eyebrow" themeColor="textSecondary">
           {done} / {total} done
@@ -150,7 +192,6 @@ function CheckRow({
   const boxStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(progress.get(), [0, 1], ['transparent', theme.tint]),
     borderColor: interpolateColor(progress.get(), [0, 1], [theme.textSecondary, theme.tint]),
-    transform: [{ scale: checked ? withSequence(withTiming(1.25, { duration: 110 }), withSpring(1)) : withTiming(1) }],
   }));
   const textStyle = useAnimatedStyle(() => ({ opacity: 1 - progress.get() * 0.45 }));
 
@@ -185,6 +226,8 @@ function CheckRow({
 
 const styles = StyleSheet.create({
   header: { gap: Spacing.two },
+  timerButtons: { flexDirection: 'row', gap: Spacing.two },
+  flex: { flex: 1 },
   list: { gap: Spacing.two },
   buttons: { gap: Spacing.two },
   row: {

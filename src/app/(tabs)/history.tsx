@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
+import { SESSION_KIND_COLORS, SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
 import { formatDuration, formatSessionDate, startOfWeek } from '@/lib/time';
 
 export default function HistoryScreen() {
@@ -22,7 +23,11 @@ export default function HistoryScreen() {
 
   const weekStart = startOfWeek(now);
   const thisWeek = sessions.filter((s) => s.startedAt >= weekStart).length;
-  const exercisesDone = sessions.reduce((sum, s) => sum + (s.kind === 'cardio' ? 0 : s.completedIds.length), 0);
+  // Only checklist workouts count toward moves done. Timed sessions list their moves but aren't ticked off.
+  const exercisesDone = sessions.reduce(
+    (sum, s) => sum + (sessionKind(s) === 'strength' ? s.completedIds.length : 0),
+    0,
+  );
 
   return (
     <Screen eyebrow="Your log" title="History">
@@ -50,8 +55,8 @@ export default function HistoryScreen() {
                       styles.dot,
                       {
                         backgroundColor:
-                          session.kind === 'cardio'
-                            ? '#5CC8FF'
+                          sessionKind(session) !== 'strength'
+                            ? SESSION_KIND_COLORS[sessionKind(session) as keyof typeof SESSION_KIND_COLORS]
                             : session.completedIds.length === session.exerciseIds.length
                               ? theme.tint
                               : theme.accent,
@@ -65,9 +70,9 @@ export default function HistoryScreen() {
                     <ThemedText type="small" themeColor="textSecondary">
                       {formatSessionDate(session.startedAt, now)} ·{' '}
                       {formatDuration(session.finishedAt - session.startedAt)} ·{' '}
-                      {session.kind === 'cardio'
-                        ? 'Cardio'
-                        : `${session.completedIds.length}/${session.exerciseIds.length}`}
+                      {sessionKind(session) === 'strength'
+                        ? `${session.completedIds.length}/${session.exerciseIds.length}`
+                        : SESSION_KIND_LABELS[sessionKind(session)]}
                     </ThemedText>
                   </View>
                   <Icon

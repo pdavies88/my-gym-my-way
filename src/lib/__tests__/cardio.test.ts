@@ -9,6 +9,8 @@ import {
   positionAt,
   stepAnnouncement,
   stepStart,
+  suggestStretch,
+  suggestStretchAfterCardio,
   totalSeconds,
 } from '../cardio';
 import { EQUIPMENT_IDS, type EquipmentId } from '../equipment';
@@ -32,8 +34,8 @@ describe('cardio sessions', () => {
     // A summary that names a length must match the real length to within a minute.
     const stated = session.summary.match(/about (\d+) minutes/i);
     if (stated) expect(Math.abs(Number(stated[1]) - totalSeconds(session) / 60)).toBeLessThanOrEqual(1);
-    // Every session lasts between 10 minutes and an hour.
-    expect(totalSeconds(session)).toBeGreaterThanOrEqual(600);
+    // Every session lasts between 10 minutes and an hour. Stretch sessions can be shorter.
+    expect(totalSeconds(session)).toBeGreaterThanOrEqual(session.category === 'stretch' ? 300 : 600);
     expect(totalSeconds(session)).toBeLessThanOrEqual(3600);
   });
 
@@ -125,6 +127,14 @@ describe('stepAnnouncement', () => {
     expect(stepAnnouncement({ label: 'Rest', seconds: 90, effort: 'rest', cue: '' })).toBe('Rest. 1 minute 30.');
     expect(stepAnnouncement({ label: 'Warm up', seconds: 300, effort: 'warmup', cue: '' })).toBe('Warm up. 5 minutes.');
   });
+
+  it('does not repeat a duration that is already in the label', () => {
+    expect(stepAnnouncement({ label: 'Hard 1 min', seconds: 60, effort: 'hard', cue: '' })).toBe('Hard. 1 minute.');
+    expect(stepAnnouncement({ label: 'All-out 1 min', seconds: 60, effort: 'max', cue: '' })).toBe(
+      'All-out. 1 minute.',
+    );
+    expect(stepAnnouncement({ label: 'Hard 3 min', seconds: 180, effort: 'hard', cue: '' })).toBe('Hard. 3 minutes.');
+  });
 });
 
 describe('bag combos', () => {
@@ -142,6 +152,27 @@ describe('bag combos', () => {
         (s) => /\d-\d/.test(`${s.label} ${s.cue}`) && s.exerciseId?.startsWith('bag-'),
       );
       if (usesNumbers) expect(session.steps.some((s) => s.cue.includes('1 jab, 2 cross'))).toBe(true);
+    }
+  });
+});
+
+describe('stretch suggestions', () => {
+  it('match the workout', () => {
+    expect(suggestStretch(['back-squat', 'barbell-rdl', 'reverse-lunge', 'push-up'])).toBe('stretch-lower-body');
+    expect(suggestStretch(['push-up', 'dumbbell-row', 'lateral-raise', 'goblet-squat'])).toBe('stretch-upper-body');
+    expect(suggestStretch(['goblet-squat', 'push-up', 'dumbbell-row', 'reverse-lunge'])).toBe('stretch-full-body');
+  });
+
+  it('match cardio, and skip after a stretch', () => {
+    expect(suggestStretchAfterCardio(getCardioSession('treadmill-speed')!)).toBe('stretch-lower-body');
+    expect(suggestStretchAfterCardio(getCardioSession('bag-basics')!)).toBe('stretch-full-body');
+    expect(suggestStretchAfterCardio(getCardioSession('stretch-full-body')!)).toBeNull();
+  });
+
+  it('only use stretch exercises in stretch sessions', () => {
+    for (const session of CARDIO_SESSIONS.filter((s) => s.category === 'stretch')) {
+      for (const step of session.steps)
+        if (step.exerciseId) expect(getExercise(step.exerciseId)!.slots).toContain('stretch');
     }
   });
 });

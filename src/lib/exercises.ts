@@ -14,7 +14,8 @@ export type Slot =
   | 'triceps'
   | 'shoulders'
   | 'core'
-  | 'cardio';
+  | 'cardio'
+  | 'stretch';
 
 export interface Exercise {
   id: string;
@@ -1364,6 +1365,187 @@ export const EXERCISES: readonly Exercise[] = [
     ],
     prescription: '3 × 30–40 meters',
   },
+  // Stretches: library-only, used by the guided stretch sessions and after workouts
+  {
+    id: 'stretch-hamstring',
+    name: 'Hamstring stretch',
+    slots: ['stretch'],
+    muscles: ['Hamstrings', 'Calves'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-hamstring',
+    libraryOnly: true,
+    cues: [
+      'Lie on your back and loop a towel or band around one foot.',
+      'Straighten that leg up toward the ceiling until you feel a stretch behind your thigh.',
+      'Keep your other leg on the floor. Relax and breathe.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-quad',
+    name: 'Standing quad stretch',
+    slots: ['stretch'],
+    muscles: ['Quads', 'Hip flexors'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-quad',
+    libraryOnly: true,
+    cues: [
+      'Stand tall and hold a wall or chair for balance.',
+      'Bend one knee and hold that ankle behind you.',
+      'Keep your knees together and gently tuck your hips under.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-hip-flexor',
+    name: 'Kneeling hip flexor stretch',
+    slots: ['stretch'],
+    muscles: ['Hip flexors', 'Quads'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-hip-flexor',
+    libraryOnly: true,
+    cues: [
+      'Kneel on one knee with the other foot flat in front of you. Pad the knee if you need to.',
+      'Squeeze the glute of the kneeling leg and shift your hips forward a little.',
+      'Stay tall. You should feel it at the front of the back hip.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-figure-four',
+    name: 'Figure-four stretch',
+    slots: ['stretch'],
+    muscles: ['Glutes', 'Hips'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-figure-four',
+    libraryOnly: true,
+    cues: [
+      'Lie on your back with both knees bent.',
+      'Cross one ankle over the opposite knee.',
+      'Pull the bottom thigh toward your chest until you feel it in the crossed leg’s glute.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-calf',
+    name: 'Wall calf stretch',
+    slots: ['stretch'],
+    muscles: ['Calves'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-calf',
+    libraryOnly: true,
+    cues: [
+      'Stand facing a wall with your hands on it.',
+      'Step one foot back, keep that leg straight and press the heel down.',
+      'Lean in until you feel the stretch in the back calf.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-chest',
+    name: 'Doorway chest stretch',
+    slots: ['stretch'],
+    muscles: ['Chest', 'Front shoulders'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-chest',
+    libraryOnly: true,
+    cues: [
+      'Stand in a doorway with your forearms on the frame, elbows at shoulder height.',
+      'Step one foot through and lean forward gently.',
+      'Stop when you feel a stretch across your chest. Keep your shoulders down.',
+    ],
+    prescription: 'Hold 30–45 seconds',
+  },
+  {
+    id: 'stretch-cross-body-shoulder',
+    name: 'Cross-body shoulder stretch',
+    slots: ['stretch'],
+    muscles: ['Rear shoulders', 'Upper back'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-cross-body-shoulder',
+    libraryOnly: true,
+    cues: [
+      'Bring one straight arm across your chest.',
+      'Hold it above the elbow with your other arm and pull it gently closer.',
+      'Keep your shoulder down, away from your ear.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-triceps',
+    name: 'Overhead triceps stretch',
+    slots: ['stretch'],
+    muscles: ['Triceps', 'Lats'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-triceps',
+    libraryOnly: true,
+    cues: [
+      'Reach one arm overhead and bend the elbow so your hand drops behind your head.',
+      'Use your other hand to ease the elbow back.',
+      'Stand tall and keep your ribs down.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-childs-pose',
+    name: 'Child’s pose',
+    slots: ['stretch'],
+    muscles: ['Lower back', 'Lats', 'Hips'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-childs-pose',
+    libraryOnly: true,
+    cues: [
+      'Kneel and sit back toward your heels.',
+      'Walk your hands forward and rest your forehead on the floor.',
+      'Breathe slowly into your back. Widen your knees if your hips are tight.',
+    ],
+    prescription: 'Hold 45–60 seconds',
+  },
+  {
+    id: 'stretch-cat-cow',
+    name: 'Cat-cow',
+    slots: ['stretch'],
+    muscles: ['Spine', 'Core'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-cat-cow',
+    libraryOnly: true,
+    cues: [
+      'Start on your hands and knees.',
+      'Breathe out and round your back toward the ceiling.',
+      'Breathe in and let your belly drop as you lift your chest. Move slowly.',
+    ],
+    prescription: '8–10 slow reps',
+  },
+  {
+    id: 'stretch-seated-twist',
+    name: 'Lying spinal twist',
+    slots: ['stretch'],
+    muscles: ['Lower back', 'Glutes', 'Obliques'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-spinal-twist',
+    libraryOnly: true,
+    cues: [
+      'Lie on your back with your arms out to the sides.',
+      'Bring one knee up and let it drop across your body.',
+      'Keep both shoulders on the floor and turn your head the other way if it’s comfortable.',
+    ],
+    prescription: 'Hold 30 seconds each side',
+  },
+  {
+    id: 'stretch-butterfly',
+    name: 'Butterfly stretch',
+    slots: ['stretch'],
+    muscles: ['Inner thighs', 'Hips'],
+    needs: BODYWEIGHT,
+    pattern: 'stretch-butterfly',
+    libraryOnly: true,
+    cues: [
+      'Sit tall with the soles of your feet together and your knees out to the sides.',
+      'Hold your feet and let your knees relax toward the floor.',
+      'Lean forward a little from the hips for more stretch. Don’t push your knees down.',
+    ],
+    prescription: 'Hold 30–60 seconds',
+  },
 ];
 
 const BY_ID = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
@@ -1395,4 +1577,5 @@ export const SLOT_LABELS: Record<Slot, string> = {
   shoulders: 'Shoulders',
   core: 'Core',
   cardio: 'Cardio',
+  stretch: 'Stretch',
 };

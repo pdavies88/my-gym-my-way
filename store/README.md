@@ -63,7 +63,7 @@ GENERATE A WORKOUT IN SECONDS
 Pick a focus (full body, upper, lower, push, pull, core or conditioning) and a length. The app picks exercises you can do and balances them across movement patterns. Swap any move you don't like, shuffle for a new mix, and save the ones you love.
 
 OR BUILD YOUR OWN
-Hand-pick every exercise from a library of over 90 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
+Hand-pick every exercise from a library of over 100 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
 
 WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
@@ -71,8 +71,14 @@ Every exercise has a short demonstration video from a fitness coach, plus step-b
 GUIDED CARDIO
 Timed sessions for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
+RUN IT AS A CIRCUIT
+Turn any workout into a timed weight circuit. Every move runs back to back on a work and rest timer, round after round, with an easy, standard or hard setting.
+
+STRETCH AFTERWARDS
+Guided full-body, lower-body and upper-body stretch sessions. After each workout, the app suggests the stretch that suits what you trained.
+
 A SIMPLE SESSION CHECKLIST
-Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. Finish, and the session goes into your history.
+Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. It pauses when you leave the app, and you can pause or restart it any time. Finish, and the session goes into your history.
 
 HISTORY AND BMI
 See your past sessions and how many you've done this week. A BMI calculator in US or metric units shows your BMI and its category.

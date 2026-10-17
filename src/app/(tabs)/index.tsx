@@ -28,7 +28,7 @@ export default function TrainScreen() {
         <Animated.View entering={FadeInDown.duration(350)}>
           <Card accent>
             <ThemedText type="eyebrow" themeColor="tint">
-              Session in progress
+              {active.pausedAt !== undefined ? 'Session paused' : 'Session in progress'}
             </ThemedText>
             <ThemedText type="heading">{active.name}</ThemedText>
             <ProgressBar progress={active.completedIds.length / Math.max(1, active.exerciseIds.length)} />

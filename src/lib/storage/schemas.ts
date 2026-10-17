@@ -44,6 +44,8 @@ export const SavedWorkoutSchema = z.object({
   name: z.string(),
   focus: FocusSchema.optional(),
   exerciseIds: z.array(z.string()),
+  /** Saved from Generate in circuit style: which intensity to start it at. */
+  circuit: z.enum(['easy', 'standard', 'hard']).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
 });
@@ -55,6 +57,10 @@ export const ActiveSessionSchema = z.object({
   exerciseIds: z.array(z.string()),
   completedIds: z.array(z.string()),
   startedAt: z.number(),
+  /** When the timer was paused, or undefined while it runs. */
+  pausedAt: z.number().optional(),
+  /** Total time spent paused before the current pause. */
+  pausedMs: z.number().optional(),
 });
 export type ActiveSession = z.infer<typeof ActiveSessionSchema>;
 
@@ -62,8 +68,12 @@ export const SessionLogSchema = ActiveSessionSchema.extend({
   id: z.string(),
   finishedAt: z.number(),
   /** Strength sessions are checklists. Cardio sessions are guided timers. Older logs are strength. */
-  kind: z.enum(['strength', 'cardio']).optional(),
+  kind: z.enum(['strength', 'cardio', 'circuit', 'stretch']).optional(),
   /** The guided cardio session this log came from. */
   cardioId: z.string().optional(),
+  /** How a weight circuit was timed, so it can be run again from history. */
+  circuit: z
+    .object({ rounds: z.number(), workSeconds: z.number(), restSeconds: z.number(), roundRestSeconds: z.number() })
+    .optional(),
 });
 export type SessionLog = z.infer<typeof SessionLogSchema>;

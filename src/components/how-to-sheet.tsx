@@ -1,4 +1,5 @@
 import { Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExerciseVideo } from '@/components/exercise-video';
@@ -16,11 +17,16 @@ import { getVideo } from '@/lib/videos';
 export function HowToSheet({ exerciseId, onClose }: { exerciseId: string | null; onClose: () => void }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
   const exercise = exerciseId ? getExercise(exerciseId) : undefined;
   const video = exercise ? getVideo(exercise.id) : undefined;
 
   return (
-    <Modal visible={!!exercise} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={!!exercise}
+      animationType={reduceMotion ? 'fade' : 'slide'}
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}>
       <View style={[styles.fill, { backgroundColor: theme.background }]}>
         <View style={styles.header}>
           <IconButton icon={{ ios: 'xmark', android: 'close' }} label="Close" onPress={onClose} />

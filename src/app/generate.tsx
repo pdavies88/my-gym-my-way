@@ -14,6 +14,8 @@ import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { equipmentName } from '@/lib/equipment';
 import { useFeedback } from '@/hooks/use-feedback';
+import { totalSeconds } from '@/lib/cardio';
+import { buildCircuit, CIRCUIT_PRESETS, circuitParams, type CircuitPresetId } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import {
   FOCUS_LABELS,
@@ -38,6 +40,8 @@ export default function GenerateScreen() {
   const feedback = useFeedback();
   const [focus, setFocus] = useState<Focus>('full');
   const [length, setLength] = useState<Length>('medium');
+  const [style, setStyle] = useState<'sets' | 'circuit'>('sets');
+  const [preset, setPreset] = useState<CircuitPresetId>('standard');
   const [batch, setBatch] = useState(0);
   const [ids, setIds] = useState(() =>
     generateWorkout({ focus: 'full', count: LENGTHS.medium.count, owned, seed: newSeed() }),
@@ -55,6 +59,8 @@ export default function GenerateScreen() {
 
   const name = FOCUS_LABELS[focus];
   const exercises = ids.map(getExercise).filter((e) => !!e);
+  const circuitSettings = CIRCUIT_PRESETS[preset].settings;
+  const circuitMinutes = Math.round(totalSeconds(buildCircuit(name, ids, circuitSettings)) / 60);
   const gear = settings.equipment.length ? settings.equipment.map(equipmentName).join(', ') : 'Bodyweight only';
 
   return (
@@ -76,7 +82,44 @@ export default function GenerateScreen() {
       </View>
 
       <View style={styles.group}>
-        <SectionHeader title={`Length · ${LENGTHS[length].count} moves · ${LENGTHS[length].minutes}`} />
+        <SectionHeader title="Style" />
+        <SegmentedControl
+          accessibilityLabel="Workout style"
+          options={[
+            { value: 'sets', label: 'Sets' },
+            { value: 'circuit', label: 'Circuit' },
+          ]}
+          value={style}
+          onChange={setStyle}
+        />
+        <ThemedText type="small" themeColor="textSecondary">
+          {style === 'sets'
+            ? 'Do each exercise’s sets, then tick it off. You set your own pace.'
+            : 'Move through every exercise back to back on a timer, then repeat the round. Guided with chimes and a voice.'}
+        </ThemedText>
+        {style === 'circuit' && (
+          <>
+            <SegmentedControl
+              accessibilityLabel="Circuit intensity"
+              options={(Object.keys(CIRCUIT_PRESETS) as CircuitPresetId[]).map((value) => ({
+                value,
+                label: CIRCUIT_PRESETS[value].label.split(' · ')[0],
+              }))}
+              value={preset}
+              onChange={setPreset}
+            />
+            <ThemedText type="eyebrow" themeColor="tint">
+              {circuitSettings.rounds} rounds · {circuitSettings.workSeconds}s on, {circuitSettings.restSeconds}s off ·{' '}
+              about {circuitMinutes} min
+            </ThemedText>
+          </>
+        )}
+      </View>
+
+      <View style={styles.group}>
+        <SectionHeader
+          title={`Length · ${LENGTHS[length].count} moves${style === 'sets' ? ` · ${LENGTHS[length].minutes}` : ''}`}
+        />
         <SegmentedControl
           accessibilityLabel="Workout length"
           options={(Object.keys(LENGTHS) as Length[]).map((value) => ({
@@ -142,10 +185,15 @@ export default function GenerateScreen() {
 
       <View style={styles.buttons}>
         <Button
-          title="Start now"
+          title={style === 'circuit' ? 'Start circuit' : 'Start now'}
           icon={{ ios: 'play.fill', android: 'play_arrow' }}
           disabled={exercises.length === 0}
           onPress={() => {
+            if (style === 'circuit') {
+              router.back();
+              router.push({ pathname: '/cardio-player/[id]', params: circuitParams(name, ids, circuitSettings) });
+              return;
+            }
             const begin = () => {
               startSession({ name, exerciseIds: ids });
               router.back();
@@ -163,7 +211,12 @@ export default function GenerateScreen() {
           variant="secondary"
           disabled={exercises.length === 0}
           onPress={() => {
-            const workout = saveWorkout({ name, exerciseIds: ids, focus });
+            const workout = saveWorkout({
+              name,
+              exerciseIds: ids,
+              focus,
+              ...(style === 'circuit' ? { circuit: preset } : {}),
+            });
             router.back();
             router.push({ pathname: '/workout/[id]', params: { id: workout.id } });
           }}

@@ -24,6 +24,7 @@ const SLOT_ORDER: Slot[] = [
   'shoulders',
   'core',
   'cardio',
+  'stretch',
 ];
 
 export default function LibraryScreen() {

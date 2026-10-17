@@ -474,6 +474,66 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     title: 'Heavy Bag Boxing Defense Drills (No Partner NEEDED!!)',
     channel: 'Tony Jeffries',
   },
+  'stretch-hamstring': {
+    videoId: 'r7Of03DkVMA',
+    title: 'Supine Hamstring Stretch With Strap',
+    channel: 'OrthoIndy',
+  },
+  'stretch-quad': {
+    videoId: 'DxBDqHL5NlM',
+    title: 'How to do a quadriceps stretch | Bupa Health',
+    channel: 'Bupa Health',
+  },
+  'stretch-hip-flexor': {
+    videoId: '34SlL-PPCWQ',
+    title: 'Kneeling Hip Flexor Stretch',
+    channel: 'MGHOrthopaedics',
+  },
+  'stretch-figure-four': {
+    videoId: 'Xb5gHdYtHnk',
+    title: 'Figure 4 stretching',
+    channel: 'Canadian Chiropractic Guideline Initiative (CCGI)',
+  },
+  'stretch-calf': {
+    videoId: 'tUA4MO1kXV8',
+    title: 'Wall calf stretch for calf pain',
+    channel: 'The Running PTs',
+  },
+  'stretch-chest': {
+    videoId: 'CEQMx4zFwYs',
+    title: 'Doorway Pec Stretch',
+    channel: 'MidwestOrtho',
+  },
+  'stretch-cross-body-shoulder': {
+    videoId: 'aIq0fLi8iak',
+    title: 'Shoulder Crossbody Stretch',
+    channel: 'React Physical Therapy',
+  },
+  'stretch-triceps': {
+    videoId: 'ohmRImmdo8I',
+    title: 'Triceps Stretch',
+    channel: 'EmergeOrtho-Triangle Region',
+  },
+  'stretch-childs-pose': {
+    videoId: '_ZX_zTOBgp8',
+    title: "How to do a Child's Pose Stretch | Proper Form & Technique | NASM",
+    channel: 'National Academy of Sports Medicine (NASM)',
+  },
+  'stretch-cat-cow': {
+    videoId: '1Y0YjXS9sKI',
+    title: 'How to Do a Cat Cow Stretch: A Guide from Physical Therapists',
+    channel: 'Hinge Health',
+  },
+  'stretch-seated-twist': {
+    videoId: 'BzYBkAvdCJY',
+    title: 'Spine lumbar twist stretch',
+    channel: 'Rehab My Patient',
+  },
+  'stretch-butterfly': {
+    videoId: '4J7kbCmPScQ',
+    title: 'How to do a butterfly stretch',
+    channel: 'Medibank',
+  },
 };
 
 export function getVideo(exerciseId: string): ExerciseVideo | undefined {

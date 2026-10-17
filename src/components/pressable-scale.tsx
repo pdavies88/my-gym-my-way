@@ -1,5 +1,5 @@
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -18,7 +18,7 @@ export function PressableScale({ style, scaleTo = 0.97, onPressIn, onPressOut, d
         onPressIn?.(event);
       }}
       onPressOut={(event) => {
-        scale.set(withSpring(1, { damping: 14, stiffness: 260 }));
+        scale.set(withTiming(1, { duration: 120 }));
         onPressOut?.(event);
       }}
       style={[style, animatedStyle]}

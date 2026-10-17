@@ -10,6 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
+import { CIRCUIT_PRESETS, circuitParams } from '@/lib/circuit';
 import { canDo, getExercise } from '@/lib/exercises';
 import { FOCUS_LABELS } from '@/lib/generator';
 import { goBackOrHome } from '@/lib/navigation';
@@ -73,7 +74,28 @@ export default function WorkoutScreen() {
         </View>
       </View>
 
-      <Button title="Start workout" icon={{ ios: 'play.fill', android: 'play_arrow' }} onPress={start} />
+      <View style={styles.startButtons}>
+        <Button title="Start workout" icon={{ ios: 'play.fill', android: 'play_arrow' }} onPress={start} />
+        <Button
+          title="Start as circuit"
+          variant="secondary"
+          icon={{ ios: 'timer', android: 'timer' }}
+          onPress={() =>
+            router.push({
+              pathname: '/cardio-player/[id]',
+              params: circuitParams(
+                workout.name,
+                workout.exerciseIds,
+                CIRCUIT_PRESETS[workout.circuit ?? 'standard'].settings,
+              ),
+            })
+          }
+        />
+        <ThemedText type="small" themeColor="textSecondary">
+          A circuit runs every move back to back on a timer
+          {` (${CIRCUIT_PRESETS[workout.circuit ?? 'standard'].label.toLowerCase()})`}, then repeats the round.
+        </ThemedText>
+      </View>
 
       <View style={styles.group}>
         <SectionHeader title="Exercises" />
@@ -105,6 +127,7 @@ export default function WorkoutScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: Spacing.two },
+  startButtons: { gap: Spacing.two },
   tags: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.one },
   group: { gap: Spacing.two },
   row: { flexDirection: 'row', gap: Spacing.two },
