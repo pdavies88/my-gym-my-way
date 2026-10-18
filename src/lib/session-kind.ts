@@ -6,6 +6,7 @@ export const SESSION_KIND_LABELS = {
   cardio: 'Cardio',
   circuit: 'Circuit',
   stretch: 'Stretch',
+  mobility: 'Mobility',
 } as const;
 
 /** Color of the bar beside each session in History. */
@@ -13,6 +14,7 @@ export const SESSION_KIND_COLORS = {
   cardio: '#5CC8FF',
   circuit: '#FFC233',
   stretch: '#B48CFF',
+  mobility: '#4FE0B6',
 } as const;
 
 export function sessionKind(log: Pick<SessionLog, 'kind'>): keyof typeof SESSION_KIND_LABELS {

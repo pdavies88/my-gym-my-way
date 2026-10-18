@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 
 import { useSettings } from '@/context/settings-context';
 import { useBestVoice } from '@/hooks/use-best-voice';
-import { useFeedback } from '@/hooks/use-feedback';
 import { spokenDuration, stepAnnouncement, type Cue } from '@/lib/cardio';
 import { SPEECH_RATE } from '@/lib/voice';
 
@@ -17,12 +16,11 @@ const SOUNDS = {
 type SoundName = keyof typeof SOUNDS;
 
 /**
- * Plays the cardio timer's cues as soft chimes, a spoken voice and haptics, each following its setting.
+ * Plays the cardio timer's cues as soft chimes and a spoken voice, each following its setting.
  * Music or podcasts keep playing and dip in volume under each cue.
  */
 export function useCardioCues() {
   const { settings } = useSettings();
-  const haptics = useFeedback();
   const { voice: bestVoice } = useBestVoice();
   const players = useRef<Partial<Record<SoundName, AudioPlayer>>>({});
   const pending = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -79,16 +77,13 @@ export function useCardioCues() {
           break;
         case 'tick':
           chime('tick');
-          haptics.tap();
           break;
         case 'step':
           chime('go');
-          haptics.thump();
           sayLater(stepAnnouncement(cue.step), 450);
           break;
         case 'done':
           chime('done');
-          haptics.success();
           sayLater('Session complete. Great work.', 700);
           break;
       }
@@ -96,7 +91,6 @@ export function useCardioCues() {
     /** Announces the first step when the session starts, since no transition leads into it. */
     start(firstStepSeconds: number, firstStepLabel: string) {
       chime('go');
-      haptics.thump();
       sayLater(`Starting. ${firstStepLabel}. ${spokenDuration(firstStepSeconds)}.`, 450);
     },
     silence() {

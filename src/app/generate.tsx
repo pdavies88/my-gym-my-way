@@ -11,9 +11,8 @@ import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
-import { useTraining } from '@/context/training-context';
+import { alertWorkoutsFull, useTraining } from '@/context/training-context';
 import { equipmentName } from '@/lib/equipment';
-import { useFeedback } from '@/hooks/use-feedback';
 import { totalSeconds } from '@/lib/cardio';
 import { buildCircuit, CIRCUIT_PRESETS, circuitParams, type CircuitPresetId } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
@@ -37,7 +36,6 @@ const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 export default function GenerateScreen() {
   const { owned, settings } = useSettings();
   const { saveWorkout, startSession, active } = useTraining();
-  const feedback = useFeedback();
   const [focus, setFocus] = useState<Focus>('full');
   const [length, setLength] = useState<Length>('medium');
   const [style, setStyle] = useState<'sets' | 'circuit'>('sets');
@@ -144,7 +142,6 @@ export default function GenerateScreen() {
               variant="ghost"
               icon={{ ios: 'shuffle', android: 'shuffle' }}
               onPress={() => {
-                feedback.tap();
                 regenerate();
               }}
             />
@@ -164,7 +161,6 @@ export default function GenerateScreen() {
                     icon={{ ios: 'arrow.triangle.2.circlepath', android: 'swap_horiz' }}
                     label={`Swap ${exercise.name}`}
                     onPress={() => {
-                      feedback.tap();
                       swap(i);
                     }}
                   />
@@ -217,6 +213,10 @@ export default function GenerateScreen() {
               focus,
               ...(style === 'circuit' ? { circuit: preset } : {}),
             });
+            if (!workout) {
+              alertWorkoutsFull();
+              return;
+            }
             router.back();
             router.push({ pathname: '/workout/[id]', params: { id: workout.id } });
           }}

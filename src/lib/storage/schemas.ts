@@ -27,6 +27,7 @@ export const SettingsSchema = z.object({
   /** Feedback preferences. Missing means on. */
   sounds: z.boolean().optional(),
   voice: z.boolean().optional(),
+  /** No longer used. Kept so settings saved by version 1.0 still parse. */
   haptics: z.boolean().optional(),
   /** True once the person has read and closed the "before you start" health note. */
   healthNoteSeen: z.boolean().optional(),
@@ -68,7 +69,7 @@ export const SessionLogSchema = ActiveSessionSchema.extend({
   id: z.string(),
   finishedAt: z.number(),
   /** Strength sessions are checklists. Cardio sessions are guided timers. Older logs are strength. */
-  kind: z.enum(['strength', 'cardio', 'circuit', 'stretch']).optional(),
+  kind: z.enum(['strength', 'cardio', 'circuit', 'stretch', 'mobility']).optional(),
   /** The guided cardio session this log came from. */
   cardioId: z.string().optional(),
   /** How a weight circuit was timed, so it can be run again from history. */

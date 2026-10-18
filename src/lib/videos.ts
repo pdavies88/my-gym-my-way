@@ -534,6 +534,66 @@ export const EXERCISE_VIDEOS: Record<string, ExerciseVideo> = {
     title: 'How to do a butterfly stretch',
     channel: 'Medibank',
   },
+  'mobility-worlds-greatest-stretch': {
+    videoId: '-CiWQ2IvY34',
+    title: "The World's Greatest Stretch (Mobility Exercise) by Squat University",
+    channel: 'Squat University',
+  },
+  'mobility-90-90': {
+    videoId: 'qq_Z7sAmVrA',
+    title: '90/90 Hip Switch (Improve Hip Health & Mobility)',
+    channel: 'Simone Sports Performance',
+  },
+  'mobility-open-book': {
+    videoId: 'OW6YHlxY6JI',
+    title: 'Open Book Stretch - Physical Therapy Exercises',
+    channel: 'TSAOG Orthopaedics & Spine',
+  },
+  'mobility-thread-the-needle': {
+    videoId: '6roMIB2YV4Y',
+    title: 'Thoracic mobility exercise - thread the needle',
+    channel: 'Revival Performance Physical Therapy',
+  },
+  'mobility-leg-swings': {
+    videoId: '-KbrCW3MRbg',
+    title: 'Dynamic Multidirectional Leg Swings Stretch',
+    channel: 'Athletico Physical Therapy',
+  },
+  'mobility-hip-circles': {
+    videoId: 'tMj5IISIkJ4',
+    title: 'Standing Hip Car',
+    channel: 'Mike Boyle Strength & Conditioning',
+  },
+  'mobility-ankle-rocks': {
+    videoId: 'ElrpduJn92Y',
+    title: 'Knee To Wall Exercise for Ankle Mobility',
+    channel: 'Dr. Jess Harvey, Osteopath & Health Coach',
+  },
+  'mobility-deep-squat-hold': {
+    videoId: 'h6icB2irtCc',
+    title: 'Deep Squat with Prying',
+    channel: 'Bullett Performance Training',
+  },
+  'mobility-arm-circles': {
+    videoId: '35h5gdlm46w',
+    title: 'Dynamic Arm Circles',
+    channel: 'Invictus Performance Therapy',
+  },
+  'mobility-inchworm': {
+    videoId: 'NlN22MWG2ZQ',
+    title: "Inchworm Essential Exercise |  Core Strength I Flexibility | Doctor of Physical Therapy's Guide",
+    channel: 'PhysioSpace',
+  },
+  'mobility-wall-slides': {
+    videoId: '1UU4VvklQ44',
+    title: 'How to Perform Wall Angel for Tight Upper Back',
+    channel: 'Vive Health',
+  },
+  'mobility-cossack-squat': {
+    videoId: 'nLNqEQ4B6XI',
+    title: 'Cossack Squat | Hip Mobilization Exercise',
+    channel: 'Dr. Carl Baird',
+  },
 };
 
 export function getVideo(exerciseId: string): ExerciseVideo | undefined {

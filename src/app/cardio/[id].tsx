@@ -41,7 +41,7 @@ export default function CardioOverviewScreen() {
   const available = canDoCardio(session, owned);
   const technique = session.techniqueExerciseId ? getExercise(session.techniqueExerciseId) : undefined;
   const techniqueVideo = technique ? getVideo(technique.id) : undefined;
-  const efforts = (['easy', 'moderate', 'hard', 'max', 'rest', 'stretch'] as const).filter((effort) =>
+  const efforts = (['easy', 'moderate', 'hard', 'max', 'rest', 'mobility', 'stretch'] as const).filter((effort) =>
     session.steps.some((s) => s.effort === effort || (effort === 'easy' && s.effort === 'warmup')),
   );
 
@@ -51,9 +51,11 @@ export default function CardioOverviewScreen() {
         <ThemedText type="eyebrow" themeColor="tint">
           {session.category === 'stretch'
             ? 'Stretch and cool-down'
-            : session.category === 'weights'
-              ? 'Weight circuit'
-              : 'Guided cardio'}
+            : session.category === 'mobility'
+              ? 'Mobility'
+              : session.category === 'weights'
+                ? 'Weight circuit'
+                : 'Guided cardio'}
         </ThemedText>
         <ThemedText type="title">{session.name}</ThemedText>
         <ThemedText themeColor="textSecondary">{session.summary}</ThemedText>

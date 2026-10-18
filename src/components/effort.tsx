@@ -14,6 +14,7 @@ export const EFFORT_COLORS: Record<Effort, string> = {
   // Light enough to read as a big 3-2-1 on the near-black background.
   rest: '#A7AEAA',
   stretch: '#B48CFF',
+  mobility: '#4FE0B6',
 };
 
 export function EffortChip({ effort, large }: { effort: Effort; large?: boolean }) {

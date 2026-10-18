@@ -9,8 +9,6 @@ import {
   positionAt,
   stepAnnouncement,
   stepStart,
-  suggestStretch,
-  suggestStretchAfterCardio,
   totalSeconds,
 } from '../cardio';
 import { EQUIPMENT_IDS, type EquipmentId } from '../equipment';
@@ -34,8 +32,10 @@ describe('cardio sessions', () => {
     // A summary that names a length must match the real length to within a minute.
     const stated = session.summary.match(/about (\d+) minutes/i);
     if (stated) expect(Math.abs(Number(stated[1]) - totalSeconds(session) / 60)).toBeLessThanOrEqual(1);
-    // Every session lasts between 10 minutes and an hour. Stretch sessions can be shorter.
-    expect(totalSeconds(session)).toBeGreaterThanOrEqual(session.category === 'stretch' ? 300 : 600);
+    // Every session lasts between 10 minutes and an hour. Stretch and mobility sessions can be shorter.
+    expect(totalSeconds(session)).toBeGreaterThanOrEqual(
+      session.category === 'stretch' || session.category === 'mobility' ? 300 : 600,
+    );
     expect(totalSeconds(session)).toBeLessThanOrEqual(3600);
   });
 
@@ -156,23 +156,27 @@ describe('bag combos', () => {
   });
 });
 
-describe('stretch suggestions', () => {
-  it('match the workout', () => {
-    expect(suggestStretch(['back-squat', 'barbell-rdl', 'reverse-lunge', 'push-up'])).toBe('stretch-lower-body');
-    expect(suggestStretch(['push-up', 'dumbbell-row', 'lateral-raise', 'goblet-squat'])).toBe('stretch-upper-body');
-    expect(suggestStretch(['goblet-squat', 'push-up', 'dumbbell-row', 'reverse-lunge'])).toBe('stretch-full-body');
-  });
-
-  it('match cardio, and skip after a stretch', () => {
-    expect(suggestStretchAfterCardio(getCardioSession('treadmill-speed')!)).toBe('stretch-lower-body');
-    expect(suggestStretchAfterCardio(getCardioSession('bag-basics')!)).toBe('stretch-full-body');
-    expect(suggestStretchAfterCardio(getCardioSession('stretch-full-body')!)).toBeNull();
-  });
-
-  it('only use stretch exercises in stretch sessions', () => {
-    for (const session of CARDIO_SESSIONS.filter((s) => s.category === 'stretch')) {
-      for (const step of session.steps)
-        if (step.exerciseId) expect(getExercise(step.exerciseId)!.slots).toContain('stretch');
+describe('stretch and mobility sessions', () => {
+  it('only use their own kind of exercise', () => {
+    for (const session of CARDIO_SESSIONS.filter((s) => s.category === 'stretch' || s.category === 'mobility')) {
+      for (const step of session.steps) {
+        if (!step.exerciseId) continue;
+        const slots = getExercise(step.exerciseId)!.slots;
+        expect(slots.includes('stretch') || slots.includes('mobility')).toBe(true);
+      }
     }
+  });
+
+  it('need no equipment', () => {
+    for (const session of CARDIO_SESSIONS.filter((s) => s.category === 'stretch' || s.category === 'mobility')) {
+      expect(session.needs).toEqual([]);
+    }
+  });
+});
+
+describe('long sessions', () => {
+  it.each(['rower', 'treadmill', 'bag'] as const)('offer a 30–45 minute %s session', (category) => {
+    const lengths = CARDIO_SESSIONS.filter((s) => s.category === category).map((s) => totalSeconds(s) / 60);
+    expect(lengths.some((m) => m >= 30 && m <= 45)).toBe(true);
   });
 });

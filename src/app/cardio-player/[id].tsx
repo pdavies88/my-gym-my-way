@@ -1,5 +1,5 @@
 import { useKeepAwake } from 'expo-keep-awake';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AppState, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -25,7 +25,6 @@ import {
   INTENSITY,
   positionAt,
   stepStart,
-  suggestStretchAfterCardio,
   totalSeconds,
   type CardioSession,
   type Effort,
@@ -67,8 +66,6 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
   const { logCardio } = useTraining();
   const { steps } = session;
   const total = totalSeconds(session);
-  const stretchId = suggestStretchAfterCardio(session);
-  const stretchAfter = stretchId ? getCardioSession(stretchId) : undefined;
 
   // The clock is built from timestamps, so it stays right if the phone locks or the app is backgrounded.
   const [startedAt, setStartedAt] = useState(() => Date.now());
@@ -135,7 +132,7 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
   const { settings, updateSettings } = useSettings();
   const muted = settings.sounds === false && settings.voice === false;
 
-  // Beeps, voice and haptics. Each clock reading plays whatever cues the clock just passed.
+  // Chimes and voice. Each clock reading plays whatever cues the clock just passed.
   const lastElapsed = useRef<number | null>(null);
   useEffect(() => {
     if (lastElapsed.current === null) {
@@ -157,7 +154,11 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
       startedAt,
       durationMs: activeMs(at),
       exerciseIds,
-      kind: circuit ? 'circuit' : session.category === 'stretch' ? 'stretch' : 'cardio',
+      kind: circuit
+        ? 'circuit'
+        : session.category === 'stretch' || session.category === 'mobility'
+          ? session.category
+          : 'cardio',
       circuit,
     });
   };
@@ -250,26 +251,16 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
           </ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.center}>
             {formatDuration(activeMs(now))} of{' '}
-            {circuit ? 'circuit training' : session.category === 'stretch' ? 'stretching' : 'guided cardio'}. It’s saved
-            to your history.
+            {circuit
+              ? 'circuit training'
+              : session.category === 'stretch'
+                ? 'stretching'
+                : session.category === 'mobility'
+                  ? 'mobility'
+                  : 'guided cardio'}
+            . It’s saved to your history.
           </ThemedText>
-          {stretchAfter && (
-            <Button
-              title={`Stretch now · ${Math.round(totalSeconds(stretchAfter) / 60)} min`}
-              icon={{ ios: 'figure.flexibility', android: 'self_improvement' }}
-              style={styles.doneButton}
-              onPress={() => {
-                goBackOrHome();
-                router.push({ pathname: '/cardio/[id]', params: { id: stretchAfter.id } });
-              }}
-            />
-          )}
-          <Button
-            title="Done"
-            variant={stretchAfter ? 'secondary' : 'primary'}
-            style={stretchAfter ? styles.doneSecondary : styles.doneButton}
-            onPress={goBackOrHome}
-          />
+          <Button title="Done" style={styles.doneButton} onPress={goBackOrHome} />
         </View>
       </View>
     );
@@ -576,5 +567,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   doneButton: { alignSelf: 'stretch', marginTop: Spacing.three },
-  doneSecondary: { alignSelf: 'stretch' },
 });

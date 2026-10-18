@@ -18,7 +18,6 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
-import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
 import { activeMs } from '@/lib/session-clock';
@@ -28,7 +27,6 @@ import { goBackOrHome, goHome } from '@/lib/navigation';
 export default function SessionScreen() {
   const { active, toggleExercise, finishSession, discardSession, pauseSession, resumeSession, restartSessionTimer } =
     useTraining();
-  const feedback = useFeedback();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -71,7 +69,6 @@ export default function SessionScreen() {
   const finish = () => {
     const save = () => {
       const log = finishSession();
-      feedback.success();
       if (log) router.replace({ pathname: '/log/[id]', params: { id: log.id, fresh: '1' } });
     };
     if (allDone) return save();
@@ -88,7 +85,6 @@ export default function SessionScreen() {
         text: 'Discard',
         style: 'destructive',
         onPress: () => {
-          feedback.warning();
           discardSession();
           goHome();
         },
@@ -125,7 +121,6 @@ export default function SessionScreen() {
             variant={paused ? 'primary' : 'secondary'}
             icon={paused ? { ios: 'play.fill', android: 'play_arrow' } : { ios: 'pause.fill', android: 'pause' }}
             onPress={() => {
-              feedback.select();
               if (paused) resumeSession();
               else pauseSession();
             }}
@@ -154,7 +149,6 @@ export default function SessionScreen() {
               index={i}
               checked={active.completedIds.includes(exercise.id)}
               onToggle={() => {
-                feedback.tap();
                 toggleExercise(exercise.id);
               }}
             />

@@ -63,19 +63,19 @@ GENERATE A WORKOUT IN SECONDS
 Pick a focus (full body, upper, lower, push, pull, core or conditioning) and a length. The app picks exercises you can do and balances them across movement patterns. Swap any move you don't like, shuffle for a new mix, and save the ones you love.
 
 OR BUILD YOUR OWN
-Hand-pick every exercise from a library of over 100 moves. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
+Hand-pick every exercise from a library of over 100 moves, grouped by movement type or by muscle so you can find what you want fast. Each one lists the muscles it works, the gear it needs and step-by-step form cues.
 
 WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
 
 GUIDED CARDIO
-Timed sessions for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
+Timed sessions from 14 to 45 minutes for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
 RUN IT AS A CIRCUIT
 Turn any workout into a timed weight circuit. Every move runs back to back on a work and rest timer, round after round, with an easy, standard or hard setting.
 
-STRETCH AFTERWARDS
-Guided full-body, lower-body and upper-body stretch sessions. After each workout, the app suggests the stretch that suits what you trained.
+MOBILITY AND STRETCHING
+A Recover tab with guided mobility sessions, including a quick pre-workout warm-up, and full-body, lower-body and upper-body stretches. No equipment needed.
 
 A SIMPLE SESSION CHECKLIST
 Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. It pauses when you leave the app, and you can pause or restart it any time. Finish, and the session goes into your history.
@@ -164,7 +164,7 @@ d. From the saved workout, tap "Start workout". Tick off each exercise, then tap
 e. Open the Cardio tab, choose any session ("No-equipment HIIT" needs no gear) and tap "Start session". The timer shows each step with chimes and a spoken cue. Tap the skip button to move through steps, then the X and "Save and end".
 f. Open the History tab to see the sessions. Open it and tap "Delete from history" to remove it.
 g. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.
-h. Me > Feedback has switches for sounds, voice and haptics. Me > About links to the privacy policy and support page.
+h. Me > Feedback has switches for sounds and voice. Me > About links to the privacy policy and support page.
 
 4. EXTERNAL SERVICES
 YouTube, for exercise demonstration videos. Each exercise embeds one public YouTube video with YouTube's own embedded player, in privacy-enhanced mode (youtube-nocookie.com). The app has no backend server, authentication service, payment processor, analytics, crash reporting or advertising SDK. It also opens its own privacy policy and support pages in an in-app browser when the user taps them. All user data is stored on the device.
@@ -206,7 +206,7 @@ Not taken yet. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, f
 2. Generate screen with a focus picked and the exercise list
 3. Exercise detail with the video
 4. Session checklist part way through
-5. Library filtered to your equipment
+5. Recover tab with mobility and stretch sessions
 6. History
 7. Me tab with equipment and the BMI calculator
 

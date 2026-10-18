@@ -1,8 +1,7 @@
 import type { EquipmentId } from './equipment';
-import { getExercise } from './exercises';
 
 /** How hard to work during a step. */
-export type Effort = 'warmup' | 'easy' | 'moderate' | 'hard' | 'max' | 'rest' | 'stretch';
+export type Effort = 'warmup' | 'easy' | 'moderate' | 'hard' | 'max' | 'rest' | 'stretch' | 'mobility';
 
 export const EFFORT_LABELS: Record<Effort, string> = {
   warmup: 'Warm-up',
@@ -12,6 +11,7 @@ export const EFFORT_LABELS: Record<Effort, string> = {
   max: 'All out',
   rest: 'Rest',
   stretch: 'Stretch',
+  mobility: 'Mobility',
 };
 
 /** What each effort feels like, using the talk test. Shown on the session overview. */
@@ -22,6 +22,7 @@ export const EFFORT_GUIDE: Record<Exclude<Effort, 'warmup'>, string> = {
   max: 'You can’t talk. Hold it only for the short interval.',
   rest: 'Stop, breathe and shake it out.',
   stretch: 'A gentle pull, never pain. Breathe slowly and relax into it.',
+  mobility: 'Slow, controlled movement through a range that feels easy.',
 };
 
 export interface CardioStep {
@@ -45,6 +46,7 @@ export type CardioCategory =
   | 'bodyweight'
   | 'circuit'
   | 'stretch'
+  | 'mobility'
   | 'weights';
 
 export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
@@ -57,7 +59,8 @@ export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   rope: 'Jump rope',
   bodyweight: 'No equipment',
   circuit: 'Mixed circuits',
-  stretch: 'Stretch and cool-down',
+  stretch: 'Stretching',
+  mobility: 'Mobility',
   weights: 'Weight circuits',
 };
 
@@ -100,6 +103,15 @@ function hold(exerciseId: string, name: string, seconds: number, cue: string, si
   ];
 }
 
+/** A controlled mobility move for `seconds`, once or on each side. */
+function flow(exerciseId: string, name: string, seconds: number, cue: string, sides = false): CardioStep[] {
+  if (!sides) return [step(name, seconds, 'mobility', cue, exerciseId)];
+  return [
+    step(`${name} · left`, seconds, 'mobility', cue, exerciseId),
+    step(`${name} · right`, seconds, 'mobility', `Switch sides. ${cue}`, exerciseId),
+  ];
+}
+
 /**
  * Boxing combos use the standard punch numbers. Every bag session explains them on its first step.
  */
@@ -112,6 +124,15 @@ function comboExercise(combo: string): string {
   if (/[34]/.test(combo)) return 'bag-hooks';
   return 'bag-jab-cross';
 }
+
+const BAG_30_ROUNDS: [string, string, string][] = [
+  ['1-2', 'bag-jab-cross', 'Throw 1-2 on repeat. Snap each punch back to your chin.'],
+  ['1-1-2', 'bag-jab-cross', 'Double jab, then a hard cross. Step in on the jabs.'],
+  ['body shots', 'bag-body-shots', 'Bend your knees and dig hooks to the body. Come back up to the head.'],
+  ['1-2-3', 'bag-hooks', 'Jab, cross, lead hook. Turn your hips into the hook.'],
+  ['slip and counter', 'bag-slip-drill', 'Slip left and right, then answer with a 1-2 every time.'],
+  ['freestyle', 'bag-body-shots', 'Mix every punch, head and body. Keep your feet moving.'],
+];
 
 export const CARDIO_SESSIONS: readonly CardioSession[] = [
   // Rower
@@ -178,6 +199,47 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Cool down', min(3), 'easy', 'Light rowing until your breathing settles.'),
     ],
   },
+  {
+    id: 'rower-power-tens',
+    name: 'Power tens 30',
+    summary: 'Thirty minutes: steady rowing with ten hard strokes every two minutes.',
+    level: 'Intermediate',
+    category: 'rower',
+    needs: ['rower'],
+    techniqueExerciseId: 'rowing-machine',
+    steps: [
+      step('Warm up', min(5), 'warmup', 'Easy rowing at 18–20 strokes a minute. Legs, then body, then arms.'),
+      ...rounds(10, (r) => [
+        step(`Steady ${r} of 10`, 100, 'moderate', 'Rate 22–24. Long, strong strokes you could hold all day.'),
+        step(`Power ten ${r} of 10`, 20, 'hard', 'Ten big strokes. Drive hard with the legs, then settle back down.'),
+      ]),
+      step('Cool down', min(5), 'easy', 'Light paddle. Let your heart rate come down.'),
+    ],
+  },
+  {
+    id: 'rower-four-by-six',
+    name: '4 × 6 minutes',
+    summary: 'Four 6-minute pieces with 2 minutes easy between. A 45-minute endurance builder.',
+    level: 'Advanced',
+    category: 'rower',
+    needs: ['rower'],
+    techniqueExerciseId: 'rowing-machine',
+    steps: [
+      step('Warm up', min(8), 'warmup', 'Easy rowing, then three 10-stroke pushes in the last three minutes.'),
+      ...rounds(4, (r) => [
+        step(
+          `Piece ${r} of 4`,
+          min(6),
+          'hard',
+          r === 4
+            ? 'Rate 24–26. Last one: lift the pace for the final minute.'
+            : 'Rate 24. Hold the same split all the way.',
+        ),
+        step('Easy', min(2), 'easy', 'Paddle at rate 18. Breathe and sip water.'),
+      ]),
+      step('Cool down', min(5), 'easy', 'Light rowing, long relaxed strokes.'),
+    ],
+  },
   // Treadmill
   {
     id: 'treadmill-walk-run',
@@ -228,6 +290,51 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         step('Easy jog', 90, 'easy', 'Slow right down to an easy jog or a walk.'),
       ]),
       step('Cool down', min(4), 'easy', 'Easy jog, then walk.'),
+    ],
+  },
+  {
+    id: 'treadmill-tempo',
+    name: 'Tempo 32',
+    summary: 'Three 6-minute tempo runs with easy jogging between. About 32 minutes.',
+    level: 'Intermediate',
+    category: 'treadmill',
+    needs: ['treadmill'],
+    techniqueExerciseId: 'treadmill-run',
+    steps: [
+      step('Warm up', min(5), 'warmup', 'Walk for 2 minutes, then an easy jog.'),
+      ...rounds(3, (r) => [
+        step(
+          `Tempo ${r} of 3`,
+          min(6),
+          'hard',
+          'Comfortably hard: a pace you could hold for about an hour in a race. Short, quick steps.',
+        ),
+        step('Easy jog', min(2), 'easy', 'Slow to an easy jog or a brisk walk.'),
+      ]),
+      step('Cool down', min(3), 'easy', 'Easy jog, then walk.'),
+    ],
+  },
+  {
+    id: 'treadmill-rolling-hills',
+    name: 'Rolling hills 45',
+    summary: 'Forty-five minutes of climbs and flats. Walk or jog them. About 45 minutes.',
+    level: 'Beginner',
+    category: 'treadmill',
+    needs: ['treadmill'],
+    techniqueExerciseId: 'treadmill-run',
+    steps: [
+      step('Warm up', min(5), 'warmup', 'Walk on the flat at an easy pace.'),
+      ...rounds(6, (r) => [
+        step(
+          `Climb ${r} of 6`,
+          min(3),
+          'moderate',
+          'Raise the incline to 6–8%. Walk briskly or jog. Don’t hold the rails.',
+        ),
+        step('Flat', min(2), 'easy', 'Drop the incline to 1%. Keep moving at an easy pace.'),
+      ]),
+      step('Steady', min(5), 'moderate', 'Flat, at a pace that makes you breathe harder but still talk.'),
+      step('Cool down', min(5), 'easy', 'Slow walk.'),
     ],
   },
   // Boxing bag
@@ -311,6 +418,55 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
         step('Rest', 10, 'rest', 'Hands up. Get ready.'),
       ]),
       step('Cool down', min(2), 'easy', 'Walk, then stretch your shoulders.'),
+    ],
+  },
+  {
+    id: 'bag-30',
+    name: 'Bag 30',
+    summary: 'Six 3-minute rounds, each with its own focus. About 30 minutes.',
+    level: 'Intermediate',
+    category: 'bag',
+    needs: ['heavyBag'],
+    techniqueExerciseId: 'bag-jab-cross',
+    steps: [
+      step('Warm up', min(4), 'warmup', `Shadowbox and bounce on your toes. Punch numbers: ${PUNCH_KEY}`),
+      ...BAG_30_ROUNDS.flatMap(([focus, exerciseId, cue], i) => [
+        step(`Round ${i + 1}: ${focus}`, min(3), 'hard', cue, exerciseId),
+        ...(i < BAG_30_ROUNDS.length - 1
+          ? [step('Rest', min(1), 'rest' as const, 'Walk, breathe, shake out your arms.')]
+          : []),
+      ]),
+      step('Cool down', min(3), 'easy', 'Slow shadowboxing, then stretch your shoulders and chest.'),
+    ],
+  },
+  {
+    id: 'bag-nine-rounds',
+    name: 'Nine rounds',
+    summary:
+      'A fight-length workout: nine 3-minute rounds with a 30-second burnout every third round. About 43 minutes.',
+    level: 'Advanced',
+    category: 'bag',
+    needs: ['heavyBag'],
+    techniqueExerciseId: 'bag-jab-cross',
+    steps: [
+      step('Warm up', min(5), 'warmup', `Shadowbox, then light 1-2s on the bag. Punch numbers: ${PUNCH_KEY}`),
+      ...rounds(9, (r) => {
+        const combo = COMBOS[(r - 1) % COMBOS.length];
+        const burnout = r % 3 === 0;
+        return [
+          step(
+            `Round ${r}: ${combo.startsWith('Freestyle') ? 'freestyle' : combo}`,
+            min(3),
+            burnout ? 'max' : 'hard',
+            `${combo.startsWith('Freestyle') ? 'Mix everything, head and body.' : `Throw ${combo} on repeat.`}${
+              burnout ? ' Last 30 seconds: nonstop fast straight punches.' : ' Reset your stance after each combo.'
+            }`,
+            combo.startsWith('Freestyle') ? 'bag-body-shots' : comboExercise(combo),
+          ),
+          ...(r < 9 ? [step('Rest', min(1), 'rest' as const, 'Walk, breathe, sip water.')] : []),
+        ];
+      }),
+      step('Cool down', min(3), 'easy', 'Slow shadowboxing, then stretch.'),
     ],
   },
   // Kettlebell conditioning
@@ -607,7 +763,148 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Cool down', min(3), 'easy', 'Walk, then stretch your hips, back and shoulders.'),
     ],
   },
-  // Stretch and cool-down
+  // Mobility
+  {
+    id: 'mobility-morning',
+    name: 'Morning mobility',
+    summary: 'Wake up your spine, hips and shoulders. Good any day, training or not. About 10 minutes.',
+    level: 'Beginner',
+    category: 'mobility',
+    needs: [],
+    techniqueExerciseId: 'mobility-worlds-greatest-stretch',
+    steps: [
+      ...flow('stretch-cat-cow', 'Cat-cow', 60, 'Slow rounds. Breathe out as you round, in as you arch.'),
+      ...flow(
+        'mobility-worlds-greatest-stretch',
+        'World’s greatest stretch',
+        45,
+        'Lunge, elbow down, then rotate and reach up.',
+        true,
+      ),
+      ...flow('mobility-90-90', '90/90 hip switch', 60, 'Rotate both knees side to side. Chest tall.'),
+      ...flow(
+        'mobility-open-book',
+        'Open book',
+        40,
+        'Knees stay together. Open your top arm and follow it with your eyes.',
+        true,
+      ),
+      ...flow('mobility-thread-the-needle', 'Thread the needle', 40, 'Reach under, then up to the ceiling.', true),
+      ...flow(
+        'mobility-hip-circles',
+        'Hip circles',
+        30,
+        'Big slow circles with the knee. Switch direction halfway.',
+        true,
+      ),
+      ...flow('mobility-arm-circles', 'Arm circles', 45, 'Small to big. Reverse halfway.'),
+      ...flow('mobility-inchworm', 'Inchworm', 60, 'Walk out to a plank and back. Slow and controlled.'),
+      ...flow('mobility-deep-squat-hold', 'Deep squat hold', 45, 'Heels down, elbows press your knees out. Breathe.'),
+    ],
+  },
+  {
+    id: 'mobility-hips',
+    name: 'Hips and lower back',
+    summary: 'Loosen tight hips, ankles and lower back, before leg day or after a day of sitting. About 10 minutes.',
+    level: 'Beginner',
+    category: 'mobility',
+    needs: [],
+    techniqueExerciseId: 'mobility-90-90',
+    steps: [
+      ...flow(
+        'mobility-hip-circles',
+        'Hip circles',
+        40,
+        'Big slow circles with the knee. Switch direction halfway.',
+        true,
+      ),
+      ...flow(
+        'mobility-leg-swings',
+        'Leg swings',
+        45,
+        'Forward and back, then side to side. Let the range grow.',
+        true,
+      ),
+      ...flow('mobility-90-90', '90/90 hip switch', 60, 'Rotate both knees side to side. Chest tall.'),
+      ...flow(
+        'mobility-cossack-squat',
+        'Cossack squat',
+        60,
+        'Shift side to side. Only as deep as your heel stays down.',
+      ),
+      ...flow('mobility-ankle-rocks', 'Ankle rocks', 40, 'Knee forward over your toes, heel down.', true),
+      ...flow('mobility-deep-squat-hold', 'Deep squat hold', 60, 'Heels down, elbows press your knees out. Breathe.'),
+      ...flow(
+        'mobility-worlds-greatest-stretch',
+        'World’s greatest stretch',
+        45,
+        'Lunge, elbow down, then rotate and reach up.',
+        true,
+      ),
+      ...flow('stretch-cat-cow', 'Cat-cow', 45, 'Slow rounds. Move one segment of your back at a time.'),
+      step(
+        'Child’s pose',
+        45,
+        'stretch',
+        'Sink your hips back and breathe into your lower back.',
+        'stretch-childs-pose',
+      ),
+    ],
+  },
+  {
+    id: 'mobility-shoulders',
+    name: 'Shoulders and upper back',
+    summary: 'Free up your shoulders and upper back, before pressing or after a day at a desk. About 8 minutes.',
+    level: 'Beginner',
+    category: 'mobility',
+    needs: [],
+    techniqueExerciseId: 'mobility-wall-slides',
+    steps: [
+      ...flow('mobility-arm-circles', 'Arm circles', 60, 'Small to big. Reverse halfway.'),
+      ...flow(
+        'mobility-wall-slides',
+        'Wall slides',
+        60,
+        'Back flat on the wall. Slide up only as far as you can keep contact.',
+      ),
+      ...flow('mobility-thread-the-needle', 'Thread the needle', 45, 'Reach under, then up to the ceiling.', true),
+      ...flow(
+        'mobility-open-book',
+        'Open book',
+        45,
+        'Knees stay together. Open your top arm and follow it with your eyes.',
+        true,
+      ),
+      ...flow('stretch-cat-cow', 'Cat-cow', 45, 'Slow rounds. Push the floor away as you round.'),
+      ...flow('mobility-inchworm', 'Inchworm', 60, 'Walk out to a plank and back. Slow and controlled.'),
+      step('Child’s pose', 45, 'stretch', 'Reach your arms long to stretch your lats.', 'stretch-childs-pose'),
+    ],
+  },
+  {
+    id: 'mobility-warm-up',
+    name: 'Pre-workout warm-up',
+    summary: 'A quick full-body warm-up to do before lifting or cardio. About 5 minutes.',
+    level: 'Beginner',
+    category: 'mobility',
+    needs: [],
+    techniqueExerciseId: 'mobility-inchworm',
+    steps: [
+      ...flow('mobility-inchworm', 'Inchworm', 45, 'Walk out to a plank and back.'),
+      ...flow(
+        'mobility-worlds-greatest-stretch',
+        'World’s greatest stretch',
+        30,
+        'Lunge, elbow down, rotate and reach.',
+        true,
+      ),
+      ...flow('mobility-leg-swings', 'Leg swings', 30, 'Forward and back, then side to side.', true),
+      ...flow('mobility-hip-circles', 'Hip circles', 30, 'Big circles, both directions.', true),
+      ...flow('mobility-arm-circles', 'Arm circles', 30, 'Small to big, then reverse.'),
+      ...flow('mobility-ankle-rocks', 'Ankle rocks', 20, 'Knee forward over your toes, heel down.', true),
+      ...flow('mobility-deep-squat-hold', 'Deep squat hold', 30, 'Sit deep, heels down, chest up.'),
+    ],
+  },
+  // Stretching
   {
     id: 'stretch-full-body',
     name: 'Full-body stretch',
@@ -740,6 +1037,11 @@ export const INTENSITY: Record<Effort, { rpe: [number, number]; heartRate: strin
   easy: { rpe: [3, 4], heartRate: 'about 60–70% of max', feel: 'Comfortable. You could chat the whole time.' },
   moderate: { rpe: [5, 6], heartRate: 'about 70–80% of max', feel: 'Working. Breathing deeper, short sentences only.' },
   hard: { rpe: [7, 8], heartRate: 'about 80–90% of max', feel: 'Tough. A few words at a time. Hold your form.' },
+  mobility: {
+    rpe: [2, 3],
+    heartRate: 'a little above resting',
+    feel: 'Easy, smooth movement. Go a little further each rep, never into pain.',
+  },
   stretch: {
     rpe: [1, 2],
     heartRate: 'settling back to normal',
@@ -818,35 +1120,4 @@ export function stepAnnouncement(step: CardioStep): string {
   const effort = EFFORT_LABELS[step.effort];
   const prefix = letters(label).startsWith(letters(effort)) ? '' : `${effort}. `;
   return `${prefix}${label}. ${spokenDuration(step.seconds)}.`;
-}
-
-const LOWER_SLOTS = ['squat', 'hinge', 'lunge', 'calves'];
-const UPPER_SLOTS = ['hpush', 'vpush', 'hpull', 'vpull', 'biceps', 'triceps', 'shoulders'];
-
-/**
- * The stretch session to suggest after a workout: lower body after mostly leg work, upper body after
- * mostly upper work, full body otherwise.
- */
-export function suggestStretch(exerciseIds: readonly string[]): string {
-  let lower = 0;
-  let upper = 0;
-  for (const id of exerciseIds) {
-    const slot = getExercise(id)?.slots[0];
-    if (!slot) continue;
-    if (LOWER_SLOTS.includes(slot)) lower += 1;
-    if (UPPER_SLOTS.includes(slot)) upper += 1;
-  }
-  if (lower >= 2 * Math.max(1, upper)) return 'stretch-lower-body';
-  if (upper >= 2 * Math.max(1, lower)) return 'stretch-upper-body';
-  return 'stretch-full-body';
-}
-
-/** The stretch session to suggest after a cardio session, or null after a stretch. */
-export function suggestStretchAfterCardio(session: Pick<CardioSession, 'category' | 'steps'>): string | null {
-  if (session.category === 'stretch') return null;
-  if (session.category === 'weights') {
-    return suggestStretch(session.steps.map((s) => s.exerciseId).filter((id): id is string => !!id));
-  }
-  if (['treadmill', 'bike', 'rope'].includes(session.category)) return 'stretch-lower-body';
-  return 'stretch-full-body';
 }

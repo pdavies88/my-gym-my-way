@@ -14,7 +14,6 @@ import { AppName } from '@/constants/brand';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useBestVoice } from '@/hooks/use-best-voice';
-import { useFeedback } from '@/hooks/use-feedback';
 import { useTheme } from '@/hooks/use-theme';
 import { equipmentName } from '@/lib/equipment';
 import { availableExercises } from '@/lib/exercises';
@@ -70,12 +69,6 @@ export default function MeScreen() {
             detail={`Announces each cardio step and a 10-second heads-up${loaded ? `. Using ${voice ? voice.name : 'the system voice'}.` : ''}`}
             value={settings.voice !== false}
             onChange={(voice) => updateSettings({ voice })}
-          />
-          <ToggleRow
-            label="Haptics"
-            detail="Taps when you tick, pick or finish something, and at each cardio step change"
-            value={settings.haptics !== false}
-            onChange={(haptics) => updateSettings({ haptics })}
           />
           {loaded && couldUpgradeVoice(voice) && Platform.OS === 'ios' && (
             <ThemedText type="small" themeColor="textSecondary">
@@ -138,7 +131,6 @@ function ToggleRow({
   onChange: (value: boolean) => void;
 }) {
   const theme = useTheme();
-  const feedback = useFeedback();
   return (
     <View style={styles.toggleRow}>
       <View style={styles.toggleText}>
@@ -153,7 +145,6 @@ function ToggleRow({
         accessibilityLabel={label}
         value={value}
         onValueChange={(next) => {
-          feedback.select();
           onChange(next);
         }}
         trackColor={{ true: theme.tint, false: theme.backgroundSelected }}

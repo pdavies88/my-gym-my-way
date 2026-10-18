@@ -10,7 +10,6 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
-import { getCardioSession, suggestStretch, totalSeconds } from '@/lib/cardio';
 import { circuitParams, normalizeSettings } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import { SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
@@ -40,9 +39,6 @@ export default function SessionLogScreen() {
   });
 
   const kind = sessionKind(log);
-  // After a workout, offer the stretch session that suits it.
-  const stretch =
-    kind === 'strength' || kind === 'circuit' ? getCardioSession(suggestStretch(log.exerciseIds)) : undefined;
   const isCardio = kind !== 'strength';
 
   const repeat = () => {
@@ -121,15 +117,8 @@ export default function SessionLogScreen() {
       )}
 
       <View style={styles.buttons}>
-        {fresh && stretch && (
-          <Button
-            title={`Stretch now · ${Math.round(totalSeconds(stretch) / 60)} min`}
-            icon={{ ios: 'figure.flexibility', android: 'self_improvement' }}
-            onPress={() => router.replace({ pathname: '/cardio/[id]', params: { id: stretch.id } })}
-          />
-        )}
         {fresh ? (
-          <Button title="Done" variant={stretch ? 'secondary' : 'primary'} onPress={goHome} />
+          <Button title="Done" onPress={goHome} />
         ) : (
           <Button title="Do it again" icon={{ ios: 'arrow.clockwise', android: 'replay' }} onPress={repeat} />
         )}

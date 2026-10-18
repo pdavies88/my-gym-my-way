@@ -1,5 +1,5 @@
 import { createContext, use, useEffect, useState, type ReactNode } from 'react';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 
 import type { Focus } from '@/lib/generator';
 import type { CircuitPresetId, CircuitSettings } from '@/lib/circuit';
@@ -22,7 +22,8 @@ type TrainingContextValue = {
   workouts: SavedWorkout[];
   sessions: SessionLog[];
   active: ActiveSession | null;
-  saveWorkout: (workout: NewWorkout, id?: string) => SavedWorkout;
+  /** Returns null when the list is full and this would be a new workout. */
+  saveWorkout: (workout: NewWorkout, id?: string) => SavedWorkout | null;
   deleteWorkout: (id: string) => void;
   startSession: (session: { name: string; exerciseIds: string[]; workoutId?: string }) => void;
   toggleExercise: (exerciseId: string) => void;
@@ -34,7 +35,7 @@ type TrainingContextValue = {
     /** Time actually trained, without pauses. */
     durationMs: number;
     exerciseIds: string[];
-    kind?: 'cardio' | 'circuit' | 'stretch';
+    kind?: 'cardio' | 'circuit' | 'stretch' | 'mobility';
     circuit?: CircuitSettings;
   }) => SessionLog;
   discardSession: () => void;
@@ -48,6 +49,8 @@ type TrainingContextValue = {
 
 const TrainingContext = createContext<TrainingContextValue | null>(null);
 
+// Caps keep storage small: a saved workout or a history entry is well under 1 KB.
+export const MAX_WORKOUTS = 100;
 const MAX_SESSIONS = 500;
 
 export function TrainingProvider({ children }: { children: ReactNode }) {
@@ -70,9 +73,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     void writeJson(KEYS.activeSession, next);
   };
 
-  const saveWorkout = (input: NewWorkout, id?: string): SavedWorkout => {
+  const saveWorkout = (input: NewWorkout, id?: string): SavedWorkout | null => {
     const now = Date.now();
     const existing = id ? workouts.find((w) => w.id === id) : undefined;
+    if (!existing && workouts.length >= MAX_WORKOUTS) return null;
     const workout: SavedWorkout = {
       id: existing?.id ?? newId(),
       createdAt: existing?.createdAt ?? now,
@@ -178,6 +182,13 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
       }}>
       {children}
     </TrainingContext>
+  );
+}
+
+export function alertWorkoutsFull() {
+  Alert.alert(
+    'Your saved workouts are full',
+    `You can keep up to ${MAX_WORKOUTS} saved workouts. Delete one you no longer use, then save this one.`,
   );
 }
 

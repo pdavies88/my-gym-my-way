@@ -91,6 +91,23 @@ export default function TrainScreen() {
         />
       </Animated.View>
 
+      <Animated.View entering={FadeInDown.delay(120).duration(350)}>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel="Exercise library. Every move, with a demo video"
+          onPress={() => router.push('/library')}
+          style={[styles.workout, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Icon name={{ ios: 'square.grid.2x2', android: 'grid_view' }} size={22} color={theme.tint} />
+          <View style={styles.workoutText}>
+            <ThemedText type="heading">Exercise library</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Every move, with a demo video
+            </ThemedText>
+          </View>
+          <Icon name={{ ios: 'chevron.right', android: 'chevron_right' }} size={16} color={theme.textSecondary} />
+        </PressableScale>
+      </Animated.View>
+
       <SectionHeader title={`Saved workouts · ${workouts.length}`} />
       {workouts.length === 0 ? (
         <ThemedText type="small" themeColor="textSecondary">

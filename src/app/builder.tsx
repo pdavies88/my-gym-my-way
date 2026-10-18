@@ -4,20 +4,19 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
+import { ExerciseBrowser } from '@/components/exercise-browser';
 import { ExerciseRow } from '@/components/exercise-row';
 import { IconButton } from '@/components/icon-button';
 import { Screen, SectionHeader } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
-import { useTraining } from '@/context/training-context';
-import { useFeedback } from '@/hooks/use-feedback';
+import { alertWorkoutsFull, useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
 import { availableExercises, getExercise } from '@/lib/exercises';
 
 export default function BuilderScreen() {
   const theme = useTheme();
-  const feedback = useFeedback();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { workouts, saveWorkout } = useTraining();
   const { owned } = useSettings();
@@ -25,7 +24,6 @@ export default function BuilderScreen() {
 
   const [name, setName] = useState(existing?.name ?? '');
   const [ids, setIds] = useState<string[]>(existing?.exerciseIds ?? []);
-  const [query, setQuery] = useState('');
 
   const move = (index: number, delta: number) => {
     const next = [...ids];
@@ -34,12 +32,7 @@ export default function BuilderScreen() {
     setIds(next);
   };
 
-  const needle = query.trim().toLowerCase();
-  const choices = availableExercises(owned).filter(
-    (e) =>
-      !ids.includes(e.id) &&
-      (!needle || e.name.toLowerCase().includes(needle) || e.muscles.some((m) => m.toLowerCase().includes(needle))),
-  );
+  const choices = availableExercises(owned).filter((e) => !ids.includes(e.id));
 
   const inputStyle = [styles.input, { color: theme.text, backgroundColor: theme.card, borderColor: theme.border }];
 
@@ -99,41 +92,27 @@ export default function BuilderScreen() {
         title={existing ? 'Save changes' : 'Save workout'}
         disabled={ids.length === 0}
         onPress={() => {
-          saveWorkout({ name: name || 'My workout', exerciseIds: ids }, existing?.id);
+          if (!saveWorkout({ name: name || 'My workout', exerciseIds: ids }, existing?.id)) {
+            alertWorkoutsFull();
+            return;
+          }
           router.back();
         }}
       />
 
       <View style={styles.group}>
         <SectionHeader title="Add exercises" />
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Search by name or muscle"
-          accessibilityLabel="Search exercises"
-          placeholderTextColor={theme.textSecondary}
-          style={inputStyle}
-          autoCorrect={false}
-          clearButtonMode="while-editing"
-        />
-        {choices.map((exercise) => (
-          <Animated.View key={exercise.id} layout={LinearTransition.duration(200)}>
-            <ExerciseRow
-              exercise={exercise}
-              trailing={
-                <IconButton
-                  icon={{ ios: 'plus', android: 'add' }}
-                  label={`Add ${exercise.name}`}
-                  tone="tint"
-                  onPress={() => {
-                    feedback.select();
-                    setIds([...ids, exercise.id]);
-                  }}
-                />
-              }
+        <ExerciseBrowser
+          exercises={choices}
+          trailing={(exercise) => (
+            <IconButton
+              icon={{ ios: 'plus', android: 'add' }}
+              label={`Add ${exercise.name}`}
+              tone="tint"
+              onPress={() => setIds([...ids, exercise.id])}
             />
-          </Animated.View>
-        ))}
+          )}
+        />
       </View>
     </Screen>
   );
