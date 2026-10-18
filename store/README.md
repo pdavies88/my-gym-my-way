@@ -8,7 +8,7 @@ Everything App Store Connect asks for, ready to paste. Fill these in under **App
 - [x] The app links to the privacy policy and support page from **Me → About**. Apple requires this.
 - [ ] A TestFlight build installs and works on your iPhone.
 - [ ] App information, pricing and the version page are filled in from this file.
-- [ ] Screenshots are uploaded. See [Screenshots](#screenshots). *Not taken yet.*
+- [ ] Screenshots are uploaded. See [Screenshots](#screenshots). *Play shots are ready. App Store 6.9-inch shots are not taken yet.*
 - [ ] The App Privacy questionnaire is answered. See [App Privacy](#app-privacy-questionnaire).
 - [ ] The age rating questionnaire is answered.
 - [ ] The App Review notes are pasted in. See [App Review information](#app-review-information).
@@ -200,7 +200,7 @@ Apple asks for a recording on a physical iPhone running the latest iOS, starting
 
 ## Screenshots
 
-Not taken yet. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, from the Pro Max simulator. Save them in `store/screenshots/`. A suggested order, since the first three show in search results:
+`store/screenshots/` now holds six iPhone 18 Pro shots (1206 × 2622) taken in Expo Go for the Play listing. They show Expo Go's blue developer button at the top right, so don't upload them to App Store Connect as they are. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, from the Pro Max simulator. Save them in `store/screenshots/`. A suggested order, since the first three show in search results:
 
 1. Train tab with saved workouts
 2. Generate screen with a focus picked and the exercise list
@@ -225,7 +225,7 @@ For the 6.1"/6.3" slot, resize to 1206 × 2622: `mkdir -p 6.3-inch && for f in 0
 | Category | Health & Fitness | |
 | Data safety | No data collected, no data shared. Review the YouTube note under App Privacy first. | |
 
-The Play feature graphic (1024 × 500) and phone screenshots are not made yet. The Whatcha Eatin' repo has `scripts/generate-play-assets.mjs` to copy for them.
+The feature graphic, phone screenshots and every Play Console answer are in [android/README.md](android/README.md). `node scripts/generate-play-assets.mjs` regenerates the images.
 
 ## Brand assets
 
