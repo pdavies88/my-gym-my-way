@@ -69,7 +69,7 @@ WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
 
 GUIDED CARDIO
-Timed sessions from 14 to 45 minutes for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus circuits that mix them and a no-equipment HIIT. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
+Timed sessions from 14 to 45 minutes for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus a no-equipment HIIT. Quiet 15-minute morning and evening sessions mix full-body strength and stretching with no jumping, so they won't wake the house. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
 RUN IT AS A CIRCUIT
 Turn any workout into a timed weight circuit. Every move runs back to back on a work and rest timer, round after round, with an easy, standard or hard setting.

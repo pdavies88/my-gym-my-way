@@ -7,6 +7,7 @@ import {
   formatCountdown,
   getCardioSession,
   positionAt,
+  sessionExerciseIds,
   stepAnnouncement,
   stepStart,
   totalSeconds,
@@ -39,13 +40,12 @@ describe('cardio sessions', () => {
     expect(totalSeconds(session)).toBeLessThanOrEqual(3600);
   });
 
-  it('covers the rower, treadmill and boxing bag, alone and together', () => {
+  it('covers the rower, treadmill and boxing bag', () => {
     const owned = (...items: EquipmentId[]) => new Set<EquipmentId>(items);
     const count = (set: Set<EquipmentId>) => CARDIO_SESSIONS.filter((s) => canDoCardio(s, set)).length;
     expect(count(owned('rower'))).toBeGreaterThan(count(owned()));
     expect(count(owned('treadmill'))).toBeGreaterThan(count(owned()));
     expect(count(owned('heavyBag'))).toBeGreaterThan(count(owned()));
-    expect(CARDIO_SESSIONS.some((s) => s.needs.length > 1)).toBe(true);
   });
 
   it('always offers a no-equipment session', () => {
@@ -153,6 +153,43 @@ describe('bag combos', () => {
       );
       if (usesNumbers) expect(session.steps.some((s) => s.cue.includes('1 jab, 2 cross'))).toBe(true);
     }
+  });
+});
+
+describe('sessionExerciseIds', () => {
+  it('lists every move once, in the order it comes up', () => {
+    const ids = sessionExerciseIds(getCardioSession('mobility-morning')!);
+    expect(ids[0]).toBe('stretch-cat-cow');
+    expect(ids).toContain('mobility-worlds-greatest-stretch');
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('falls back to the technique video when no step has one', () => {
+    expect(sessionExerciseIds(getCardioSession('rower-steady-20')!)).toEqual(['rowing-machine']);
+  });
+});
+
+describe('quiet sessions', () => {
+  const quiet = CARDIO_SESSIONS.filter((s) => s.category === 'quiet');
+  // Moves that land or stamp, which would wake a sleeping house.
+  const LOUD = ['jumping-jack', 'high-knees', 'burpee', 'jump-squat', 'jump-rope', 'mountain-climber'];
+
+  it('offer morning and evening options', () => {
+    expect(quiet.some((s) => /morning/i.test(s.name))).toBe(true);
+    expect(quiet.some((s) => /evening/i.test(s.name))).toBe(true);
+  });
+
+  it.each(quiet.map((s) => [s.id, s] as const))('%s is a quiet 15-minute full-body session', (_, session) => {
+    expect(totalSeconds(session)).toBe(900);
+    expect(session.needs).toEqual([]);
+    expect(session.steps.some((s) => s.effort === 'stretch')).toBe(true);
+    for (const step of session.steps) {
+      if (step.exerciseId) expect(LOUD).not.toContain(step.exerciseId);
+    }
+    const slots = new Set(session.steps.flatMap((s) => (s.exerciseId ? getExercise(s.exerciseId)!.slots : [])));
+    expect(slots.has('core')).toBe(true);
+    expect((['squat', 'lunge', 'hinge'] as const).some((slot) => slots.has(slot))).toBe(true);
+    expect((['hpush', 'vpush'] as const).some((slot) => slots.has(slot))).toBe(true);
   });
 });
 

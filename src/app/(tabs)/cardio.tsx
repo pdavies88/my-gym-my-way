@@ -11,6 +11,7 @@ import { useSettings } from '@/context/settings-context';
 import { CARDIO_CATEGORY_LABELS, CARDIO_SESSIONS, canDoCardio, type CardioCategory } from '@/lib/cardio';
 
 const CATEGORY_ORDER: CardioCategory[] = [
+  'quiet',
   'rower',
   'treadmill',
   'bag',
@@ -19,7 +20,6 @@ const CATEGORY_ORDER: CardioCategory[] = [
   'bike',
   'rope',
   'bodyweight',
-  'circuit',
 ];
 
 export default function CardioScreen() {

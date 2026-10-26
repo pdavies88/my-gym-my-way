@@ -5,8 +5,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EFFORT_COLORS, EffortStrip } from '@/components/effort';
-import { ExerciseVideo } from '@/components/exercise-video';
 import { Screen, SectionHeader } from '@/components/screen';
+import { SessionVideos } from '@/components/session-videos';
 import { Tag } from '@/components/tag';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -17,12 +17,11 @@ import {
   EFFORT_LABELS,
   formatCountdown,
   getCardioSession,
+  sessionExerciseIds,
   totalSeconds,
   type Effort,
 } from '@/lib/cardio';
 import { equipmentName } from '@/lib/equipment';
-import { getExercise } from '@/lib/exercises';
-import { getVideo } from '@/lib/videos';
 
 export default function CardioOverviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,8 +38,7 @@ export default function CardioOverviewScreen() {
 
   const minutes = Math.round(totalSeconds(session) / 60);
   const available = canDoCardio(session, owned);
-  const technique = session.techniqueExerciseId ? getExercise(session.techniqueExerciseId) : undefined;
-  const techniqueVideo = technique ? getVideo(technique.id) : undefined;
+  const exerciseIds = sessionExerciseIds(session);
   const efforts = (['easy', 'moderate', 'hard', 'max', 'rest', 'mobility', 'stretch'] as const).filter((effort) =>
     session.steps.some((s) => s.effort === effort || (effort === 'easy' && s.effort === 'warmup')),
   );
@@ -55,7 +53,9 @@ export default function CardioOverviewScreen() {
               ? 'Mobility'
               : session.category === 'weights'
                 ? 'Weight circuit'
-                : 'Guided cardio'}
+                : session.category === 'quiet'
+                  ? 'Quiet full body'
+                  : 'Guided cardio'}
         </ThemedText>
         <ThemedText type="title">{session.name}</ThemedText>
         <ThemedText themeColor="textSecondary">{session.summary}</ThemedText>
@@ -88,10 +88,15 @@ export default function CardioOverviewScreen() {
         </ThemedText>
       )}
 
-      {technique && techniqueVideo && (
+      {exerciseIds.length > 0 && (
         <Animated.View entering={FadeInDown.delay(60).duration(300)} style={styles.group}>
-          <SectionHeader title={`Technique: ${technique.name}`} />
-          <ExerciseVideo video={techniqueVideo} />
+          <SectionHeader title={exerciseIds.length === 1 ? 'How-to video' : `How-to videos · ${exerciseIds.length}`} />
+          {exerciseIds.length > 1 && (
+            <ThemedText type="small" themeColor="textSecondary">
+              Tap any move to watch how it’s done before you start.
+            </ThemedText>
+          )}
+          <SessionVideos exerciseIds={exerciseIds} />
         </Animated.View>
       )}
 

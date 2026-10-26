@@ -44,7 +44,7 @@ export type CardioCategory =
   | 'bike'
   | 'rope'
   | 'bodyweight'
-  | 'circuit'
+  | 'quiet'
   | 'stretch'
   | 'mobility'
   | 'weights';
@@ -58,7 +58,7 @@ export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   bike: 'Bike',
   rope: 'Jump rope',
   bodyweight: 'No equipment',
-  circuit: 'Mixed circuits',
+  quiet: 'Quiet: no jumping',
   stretch: 'Stretching',
   mobility: 'Mobility',
   weights: 'Weight circuits',
@@ -660,107 +660,205 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
       step('Cool down', min(3), 'easy', 'Walk around, then stretch your legs and chest.'),
     ],
   },
-  // Mixed circuits
+  // Quiet: full body with no jumping, for early mornings and late evenings
   {
-    id: 'circuit-row-bag',
-    name: 'Row and box',
-    summary: 'Four rounds of hard rowing straight into the bag.',
-    level: 'Intermediate',
-    category: 'circuit',
-    needs: ['rower', 'heavyBag'],
-    techniqueExerciseId: 'rowing-machine',
+    id: 'quiet-morning',
+    name: 'Quiet morning',
+    summary: 'Wake up, two easy rounds of five moves, then stretch. No jumping, so nobody wakes up. About 15 minutes.',
+    level: 'Beginner',
+    category: 'quiet',
+    needs: [],
+    techniqueExerciseId: 'bodyweight-squat',
     steps: [
-      step('Warm up', min(4), 'warmup', 'Easy rowing. Put your gloves within reach.'),
-      ...rounds(4, (r) => [
-        step(`Row · round ${r}`, min(2), 'hard', 'Rate 26–28. Then get straight to the bag.'),
-        step(`Bag · round ${r}`, min(1), 'max', 'Freestyle on the bag. Keep your hands moving.', 'bag-jab-cross'),
-        step('Rest', min(1), 'rest', r < 4 ? 'Take your gloves off, then back to the rower.' : 'Last rest.'),
-      ]),
-      step('Cool down', min(3), 'easy', 'Easy rowing, then stretch.'),
-    ],
-  },
-  {
-    id: 'circuit-run-bag',
-    name: 'Run and punch',
-    summary: 'Treadmill runs into bag work. Four rounds.',
-    level: 'Intermediate',
-    category: 'circuit',
-    needs: ['treadmill', 'heavyBag'],
-    techniqueExerciseId: 'treadmill-run',
-    steps: [
-      step('Warm up', min(5), 'warmup', `Walk, then an easy jog. On the bag, punch numbers are: ${PUNCH_KEY}`),
-      ...rounds(4, (r) => [
-        step(`Run · round ${r}`, min(3), 'hard', 'Comfortably hard pace. Then stop the belt before you step off.'),
-        step(`Bag · round ${r}`, min(2), 'hard', `Throw ${COMBOS[r - 1]} on repeat.`, comboExercise(COMBOS[r - 1])),
-        step('Rest', min(1), 'rest', 'Breathe. Back on the treadmill next.'),
-      ]),
-      step('Cool down', min(3), 'easy', 'Walk on the treadmill.'),
-    ],
-  },
-  {
-    id: 'circuit-triple',
-    name: 'Triple threat',
-    summary: 'Rower, treadmill and bag back to back. Three big rounds.',
-    level: 'Advanced',
-    category: 'circuit',
-    needs: ['rower', 'treadmill', 'heavyBag'],
-    techniqueExerciseId: 'rowing-machine',
-    steps: [
-      step('Warm up', min(5), 'warmup', 'Easy rowing, building pace.'),
-      ...rounds(3, (r) => [
-        step(`Row · round ${r}`, min(3), 'hard', 'Rate 26. Strong and steady.'),
-        step('Move', 45, 'rest', 'Walk to the treadmill and start the belt slowly.'),
-        step(`Run · round ${r}`, min(3), 'hard', 'Comfortably hard pace.'),
-        step('Move', 45, 'rest', 'Stop the belt, step off and get your gloves on.'),
-        step(`Bag · round ${r}`, min(2), 'hard', 'Freestyle. Keep your hands moving.', 'bag-body-shots'),
-        step('Rest', min(1), 'rest', r < 3 ? 'Back to the rower next.' : 'Done with the hard part.'),
-      ]),
-      step('Cool down', min(3), 'easy', 'Easy rowing or walking, then stretch.'),
-    ],
-  },
-  {
-    id: 'circuit-row-floor',
-    name: 'Row and floor',
-    summary: 'Rowing with push-ups and squats. Only needs the rower.',
-    level: 'Intermediate',
-    category: 'circuit',
-    needs: ['rower'],
-    techniqueExerciseId: 'rowing-machine',
-    steps: [
-      step('Warm up', min(4), 'warmup', 'Easy rowing.'),
-      ...rounds(5, (r) => [
-        step(`Row · round ${r}`, min(2), 'hard', 'Rate 24–26.'),
-        step(`Push-ups · round ${r}`, 40, 'hard', 'Steady reps. Drop to your knees when your form slips.', 'push-up'),
-        step(`Squats · round ${r}`, 40, 'hard', 'Sit deep, stand tall.', 'bodyweight-squat'),
-        step('Rest', 40, 'rest', r < 5 ? 'Back to the rower next.' : 'Last rest.'),
-      ]),
-      step('Cool down', min(3), 'easy', 'Easy rowing, then stretch.'),
-    ],
-  },
-  {
-    id: 'circuit-home-gym',
-    name: 'Home gym finisher',
-    summary: 'Bag, kettlebell and TRX back to back. Four rounds, about 25 minutes.',
-    level: 'Advanced',
-    category: 'circuit',
-    needs: ['heavyBag', 'kettlebell', 'suspension'],
-    techniqueExerciseId: 'kettlebell-swing',
-    steps: [
-      step('Warm up', min(3), 'warmup', 'Shadowbox, then a few light swings.'),
-      ...rounds(4, (r) => [
-        step(`Bag · round ${r}`, min(1), 'hard', 'Freestyle. Mix head and body shots.', 'bag-body-shots'),
-        step(`Swings · round ${r}`, 45, 'hard', 'Gloves off, straight to the bell.', 'kettlebell-swing'),
-        step(`TRX rows · round ${r}`, 45, 'hard', 'Squeeze your shoulder blades at the top.', 'trx-row'),
+      ...flow(
+        'stretch-cat-cow',
+        'Cat-cow',
+        60,
+        'Slow rounds on hands and knees. Breathe out as you round, in as you arch.',
+      ),
+      ...flow('mobility-arm-circles', 'Arm circles', 30, 'Small to big. Reverse halfway.'),
+      ...flow(
+        'mobility-worlds-greatest-stretch',
+        'World’s greatest stretch',
+        30,
+        'Lunge, elbow down, then rotate and reach up.',
+        true,
+      ),
+      ...rounds(2, (r) => [
         step(
-          `Knee tucks · round ${r}`,
-          30,
-          'hard',
-          'Lengthen the straps, feet in the cradles, hips level.',
-          'trx-knee-tuck',
+          `Squats · round ${r}`,
+          45,
+          'moderate',
+          'Slow and controlled. Feet stay flat on the floor.',
+          'bodyweight-squat',
         ),
-        step('Rest', 90, 'rest', r < 4 ? 'Gloves back on. Bag next.' : 'Last rest.'),
+        step(
+          `Knee push-ups · round ${r}`,
+          45,
+          'moderate',
+          'Lower your chest slowly. Body straight from knees to head.',
+          'knee-push-up',
+        ),
+        step(
+          `Reverse lunges · round ${r}`,
+          45,
+          'moderate',
+          'Step back softly and lower the back knee gently. Alternate legs.',
+          'reverse-lunge',
+        ),
+        step(
+          `Glute bridges · round ${r}`,
+          45,
+          'moderate',
+          'Squeeze your glutes at the top and hold for a second.',
+          'glute-bridge',
+        ),
+        step(
+          `Bird dog · round ${r}`,
+          45,
+          'moderate',
+          'Reach opposite arm and leg long. Keep your hips level.',
+          'bird-dog',
+        ),
+        step('Rest', 15, 'rest', r < 2 ? 'Breathe. Next: squats.' : 'Breathe. Stretching next.'),
       ]),
-      step('Cool down', min(3), 'easy', 'Walk, then stretch your hips, back and shoulders.'),
+      ...hold('stretch-hamstring', 'Hamstring stretch', 30, 'Lift the leg until you feel a gentle pull.'),
+      ...hold('stretch-hip-flexor', 'Hip flexor stretch', 30, 'Squeeze the back glute and shift forward a little.'),
+      step('Chest stretch', 45, 'stretch', 'Forearms on a doorway or wall. Lean in gently.', 'stretch-chest'),
+      step('Child’s pose', 60, 'stretch', 'Sink your hips back and breathe into your back.', 'stretch-childs-pose'),
+      step('Breathe', 45, 'stretch', 'Sit or lie still. Slow breaths in through your nose and out through your mouth.'),
+    ],
+  },
+  {
+    id: 'quiet-morning-strength',
+    name: 'Quiet morning strength',
+    summary: 'Three rounds of slow full-body strength, then stretch. No jumping. About 15 minutes.',
+    level: 'Intermediate',
+    category: 'quiet',
+    needs: [],
+    techniqueExerciseId: 'push-up',
+    steps: [
+      ...flow('stretch-cat-cow', 'Cat-cow', 45, 'Slow rounds. Breathe out as you round, in as you arch.'),
+      ...flow('mobility-inchworm', 'Inchworm', 45, 'Walk your hands out to a plank and back. Slow and quiet.'),
+      ...flow(
+        'mobility-worlds-greatest-stretch',
+        'World’s greatest stretch',
+        30,
+        'Lunge, elbow down, then rotate and reach up.',
+        true,
+      ),
+      ...rounds(3, (r) => [
+        step(
+          `Slow squats · round ${r}`,
+          40,
+          'moderate',
+          'Take three seconds to lower. Stand up with control.',
+          'bodyweight-squat',
+        ),
+        step(
+          `Push-ups · round ${r}`,
+          40,
+          'moderate',
+          'Three seconds down. Drop to your knees when your form slips.',
+          'push-up',
+        ),
+        step(`Reverse lunges · round ${r}`, 40, 'moderate', 'Step back softly. Alternate legs.', 'reverse-lunge'),
+        step(`Dead bug · round ${r}`, 40, 'moderate', 'Lower back pressed into the floor. Move slowly.', 'dead-bug'),
+        step('Rest', 20, 'rest', r < 3 ? 'Breathe. Next: slow squats.' : 'Breathe. Stretching next.'),
+      ]),
+      ...hold('stretch-quad', 'Quad stretch', 30, 'Knees together, hips tucked under.'),
+      ...hold('stretch-hamstring', 'Hamstring stretch', 30, 'Lift the leg until you feel a gentle pull.'),
+      step('Chest stretch', 45, 'stretch', 'Forearms on a doorway or wall. Lean in gently.', 'stretch-chest'),
+      step('Child’s pose', 45, 'stretch', 'Reach your arms long and breathe slowly.', 'stretch-childs-pose'),
+    ],
+  },
+  {
+    id: 'quiet-evening',
+    name: 'Quiet evening',
+    summary: 'Gentle floor-based strength, then a long stretch to wind down. No jumping. About 15 minutes.',
+    level: 'Beginner',
+    category: 'quiet',
+    needs: [],
+    techniqueExerciseId: 'glute-bridge',
+    steps: [
+      ...flow('stretch-cat-cow', 'Cat-cow', 60, 'Slow rounds. Breathe out as you round, in as you arch.'),
+      ...flow('mobility-thread-the-needle', 'Thread the needle', 30, 'Reach under, then up to the ceiling.', true),
+      ...rounds(2, (r) => [
+        step(
+          `Glute bridges · round ${r}`,
+          45,
+          'moderate',
+          'Squeeze your glutes at the top and lower slowly.',
+          'glute-bridge',
+        ),
+        step(`Dead bug · round ${r}`, 45, 'moderate', 'Lower back pressed into the floor. Move slowly.', 'dead-bug'),
+        step(
+          `Knee push-ups · round ${r}`,
+          45,
+          'moderate',
+          'Lower your chest slowly. Body straight from knees to head.',
+          'knee-push-up',
+        ),
+        step(
+          `Bird dog · round ${r}`,
+          45,
+          'moderate',
+          'Reach opposite arm and leg long. Keep your hips level.',
+          'bird-dog',
+        ),
+        step(
+          `Slow squats · round ${r}`,
+          45,
+          'moderate',
+          'Take three seconds to lower. Feet stay flat.',
+          'bodyweight-squat',
+        ),
+        step('Rest', 15, 'rest', r < 2 ? 'Breathe. Next: glute bridges.' : 'Breathe. Time to wind down.'),
+      ]),
+      ...hold('stretch-figure-four', 'Figure-four stretch', 30, 'Pull the bottom thigh toward your chest.'),
+      ...hold('stretch-seated-twist', 'Spinal twist', 30, 'Both shoulders stay on the floor.'),
+      ...hold('stretch-hamstring', 'Hamstring stretch', 30, 'Lift the leg until you feel a gentle pull.'),
+      step('Butterfly stretch', 45, 'stretch', 'Sit tall, soles together, let your knees relax.', 'stretch-butterfly'),
+      step('Child’s pose', 45, 'stretch', 'Sink your hips back and breathe slowly.', 'stretch-childs-pose'),
+      step('Breathe', 30, 'stretch', 'Lie on your back. Slow breaths in through your nose and out through your mouth.'),
+    ],
+  },
+  {
+    id: 'quiet-evening-strength',
+    name: 'Quiet evening strength',
+    summary:
+      'Three rounds of slow full-body strength, then hip and back stretches before bed. No jumping. About 15 minutes.',
+    level: 'Intermediate',
+    category: 'quiet',
+    needs: [],
+    techniqueExerciseId: 'reverse-lunge',
+    steps: [
+      ...flow('stretch-cat-cow', 'Cat-cow', 45, 'Slow rounds. Breathe out as you round, in as you arch.'),
+      ...flow(
+        'mobility-open-book',
+        'Open book',
+        30,
+        'Knees stay together. Open your top arm and follow it with your eyes.',
+        true,
+      ),
+      ...flow('mobility-90-90', '90/90 hip switch', 45, 'Rotate both knees side to side. Chest tall.'),
+      ...rounds(3, (r) => [
+        step(`Reverse lunges · round ${r}`, 40, 'moderate', 'Step back softly. Alternate legs.', 'reverse-lunge'),
+        step(
+          `Pike push-ups · round ${r}`,
+          40,
+          'moderate',
+          'Hips high. Lower your head slowly toward the floor.',
+          'pike-push-up',
+        ),
+        step(`Glute bridges · round ${r}`, 40, 'moderate', 'Hold for two seconds at the top.', 'glute-bridge'),
+        step(`Leg raises · round ${r}`, 40, 'moderate', 'Lower back stays down. Lower your legs slowly.', 'leg-raise'),
+        step('Rest', 20, 'rest', r < 3 ? 'Breathe. Next: reverse lunges.' : 'Breathe. Time to wind down.'),
+      ]),
+      ...hold('stretch-hip-flexor', 'Hip flexor stretch', 30, 'Squeeze the back glute and shift forward a little.'),
+      ...hold('stretch-figure-four', 'Figure-four stretch', 30, 'Pull the bottom thigh toward your chest.'),
+      ...hold('stretch-seated-twist', 'Spinal twist', 30, 'Both shoulders stay on the floor.'),
+      step('Breathe', 30, 'stretch', 'Lie on your back. Slow breaths in through your nose and out through your mouth.'),
     ],
   },
   // Mobility
@@ -967,6 +1065,16 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
 
 export function getCardioSession(id: string): CardioSession | undefined {
   return CARDIO_SESSIONS.find((session) => session.id === id);
+}
+
+/**
+ * Every exercise a session uses, in the order they first come up. The technique exercise leads when
+ * no step uses it, such as the rowing video for a rower session.
+ */
+export function sessionExerciseIds(session: Pick<CardioSession, 'steps' | 'techniqueExerciseId'>): string[] {
+  const fromSteps = [...new Set(session.steps.map((s) => s.exerciseId).filter((id): id is string => !!id))];
+  const technique = session.techniqueExerciseId;
+  return technique && !fromSteps.includes(technique) ? [technique, ...fromSteps] : fromSteps;
 }
 
 export function canDoCardio(session: CardioSession, owned: ReadonlySet<EquipmentId>): boolean {
