@@ -11,7 +11,7 @@ A free home-gym workout app with no paywall, no account and no backend. You pick
 | Backend | None. All data stays on the device. There are no API keys, so App Review needs no test credentials. |
 | Cost | Free. Every dependency is open source. |
 | Look | Edgy and sleek. Dark only, near-black surfaces, sharp corners, an acid-lime accent and bold uppercase headings. |
-| Stack | Expo SDK 57, React Native 0.86, New Architecture, React Compiler, Expo Router with typed routes. Same conventions as `react-native-expo-playbook.md`. |
+| Stack | Expo SDK 58, React Native 0.88, New Architecture, React Compiler, Expo Router with typed routes. Same conventions as `react-native-expo-playbook.md`. |
 
 ## Features
 

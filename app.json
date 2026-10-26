@@ -80,7 +80,6 @@
         }
       ],
       "expo-sqlite",
-      "./plugins/with-ios-scene-lifecycle",
       [
         "expo-audio",
         {

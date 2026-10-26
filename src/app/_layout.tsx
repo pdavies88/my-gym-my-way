@@ -52,6 +52,10 @@ export default function RootLayout() {
             <StatusBar style="light" />
             <Stack
               screenOptions={{
+                // SDK 58 makes iOS headers transparent by default. Screens don't inset their content for
+                // that, so keep a solid header in the app's background color.
+                headerTransparent: false,
+                headerStyle: { backgroundColor: colors.background },
                 headerShadowVisible: false,
                 headerTintColor: colors.tint,
                 headerTitleStyle: { fontFamily: DisplayFont.semiBold, color: colors.text },

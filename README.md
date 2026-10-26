@@ -2,7 +2,7 @@
 
 A free home-gym workout app. Pick the equipment you own, generate or build workouts from it, tick off exercises as you go, run them as a station bootcamp, follow guided cardio, mobility and stretch sessions, check your BMI, and watch a demo video of every exercise. No paywall, no account, no backend. Your data stays on the phone.
 
-Built with Expo SDK 57, Expo Router and Reanimated. Exercise videos are YouTube embeds. See [PLAN.md](PLAN.md) for the plan and the decisions behind it.
+Built with Expo SDK 58, Expo Router and Reanimated. Exercise videos are YouTube embeds. See [PLAN.md](PLAN.md) for the plan and the decisions behind it.
 
 ## Run it
 
