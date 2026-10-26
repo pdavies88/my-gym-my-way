@@ -40,13 +40,22 @@ export const DEFAULT_SETTINGS: Settings = {
   equipmentChosen: false,
 };
 
+/**
+ * A bootcamp plan. Read back through normalizePlan, so unknown stations are dropped. Anything else,
+ * such as a circuit preset saved before version 1.2, is ignored instead of discarding the whole entry.
+ */
+const CircuitPlanSchema = z
+  .object({ stations: z.array(z.string()), minutes: z.number() })
+  .optional()
+  .catch(undefined);
+
 export const SavedWorkoutSchema = z.object({
   id: z.string(),
   name: z.string(),
   focus: FocusSchema.optional(),
   exerciseIds: z.array(z.string()),
-  /** Saved from Generate in circuit style: which intensity to start it at. */
-  circuit: z.enum(['easy', 'standard', 'hard']).optional(),
+  /** Saved from Generate as a bootcamp: its cardio stations and length. */
+  circuit: CircuitPlanSchema,
   createdAt: z.number(),
   updatedAt: z.number(),
 });
@@ -72,9 +81,7 @@ export const SessionLogSchema = ActiveSessionSchema.extend({
   kind: z.enum(['strength', 'cardio', 'circuit', 'stretch', 'mobility']).optional(),
   /** The guided cardio session this log came from. */
   cardioId: z.string().optional(),
-  /** How a weight circuit was timed, so it can be run again from history. */
-  circuit: z
-    .object({ rounds: z.number(), workSeconds: z.number(), restSeconds: z.number(), roundRestSeconds: z.number() })
-    .optional(),
+  /** A bootcamp's stations and length, so it can be run again from history. */
+  circuit: CircuitPlanSchema,
 });
 export type SessionLog = z.infer<typeof SessionLogSchema>;

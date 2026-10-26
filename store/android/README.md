@@ -8,7 +8,7 @@ Answers and files for the Play Console. The steps follow `react-native-expo-play
 | --- | --- | --- |
 | App icon | `play-icon-512.png` | 512 × 512 |
 | Feature graphic | `feature-graphic-1024x500.png` | 1024 × 500 |
-| Phone screenshots | `screenshots/01-train.png` to `06-build.png` | 1206 × 2412 |
+| Phone screenshots | `screenshots/01-train.png` to `08-session-videos.png` | 1206 × 2412 |
 
 `node scripts/generate-play-assets.mjs` makes the feature graphic and the screenshots. It crops the iPhone shots in `store/screenshots/` to Play's 2:1 limit and paints out Expo Go's developer button. `node scripts/generate-brand-assets.mjs` makes the icon.
 
@@ -35,7 +35,7 @@ The package name comes from the first upload: `com.pdavies.mygymmyway`. It is pe
 
 ```
 <en-US>
-Workouts built from the equipment you own, with circuits, guided cardio, mobility and stretching. Free, no account.
+Workouts built from the equipment you own, with bootcamps, guided cardio, mobility and stretching. Free, no account.
 </en-US>
 ```
 

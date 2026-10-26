@@ -2,7 +2,7 @@
   "expo": {
     "name": "My Gym My Way",
     "slug": "my-gym-my-way",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mygymmyway",

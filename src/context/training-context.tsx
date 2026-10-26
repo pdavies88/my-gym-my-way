@@ -2,7 +2,7 @@ import { createContext, use, useEffect, useState, type ReactNode } from 'react';
 import { Alert, AppState } from 'react-native';
 
 import type { Focus } from '@/lib/generator';
-import type { CircuitPresetId, CircuitSettings } from '@/lib/circuit';
+import type { CircuitPlan } from '@/lib/circuit';
 import { newId } from '@/lib/id';
 import { activeMs, pause, restart, resume } from '@/lib/session-clock';
 import { readJson, readList, writeJson } from '@/lib/storage/kv';
@@ -16,7 +16,7 @@ import {
   type SessionLog,
 } from '@/lib/storage/schemas';
 
-type NewWorkout = { name: string; exerciseIds: string[]; focus?: Focus; circuit?: CircuitPresetId };
+type NewWorkout = { name: string; exerciseIds: string[]; focus?: Focus; circuit?: CircuitPlan };
 
 type TrainingContextValue = {
   workouts: SavedWorkout[];
@@ -36,7 +36,7 @@ type TrainingContextValue = {
     durationMs: number;
     exerciseIds: string[];
     kind?: 'cardio' | 'circuit' | 'stretch' | 'mobility';
-    circuit?: CircuitSettings;
+    circuit?: CircuitPlan;
   }) => SessionLog;
   discardSession: () => void;
   /** Stop the session timer. Safe to call when it is already paused. */

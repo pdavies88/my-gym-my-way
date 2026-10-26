@@ -37,4 +37,27 @@ describe('stored data from earlier versions', () => {
       true,
     );
   });
+
+  it('keeps workouts and logs saved with a pre-1.2 circuit preset, minus the preset', () => {
+    const workout = SavedWorkoutSchema.parse({
+      id: 'w',
+      name: 'Legs',
+      exerciseIds: ['push-up'],
+      circuit: 'standard',
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    expect(workout.circuit).toBeUndefined();
+    const log = SessionLogSchema.parse({
+      id: 's',
+      name: 'Full body circuit',
+      kind: 'circuit',
+      exerciseIds: ['push-up'],
+      completedIds: [],
+      startedAt: 1,
+      finishedAt: 2,
+      circuit: { rounds: 3, workSeconds: 40, restSeconds: 20, roundRestSeconds: 90 },
+    });
+    expect(log.circuit).toBeUndefined();
+  });
 });

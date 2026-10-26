@@ -29,7 +29,7 @@ import {
   type CardioSession,
   type Effort,
 } from '@/lib/cardio';
-import { buildCircuit, parseCircuitParams, type CircuitSettings } from '@/lib/circuit';
+import { buildCircuit, parseCircuitParams, type CircuitPlan } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import { formatDuration } from '@/lib/time';
 import { goBackOrHome } from '@/lib/navigation';
@@ -42,11 +42,9 @@ const currentTime = () => Date.now();
 
 export default function CardioPlayerScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
-  // A weight circuit is built from its route parameters. Every other session comes from the catalog.
+  // A bootcamp is built from its route parameters. Every other session comes from the catalog.
   const circuit = params.id === 'circuit' ? parseCircuitParams(params) : null;
-  const session = circuit
-    ? buildCircuit(circuit.name, circuit.exerciseIds, circuit.settings)
-    : getCardioSession(params.id);
+  const session = circuit ? buildCircuit(circuit.name, circuit.exerciseIds, circuit.plan) : getCardioSession(params.id);
   if (!session) {
     return (
       <SafeAreaView style={styles.fill}>
@@ -55,10 +53,16 @@ export default function CardioPlayerScreen() {
       </SafeAreaView>
     );
   }
-  return <Player session={session} circuit={circuit?.settings} />;
+  return <Player session={session} circuit={circuit ?? undefined} />;
 }
 
-function Player({ session, circuit }: { session: CardioSession; circuit?: CircuitSettings }) {
+function Player({
+  session,
+  circuit,
+}: {
+  session: CardioSession;
+  circuit?: { exerciseIds: string[]; plan: CircuitPlan };
+}) {
   useKeepAwake();
   const theme = useTheme();
   // Full-screen modals don't get safe-area padding from SafeAreaView here, so pad from the insets directly.
@@ -143,7 +147,10 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
     lastElapsed.current = elapsed;
   });
 
-  const exerciseIds = [...new Set(steps.map((s) => s.exerciseId).filter((e): e is string => !!e))];
+  // A bootcamp logs only its floor moves, so running it again from history rebuilds the same floor station.
+  const exerciseIds = circuit?.exerciseIds ?? [
+    ...new Set(steps.map((s) => s.exerciseId).filter((e): e is string => !!e)),
+  ];
   /** Saves the session to history once. `at` is when it ended, for the time trained. */
   const save = (at: number) => {
     if (logged.current) return;
@@ -159,7 +166,7 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
         : session.category === 'stretch' || session.category === 'mobility'
           ? session.category
           : 'cardio',
-      circuit,
+      ...(circuit ? { circuit: circuit.plan } : {}),
     });
   };
 
@@ -252,7 +259,7 @@ function Player({ session, circuit }: { session: CardioSession; circuit?: Circui
           <ThemedText themeColor="textSecondary" style={styles.center}>
             {formatDuration(activeMs(now))} of{' '}
             {circuit
-              ? 'circuit training'
+              ? 'bootcamp'
               : session.category === 'stretch'
                 ? 'stretching'
                 : session.category === 'mobility'

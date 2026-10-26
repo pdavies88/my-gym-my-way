@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
-import { circuitParams, normalizeSettings } from '@/lib/circuit';
+import { circuitParams, normalizePlan } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import { SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
 import { formatDuration } from '@/lib/time';
@@ -45,7 +45,7 @@ export default function SessionLogScreen() {
     if (kind === 'circuit') {
       router.replace({
         pathname: '/cardio-player/[id]',
-        params: circuitParams(log.name.replace(/ circuit$/, ''), log.exerciseIds, normalizeSettings(log.circuit ?? {})),
+        params: circuitParams(log.name.replace(/ bootcamp$/, ''), log.exerciseIds, normalizePlan(log.circuit ?? {})),
       });
       return;
     }

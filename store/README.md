@@ -71,8 +71,8 @@ Every exercise has a short demonstration video from a fitness coach, plus step-b
 GUIDED CARDIO
 Timed sessions from 14 to 45 minutes for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus a no-equipment HIIT. Quiet 15-minute morning and evening sessions mix full-body strength and stretching with no jumping, so they won't wake the house. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
-RUN IT AS A CIRCUIT
-Turn any workout into a timed weight circuit. Every move runs back to back on a work and rest timer, round after round, with an easy, standard or hard setting.
+BOOTCAMP AT HOME
+Get a class-style station workout in 30, 45 or 60 minutes. The app builds the stations from your gear: treadmill, rower, bike, boxing bag or jump rope, plus a floor station of strength moves. Base, push and all-out efforts on cardio, one timer for the whole session.
 
 MOBILITY AND STRETCHING
 A Recover tab with guided mobility sessions, including a quick pre-workout warm-up, and full-body, lower-body and upper-body stretches. No equipment needed.
@@ -200,7 +200,7 @@ Apple asks for a recording on a physical iPhone running the latest iOS, starting
 
 ## Screenshots
 
-`store/screenshots/` now holds six iPhone 18 Pro shots (1206 × 2622) taken in Expo Go for the Play listing. They show Expo Go's blue developer button at the top right, so don't upload them to App Store Connect as they are. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, from the Pro Max simulator. Save them in `store/screenshots/`. A suggested order, since the first three show in search results:
+`store/screenshots/` now holds eight iPhone 18 Pro shots (1206 × 2622) taken in Expo Go for the Play listing. They show Expo Go's blue developer button at the top right, so don't upload them to App Store Connect as they are. App Store Connect needs the 6.9-inch size, 1320 × 2868 pixels, from the Pro Max simulator. Save them in `store/screenshots/`. A suggested order, since the first three show in search results:
 
 1. Train tab with saved workouts
 2. Generate screen with a focus picked and the exercise list

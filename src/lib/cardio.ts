@@ -47,7 +47,7 @@ export type CardioCategory =
   | 'quiet'
   | 'stretch'
   | 'mobility'
-  | 'weights';
+  | 'bootcamp';
 
 export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   rower: 'Rower',
@@ -61,7 +61,7 @@ export const CARDIO_CATEGORY_LABELS: Record<CardioCategory, string> = {
   quiet: 'Quiet: no jumping',
   stretch: 'Stretching',
   mobility: 'Mobility',
-  weights: 'Weight circuits',
+  bootcamp: 'Bootcamp',
 };
 
 export type CardioLevel = 'Beginner' | 'Intermediate' | 'Advanced';

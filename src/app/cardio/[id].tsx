@@ -51,8 +51,8 @@ export default function CardioOverviewScreen() {
             ? 'Stretch and cool-down'
             : session.category === 'mobility'
               ? 'Mobility'
-              : session.category === 'weights'
-                ? 'Weight circuit'
+              : session.category === 'bootcamp'
+                ? 'Bootcamp'
                 : session.category === 'quiet'
                   ? 'Quiet full body'
                   : 'Guided cardio'}

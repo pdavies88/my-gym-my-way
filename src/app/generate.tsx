@@ -4,6 +4,8 @@ import { Alert, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { EffortStrip } from '@/components/effort';
 import { ExerciseRow } from '@/components/exercise-row';
 import { IconButton } from '@/components/icon-button';
 import { Screen, SectionHeader } from '@/components/screen';
@@ -13,8 +15,16 @@ import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { alertWorkoutsFull, useTraining } from '@/context/training-context';
 import { equipmentName } from '@/lib/equipment';
-import { totalSeconds } from '@/lib/cardio';
-import { buildCircuit, CIRCUIT_PRESETS, circuitParams, type CircuitPresetId } from '@/lib/circuit';
+import {
+  buildCircuit,
+  CIRCUIT_MINUTES,
+  circuitBlocks,
+  circuitParams,
+  FLOOR_MOVES,
+  pickStations,
+  STATION_NAMES,
+  type CircuitMinutes,
+} from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import {
   FOCUS_LABELS,
@@ -38,15 +48,20 @@ export default function GenerateScreen() {
   const { saveWorkout, startSession, active } = useTraining();
   const [focus, setFocus] = useState<Focus>('full');
   const [length, setLength] = useState<Length>('medium');
-  const [style, setStyle] = useState<'sets' | 'circuit'>('sets');
-  const [preset, setPreset] = useState<CircuitPresetId>('standard');
+  const [style, setStyle] = useState<'sets' | 'bootcamp'>('sets');
+  const [minutes, setMinutes] = useState<CircuitMinutes>(45);
+  const [stationSeed, setStationSeed] = useState(newSeed);
   const [batch, setBatch] = useState(0);
   const [ids, setIds] = useState(() =>
     generateWorkout({ focus: 'full', count: LENGTHS.medium.count, owned, seed: newSeed() }),
   );
 
-  const regenerate = (nextFocus = focus, nextLength = length) => {
-    setIds(generateWorkout({ focus: nextFocus, count: LENGTHS[nextLength].count, owned, seed: newSeed() }));
+  /** In a bootcamp, the moves make up the floor station, so their number follows the length in minutes. */
+  const moveCount = (nextStyle = style, nextLength = length, nextMinutes = minutes) =>
+    nextStyle === 'bootcamp' ? FLOOR_MOVES[nextMinutes] : LENGTHS[nextLength].count;
+
+  const regenerate = (nextFocus = focus, count = moveCount()) => {
+    setIds(generateWorkout({ focus: nextFocus, count, owned, seed: newSeed() }));
     setBatch((b) => b + 1);
   };
 
@@ -57,8 +72,10 @@ export default function GenerateScreen() {
 
   const name = FOCUS_LABELS[focus];
   const exercises = ids.map(getExercise).filter((e) => !!e);
-  const circuitSettings = CIRCUIT_PRESETS[preset].settings;
-  const circuitMinutes = Math.round(totalSeconds(buildCircuit(name, ids, circuitSettings)) / 60);
+  // Stations follow your equipment, so changing it from this screen updates the plan.
+  const stations = pickStations(owned, stationSeed);
+  const plan = { stations, minutes };
+  const blocks = circuitBlocks(plan);
   const gear = settings.equipment.length ? settings.equipment.map(equipmentName).join(', ') : 'Bodyweight only';
 
   return (
@@ -73,7 +90,7 @@ export default function GenerateScreen() {
             value={row.includes(focus) ? focus : ('' as Focus)}
             onChange={(value) => {
               setFocus(value);
-              regenerate(value, length);
+              regenerate(value);
             }}
           />
         ))}
@@ -85,56 +102,81 @@ export default function GenerateScreen() {
           accessibilityLabel="Workout style"
           options={[
             { value: 'sets', label: 'Sets' },
-            { value: 'circuit', label: 'Circuit' },
+            { value: 'bootcamp', label: 'Bootcamp' },
           ]}
           value={style}
-          onChange={setStyle}
+          onChange={(value) => {
+            setStyle(value);
+            regenerate(focus, moveCount(value));
+          }}
         />
         <ThemedText type="small" themeColor="textSecondary">
           {style === 'sets'
             ? 'Do each exercise’s sets, then tick it off. You set your own pace.'
-            : 'Move through every exercise back to back on a timer, then repeat the round. Guided with chimes and a voice.'}
+            : 'Rotate between stations on one timer, like a class. Base, push and all-out efforts on cardio, strength moves on the floor. Guided with chimes and a voice.'}
         </ThemedText>
-        {style === 'circuit' && (
+      </View>
+
+      <View style={styles.group}>
+        {style === 'sets' ? (
           <>
+            <SectionHeader title={`Length · ${LENGTHS[length].count} moves · ${LENGTHS[length].minutes}`} />
             <SegmentedControl
-              accessibilityLabel="Circuit intensity"
-              options={(Object.keys(CIRCUIT_PRESETS) as CircuitPresetId[]).map((value) => ({
+              accessibilityLabel="Workout length"
+              options={(Object.keys(LENGTHS) as Length[]).map((value) => ({
                 value,
-                label: CIRCUIT_PRESETS[value].label.split(' · ')[0],
+                label: LENGTHS[value].label,
               }))}
-              value={preset}
-              onChange={setPreset}
+              value={length}
+              onChange={(value) => {
+                setLength(value);
+                regenerate(focus, moveCount(style, value));
+              }}
             />
-            <ThemedText type="eyebrow" themeColor="tint">
-              {circuitSettings.rounds} rounds · {circuitSettings.workSeconds}s on, {circuitSettings.restSeconds}s off ·{' '}
-              about {circuitMinutes} min
-            </ThemedText>
+          </>
+        ) : (
+          <>
+            <SectionHeader title={`Length · ${minutes} min`} />
+            <SegmentedControl
+              accessibilityLabel="Bootcamp length"
+              options={CIRCUIT_MINUTES.map((value) => ({ value: String(value), label: `${value} min` }))}
+              value={String(minutes)}
+              onChange={(value) => {
+                const next = Number(value) as CircuitMinutes;
+                setMinutes(next);
+                regenerate(focus, moveCount(style, length, next));
+              }}
+            />
+            <Card>
+              <EffortStrip segments={buildCircuit(name, ids, plan).steps} />
+              {blocks.map((block, i) => (
+                <View key={i} style={styles.blockRow}>
+                  <ThemedText type={block.kind === 'station' ? 'smallBold' : 'small'} style={styles.flex}>
+                    {block.kind === 'warmup'
+                      ? 'Warm up'
+                      : block.kind === 'cooldown'
+                        ? 'Cool down and stretch'
+                        : STATION_NAMES[block.station!]}
+                  </ThemedText>
+                  <ThemedText type="mono" themeColor="textSecondary">
+                    {Math.round(block.seconds / 60)} min
+                  </ThemedText>
+                </View>
+              ))}
+              <ThemedText type="small" themeColor="textSecondary">
+                {stations[0] === 'floorCardio'
+                  ? 'No cardio machine selected, so floor cardio is the cardio station.'
+                  : 'Cardio stations come from your equipment. Shuffle to change them.'}{' '}
+                A minute to move between stations is included.
+              </ThemedText>
+            </Card>
           </>
         )}
       </View>
 
       <View style={styles.group}>
         <SectionHeader
-          title={`Length · ${LENGTHS[length].count} moves${style === 'sets' ? ` · ${LENGTHS[length].minutes}` : ''}`}
-        />
-        <SegmentedControl
-          accessibilityLabel="Workout length"
-          options={(Object.keys(LENGTHS) as Length[]).map((value) => ({
-            value,
-            label: LENGTHS[value].label,
-          }))}
-          value={length}
-          onChange={(value) => {
-            setLength(value);
-            regenerate(focus, value);
-          }}
-        />
-      </View>
-
-      <View style={styles.group}>
-        <SectionHeader
-          title={name}
+          title={style === 'bootcamp' ? `Floor station · ${exercises.length} moves` : name}
           action={
             <Button
               title="Shuffle"
@@ -143,6 +185,7 @@ export default function GenerateScreen() {
               icon={{ ios: 'shuffle', android: 'shuffle' }}
               onPress={() => {
                 regenerate();
+                if (style === 'bootcamp') setStationSeed(newSeed());
               }}
             />
           }
@@ -181,13 +224,13 @@ export default function GenerateScreen() {
 
       <View style={styles.buttons}>
         <Button
-          title={style === 'circuit' ? 'Start circuit' : 'Start now'}
+          title={style === 'bootcamp' ? 'Start bootcamp' : 'Start now'}
           icon={{ ios: 'play.fill', android: 'play_arrow' }}
           disabled={exercises.length === 0}
           onPress={() => {
-            if (style === 'circuit') {
+            if (style === 'bootcamp') {
               router.back();
-              router.push({ pathname: '/cardio-player/[id]', params: circuitParams(name, ids, circuitSettings) });
+              router.push({ pathname: '/cardio-player/[id]', params: circuitParams(name, ids, plan) });
               return;
             }
             const begin = () => {
@@ -211,7 +254,7 @@ export default function GenerateScreen() {
               name,
               exerciseIds: ids,
               focus,
-              ...(style === 'circuit' ? { circuit: preset } : {}),
+              ...(style === 'bootcamp' ? { circuit: plan } : {}),
             });
             if (!workout) {
               alertWorkoutsFull();
@@ -231,4 +274,6 @@ const styles = StyleSheet.create({
   list: { gap: Spacing.two },
   buttons: { gap: Spacing.two },
   link: { textDecorationLine: 'none' },
+  blockRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  flex: { flex: 1 },
 });

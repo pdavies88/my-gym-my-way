@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
-import { CIRCUIT_PRESETS, circuitParams } from '@/lib/circuit';
+import { circuitParams, normalizePlan, STATION_NAMES } from '@/lib/circuit';
 import { canDo, getExercise } from '@/lib/exercises';
 import { FOCUS_LABELS } from '@/lib/generator';
 import { goBackOrHome } from '@/lib/navigation';
@@ -31,6 +31,7 @@ export default function WorkoutScreen() {
 
   const exercises = workout.exerciseIds.map(getExercise).filter((e) => !!e);
   const missingGear = exercises.filter((e) => !canDo(e, owned));
+  const bootcamp = workout.circuit ? normalizePlan(workout.circuit) : null;
 
   const start = () => {
     const begin = () => {
@@ -70,31 +71,37 @@ export default function WorkoutScreen() {
         <ThemedText type="title">{workout.name}</ThemedText>
         <View style={styles.tags}>
           {workout.focus && <Tag label={FOCUS_LABELS[workout.focus]} tone="tint" />}
+          {bootcamp && <Tag label={`${bootcamp.minutes} min bootcamp`} />}
           <Tag label={`${exercises.length} moves`} />
         </View>
       </View>
 
       <View style={styles.startButtons}>
-        <Button title="Start workout" icon={{ ios: 'play.fill', android: 'play_arrow' }} onPress={start} />
+        {bootcamp && (
+          <Button
+            title="Start bootcamp"
+            icon={{ ios: 'play.fill', android: 'play_arrow' }}
+            onPress={() =>
+              router.push({
+                pathname: '/cardio-player/[id]',
+                params: circuitParams(workout.name, workout.exerciseIds, bootcamp),
+              })
+            }
+          />
+        )}
         <Button
-          title="Start as circuit"
-          variant="secondary"
-          icon={{ ios: 'timer', android: 'timer' }}
-          onPress={() =>
-            router.push({
-              pathname: '/cardio-player/[id]',
-              params: circuitParams(
-                workout.name,
-                workout.exerciseIds,
-                CIRCUIT_PRESETS[workout.circuit ?? 'standard'].settings,
-              ),
-            })
-          }
+          title={bootcamp ? 'Start as sets' : 'Start workout'}
+          variant={bootcamp ? 'secondary' : 'primary'}
+          icon={bootcamp ? undefined : { ios: 'play.fill', android: 'play_arrow' }}
+          onPress={start}
         />
-        <ThemedText type="small" themeColor="textSecondary">
-          A circuit runs every move back to back on a timer
-          {` (${CIRCUIT_PRESETS[workout.circuit ?? 'standard'].label.toLowerCase()})`}, then repeats the round.
-        </ThemedText>
+        {bootcamp && (
+          <ThemedText type="small" themeColor="textSecondary">
+            A {bootcamp.minutes}-minute bootcamp:{' '}
+            {[...bootcamp.stations.map((s) => STATION_NAMES[s].toLowerCase()), 'floor'].join(', ')} stations. The moves
+            below make up the floor station.
+          </ThemedText>
+        )}
       </View>
 
       <View style={styles.group}>

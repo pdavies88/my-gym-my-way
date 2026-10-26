@@ -4,7 +4,7 @@ import type { SessionLog } from '@/lib/storage/schemas';
 export const SESSION_KIND_LABELS = {
   strength: 'Workout',
   cardio: 'Cardio',
-  circuit: 'Circuit',
+  circuit: 'Bootcamp',
   stretch: 'Stretch',
   mobility: 'Mobility',
 } as const;
