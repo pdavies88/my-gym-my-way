@@ -69,13 +69,13 @@ WATCH EVERY MOVE
 Every exercise has a short demonstration video from a fitness coach, plus step-by-step form cues. The cues work offline.
 
 GUIDED CARDIO
-Timed sessions from 14 to 45 minutes for the rower, treadmill, boxing bag, kettlebell, TRX, bike and jump rope, plus a no-equipment HIIT. Quiet 15-minute morning and evening sessions mix full-body strength and stretching with no jumping, so they won't wake the house. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
+At least six timed sessions each for the rower, treadmill, boxing bag, kettlebell, TRX, bike, jump rope and no equipment, from 13 to 45 minutes. Try boxing and plyometric stations, or Tabatas that keep you moving the whole way. Quiet 15-minute morning and evening sessions mix full-body strength and stretching with no jumping, so they won't wake the house. A full-screen timer tells you what to do, how hard to go on a 1–10 scale and what's next. Soft chimes count you down, a voice announces each step, and your music keeps playing underneath.
 
 BOOTCAMP AT HOME
 Get a class-style station workout in 30, 45 or 60 minutes. The app builds the stations from your gear: treadmill, rower, bike, boxing bag or jump rope, plus a floor station of strength moves. Base, push and all-out efforts on cardio, one timer for the whole session.
 
 MOBILITY AND STRETCHING
-A Recover tab with guided mobility sessions, including a quick pre-workout warm-up, and full-body, lower-body and upper-body stretches. No equipment needed.
+A Recover tab with guided mobility and stretch sessions, including 5-minute versions of each and a quick pre-workout warm-up. No equipment needed.
 
 A SIMPLE SESSION CHECKLIST
 Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. It pauses when you leave the app, and you can pause or restart it any time. Finish, and the session goes into your history.

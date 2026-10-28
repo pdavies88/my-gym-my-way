@@ -128,6 +128,13 @@ describe('stepAnnouncement', () => {
     expect(stepAnnouncement({ label: 'Warm up', seconds: 300, effort: 'warmup', cue: '' })).toBe('Warm up. 5 minutes.');
   });
 
+  it('keeps short steps, like Tabata intervals, to just the label', () => {
+    expect(stepAnnouncement({ label: 'Sprint · 3 of 8', seconds: 20, effort: 'max', cue: '' })).toBe(
+      'Sprint · 3 of 8.',
+    );
+    expect(stepAnnouncement({ label: 'Keep moving', seconds: 10, effort: 'easy', cue: '' })).toBe('Keep moving.');
+  });
+
   it('does not repeat a duration that is already in the label', () => {
     expect(stepAnnouncement({ label: 'Hard 1 min', seconds: 60, effort: 'hard', cue: '' })).toBe('Hard. 1 minute.');
     expect(stepAnnouncement({ label: 'All-out 1 min', seconds: 60, effort: 'max', cue: '' })).toBe(
@@ -152,6 +159,40 @@ describe('bag combos', () => {
         (s) => /\d-\d/.test(`${s.label} ${s.cue}`) && s.exerciseId?.startsWith('bag-'),
       );
       if (usesNumbers) expect(session.steps.some((s) => s.cue.includes('1 jab, 2 cross'))).toBe(true);
+    }
+  });
+});
+
+describe('the catalog', () => {
+  it('offers at least six sessions for every cardio type', () => {
+    const cardioTypes = ['rower', 'treadmill', 'bag', 'kettlebell', 'trx', 'bike', 'rope', 'bodyweight', 'quiet'];
+    for (const category of cardioTypes) {
+      expect(CARDIO_SESSIONS.filter((s) => s.category === category).length).toBeGreaterThanOrEqual(6);
+    }
+  });
+
+  it('offers a 5-minute stretch and a 5-minute mobility session', () => {
+    for (const category of ['stretch', 'mobility']) {
+      expect(CARDIO_SESSIONS.some((s) => s.category === category && totalSeconds(s) === 300)).toBe(true);
+    }
+  });
+
+  it('never stops you during a Tabata: the 10 seconds between are active recovery', () => {
+    const tabatas = CARDIO_SESSIONS.filter((s) => /tabata/i.test(s.name));
+    expect(tabatas.length).toBeGreaterThanOrEqual(5);
+    for (const session of tabatas) {
+      expect(session.steps.some((s) => s.effort === 'rest')).toBe(false);
+    }
+  });
+
+  it('has boxing and plyometric station sessions, with and without a bag', () => {
+    const stations = CARDIO_SESSIONS.filter((s) => s.steps.some((step) => step.label.startsWith('Station')));
+    expect(stations.some((s) => s.needs.includes('heavyBag'))).toBe(true);
+    expect(stations.some((s) => s.needs.length === 0)).toBe(true);
+    for (const session of stations) {
+      const ids = new Set(session.steps.map((s) => s.exerciseId));
+      expect([...ids].some((id) => id?.startsWith('bag-'))).toBe(true);
+      expect(['jump-squat', 'burpee', 'mountain-climber', 'high-knees'].some((id) => ids.has(id))).toBe(true);
     }
   });
 });
