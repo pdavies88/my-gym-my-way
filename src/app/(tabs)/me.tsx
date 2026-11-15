@@ -13,6 +13,7 @@ import { ThemedText } from '@/components/themed-text';
 import { AppName } from '@/constants/brand';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
+import { useAppleHealth } from '@/hooks/use-apple-health';
 import { useBestVoice } from '@/hooks/use-best-voice';
 import { useTheme } from '@/hooks/use-theme';
 import { equipmentName } from '@/lib/equipment';
@@ -22,6 +23,7 @@ import { couldUpgradeVoice } from '@/lib/voice';
 export default function MeScreen() {
   const { settings, owned, updateSettings } = useSettings();
   const { voice, loaded } = useBestVoice();
+  const health = useAppleHealth();
 
   return (
     <Screen eyebrow="Settings and body" title="Me">
@@ -66,7 +68,7 @@ export default function MeScreen() {
           />
           <ToggleRow
             label="Voice"
-            detail={`Announces each cardio step and a 10-second heads-up${loaded ? `. Using ${voice ? voice.name : 'the system voice'}.` : ''}`}
+            detail={`Says the name of each step, and the next one 10 seconds ahead${loaded ? `. Using ${voice ? voice.name : 'the system voice'}.` : ''}`}
             value={settings.voice !== false}
             onChange={(voice) => updateSettings({ voice })}
           />
@@ -78,6 +80,24 @@ export default function MeScreen() {
           )}
         </Card>
       </View>
+
+      {health.available && (
+        <View style={styles.group}>
+          <SectionHeader title="Apple Health" />
+          <Card style={styles.toggles}>
+            <ToggleRow
+              label="Save workouts"
+              detail={
+                health.lockScreen
+                  ? 'Saves finished sessions to Apple Health, and keeps timers and the voice going on the Lock Screen'
+                  : 'Saves finished sessions to Apple Health'
+              }
+              value={health.enabled}
+              onChange={(on) => void health.setEnabled(on)}
+            />
+          </Card>
+        </View>
+      )}
 
       <View style={styles.group}>
         <SectionHeader title="BMI calculator" />

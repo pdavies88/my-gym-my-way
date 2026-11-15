@@ -33,6 +33,8 @@ export interface CardioStep {
   cue: string;
   /** Library exercise for this step, so the player can link to its video. */
   exerciseId?: string;
+  /** What the voice says when the step starts. Defaults to a short form of the label. */
+  say?: string;
 }
 
 export type CardioCategory =
@@ -99,7 +101,7 @@ function hold(exerciseId: string, name: string, seconds: number, cue: string, si
   if (!sides) return [step(name, seconds, 'stretch', cue, exerciseId)];
   return [
     step(`${name} · left`, seconds, 'stretch', cue, exerciseId),
-    step(`${name} · right`, seconds, 'stretch', `Switch sides. ${cue}`, exerciseId),
+    { ...step(`${name} · right`, seconds, 'stretch', `Switch sides. ${cue}`, exerciseId), say: 'Switch sides' },
   ];
 }
 
@@ -108,7 +110,7 @@ function flow(exerciseId: string, name: string, seconds: number, cue: string, si
   if (!sides) return [step(name, seconds, 'mobility', cue, exerciseId)];
   return [
     step(`${name} · left`, seconds, 'mobility', cue, exerciseId),
-    step(`${name} · right`, seconds, 'mobility', `Switch sides. ${cue}`, exerciseId),
+    { ...step(`${name} · right`, seconds, 'mobility', `Switch sides. ${cue}`, exerciseId), say: 'Switch sides' },
   ];
 }
 
@@ -491,14 +493,14 @@ export const CARDIO_SESSIONS: readonly CardioSession[] = [
     steps: [
       step('Warm up', min(3), 'warmup', `Shadowbox, then light 1-2s on the bag. Punch numbers: ${PUNCH_KEY}`),
       ...tabata(
-        'Block 1',
+        'Straight punches',
         'bag-jab-cross',
         'Fast straight punches. 1-2-1-2 as quick as you can.',
         'Light punches and keep your feet moving.',
       ),
       step('Keep moving', min(1), 'easy', 'Slow shadowboxing. Breathe. Hooks and uppercuts next.'),
       ...tabata(
-        'Block 2',
+        'Hooks and uppercuts',
         'bag-hooks',
         'Hooks and uppercuts. Stay close to the bag.',
         'Light punches and keep your feet moving.',
@@ -2003,28 +2005,26 @@ export function cuesBetween(steps: readonly CardioStep[], from: number, to: numb
   return cues;
 }
 
-/** Plain-language duration for the voice: "2 minutes", "45 seconds", "1 minute 30". */
-export function spokenDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  if (m === 0) return `${s} seconds`;
-  const minutes = `${m} minute${m === 1 ? '' : 's'}`;
-  return s ? `${minutes} ${s}` : minutes;
+/**
+ * The short name the voice reads for a step: "Squats", "World's greatest stretch", "1, 2, 3".
+ * Labels carry extra detail for the screen, such as "· round 2", "3 of 8" or "Round 3:", which the
+ * voice leaves out so each cue is quick and never runs into the next one.
+ */
+export function spokenName(step: Pick<CardioStep, 'label' | 'say'>): string {
+  if (step.say) return step.say;
+  const name = step.label
+    .split(' · ')[0]
+    .replace(/^(Round|Station) \d+:\s*/i, '')
+    .replace(/\s+\d+ of \d+$/i, '')
+    .replace(/\s*\b\d+\s*(min|mins|minutes?|sec|secs|seconds?)\b/gi, '')
+    // Spell out combos so the voice says "one, two" instead of "one minus two".
+    .replace(/(\d)-(?=\d)/g, '$1, ')
+    .replace(/’/g, "'")
+    .trim();
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-/** What the voice says when a step starts, for example "Hard. Round 1: 1-2. 2 minutes." */
-export function stepAnnouncement(step: CardioStep): string {
-  // Spell out combos so the voice says "one, two" instead of "one minus two".
-  // Drop a duration already in the label ("Hard 1 min"), since the time is spoken at the end anyway.
-  const label = step.label
-    .replace(/\s*\b\d+\s*(min|mins|minutes?|sec|secs|seconds?)\b/gi, '')
-    .replace(/(\d)-(?=\d)/g, '$1, ')
-    .trim();
-  // Skip the effort word when the label already says it, so a rest step isn't "Rest. Rest."
-  const letters = (text: string) => text.toLowerCase().replace(/[^a-z]/g, '');
-  const effort = EFFORT_LABELS[step.effort];
-  const prefix = letters(label).startsWith(letters(effort)) ? '' : `${effort}. `;
-  // Short steps, like Tabata's 20 seconds on and 10 easy, come too fast for a full announcement.
-  if (step.seconds <= 20) return `${label}.`;
-  return `${prefix}${label}. ${spokenDuration(step.seconds)}.`;
+/** What the voice says when a step starts: just its short name, for example "Squats." */
+export function stepAnnouncement(step: Pick<CardioStep, 'label' | 'say'>): string {
+  return `${spokenName(step)}.`;
 }

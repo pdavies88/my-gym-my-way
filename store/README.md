@@ -114,6 +114,7 @@ The label then shows "Data Not Collected".
 **Review before submitting:** the exercise videos are YouTube embeds in a web view, in privacy-enhanced mode. YouTube receives the viewer's IP address and may record views. That is the standard YouTube embed, not a third-party SDK in the app, and the privacy policy discloses it. Re-read Apple's current App Privacy guidance before answering, in case it now counts embedded web players.
 
 Why this answer:
+- **Apple Health doesn't count as collection.** With the optional Apple Health switch on, the app writes workouts to HealthKit on the device. It never reads Health data and never sends it anywhere, so nothing is collected under Apple's definition. The privacy policy has an Apple Health section, which HealthKit apps need.
 - **The user's data never leaves the device.** Equipment, workouts, history, height, weight and settings are stored only in the app's on-device storage. The app's network use is loading YouTube's embedded player for exercise videos and opening its own privacy and support pages.
 - **No third-party code collects data.** The app has no analytics, crash reporting, advertising or tracking SDK.
 - **Consistency:** the app's privacy manifest (`ios.privacyManifests` in `app.json`) declares no collected data types and no tracking, so the build and the label match. It lists the required-reason APIs that React Native and Expo modules use, taken from their own `PrivacyInfo.xcprivacy` files.
@@ -165,6 +166,10 @@ e. Open the Cardio tab, choose any session ("No-equipment HIIT" needs no gear) a
 f. Open the History tab to see the sessions. Open it and tap "Delete from history" to remove it.
 g. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.
 h. Me > Feedback has switches for sounds and voice. Me > About links to the privacy policy and support page.
+i. Apple Health (optional, iPhone only): open any cardio session and tap "Turn on" on the Apple Health card, or use Me > Apple Health, and allow Workouts. Start a session and lock the phone: the timer, chimes and voice keep going, and the Lock Screen shows the step and its countdown as a Live Activity. Finish the session, and it appears in the Health app under Workouts.
+
+BACKGROUND MODES AND HEALTHKIT
+The app uses HealthKit only to save finished workouts (the workout type and its start and end time). It never reads Health data. The "workout-processing" background mode runs an HKWorkoutSession while a timed session is going, so the timer keeps running with the phone locked. The "audio" background mode plays the spoken coaching cues and countdown chimes during that workout. Both are used only while a workout the user started is running, and only when the user turned on Apple Health.
 
 4. EXTERNAL SERVICES
 YouTube, for exercise demonstration videos. Each exercise embeds one public YouTube video with YouTube's own embedded player, in privacy-enhanced mode (youtube-nocookie.com). The app has no backend server, authentication service, payment processor, analytics, crash reporting or advertising SDK. It also opens its own privacy policy and support pages in an in-app browser when the user taps them. All user data is stored on the device.

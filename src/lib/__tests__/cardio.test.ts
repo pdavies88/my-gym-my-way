@@ -120,27 +120,40 @@ describe('cuesBetween', () => {
 });
 
 describe('stepAnnouncement', () => {
-  it('reads combos and durations naturally', () => {
-    expect(stepAnnouncement({ label: 'Round 3: 1-2-3', seconds: 120, effort: 'hard', cue: '' })).toBe(
-      'Hard. Round 3: 1, 2, 3. 2 minutes.',
-    );
-    expect(stepAnnouncement({ label: 'Rest', seconds: 90, effort: 'rest', cue: '' })).toBe('Rest. 1 minute 30.');
-    expect(stepAnnouncement({ label: 'Warm up', seconds: 300, effort: 'warmup', cue: '' })).toBe('Warm up. 5 minutes.');
+  const say = (label: string, extra: Partial<{ say: string }> = {}) => stepAnnouncement({ label, ...extra });
+
+  it('says just the move, not the round, side, effort or length', () => {
+    expect(say('Squats · round 1')).toBe('Squats.');
+    expect(say('World’s greatest stretch · left')).toBe("World's greatest stretch.");
+    expect(say('Sprint · 3 of 8')).toBe('Sprint.');
+    expect(say('Keep moving')).toBe('Keep moving.');
+    expect(say('Warm up')).toBe('Warm up.');
   });
 
-  it('keeps short steps, like Tabata intervals, to just the label', () => {
-    expect(stepAnnouncement({ label: 'Sprint · 3 of 8', seconds: 20, effort: 'max', cue: '' })).toBe(
-      'Sprint · 3 of 8.',
-    );
-    expect(stepAnnouncement({ label: 'Keep moving', seconds: 10, effort: 'easy', cue: '' })).toBe('Keep moving.');
+  it('drops counts, durations and numbered prefixes, and reads combos naturally', () => {
+    expect(say('Hard 3 of 8')).toBe('Hard.');
+    expect(say('Hard 1 min')).toBe('Hard.');
+    expect(say('All-out 1 min')).toBe('All-out.');
+    expect(say('Burpees 20 seconds')).toBe('Burpees.');
+    expect(say('Round 3: 1-2-3')).toBe('1, 2, 3.');
+    expect(say('Station 2: jump squats')).toBe('Jump squats.');
   });
 
-  it('does not repeat a duration that is already in the label', () => {
-    expect(stepAnnouncement({ label: 'Hard 1 min', seconds: 60, effort: 'hard', cue: '' })).toBe('Hard. 1 minute.');
-    expect(stepAnnouncement({ label: 'All-out 1 min', seconds: 60, effort: 'max', cue: '' })).toBe(
-      'All-out. 1 minute.',
-    );
-    expect(stepAnnouncement({ label: 'Hard 3 min', seconds: 180, effort: 'hard', cue: '' })).toBe('Hard. 3 minutes.');
+  it('uses a step’s own spoken line when it has one', () => {
+    expect(say('Treadmill · push', { say: 'Push' })).toBe('Push.');
+    const stretch = getCardioSession('stretch-full-body')!;
+    const right = stretch.steps.find((s) => s.label === 'Hamstring stretch · right')!;
+    expect(stepAnnouncement(right)).toBe('Switch sides.');
+  });
+
+  it('keeps every spoken line short', () => {
+    for (const session of CARDIO_SESSIONS) {
+      for (const step of session.steps) {
+        const line = stepAnnouncement(step);
+        expect(line).not.toMatch(/·|\bof \d|\d+ (seconds|minutes?)/);
+        expect(line.split(' ').length).toBeLessThanOrEqual(6);
+      }
+    }
   });
 });
 

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { useSettings } from '@/context/settings-context';
 import { useBestVoice } from '@/hooks/use-best-voice';
-import { spokenDuration, stepAnnouncement, type Cue } from '@/lib/cardio';
+import { spokenName, stepAnnouncement, type CardioStep, type Cue } from '@/lib/cardio';
 import { SPEECH_RATE } from '@/lib/voice';
 
 const SOUNDS = {
@@ -60,7 +60,7 @@ export function useCardioCues() {
   const say = (text: string) => {
     const { voice, voiceId } = latest.current;
     if (!voice) return;
-    Speech.stop();
+    // Queue rather than interrupt: lines are short, and stopping mid-word clipped the line before.
     Speech.speak(text, { rate: SPEECH_RATE, ...(voiceId ? { voice: voiceId } : {}) });
   };
 
@@ -73,7 +73,7 @@ export function useCardioCues() {
     play(cue: Cue) {
       switch (cue.kind) {
         case 'heads-up':
-          say(`10 seconds. Next, ${stepAnnouncement(cue.next).replace(/\.$/, '')}`);
+          say(`Next, ${spokenName(cue.next)}.`);
           break;
         case 'tick':
           chime('tick');
@@ -89,9 +89,9 @@ export function useCardioCues() {
       }
     },
     /** Announces the first step when the session starts, since no transition leads into it. */
-    start(firstStepSeconds: number, firstStepLabel: string) {
+    start(first: CardioStep) {
       chime('go');
-      sayLater(`Starting. ${firstStepLabel}. ${spokenDuration(firstStepSeconds)}.`, 450);
+      sayLater(stepAnnouncement(first), 450);
     },
     silence() {
       cancelPending();

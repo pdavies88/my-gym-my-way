@@ -11,6 +11,7 @@ import { Tag } from '@/components/tag';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
+import { useAppleHealth } from '@/hooks/use-apple-health';
 import {
   canDoCardio,
   EFFORT_GUIDE,
@@ -25,7 +26,8 @@ import { equipmentName } from '@/lib/equipment';
 
 export default function CardioOverviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { owned } = useSettings();
+  const { owned, updateSettings } = useSettings();
+  const health = useAppleHealth();
   const session = getCardioSession(id);
 
   if (!session) {
@@ -86,6 +88,26 @@ export default function CardioOverviewScreen() {
         <ThemedText type="small" themeColor="accent">
           This session uses equipment you haven’t selected. You can still start it.
         </ThemedText>
+      )}
+
+      {health.available && health.lockScreen && !health.asked && (
+        <Card accent>
+          <ThemedText type="smallBold">Keep going with your phone locked</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Turn on Apple Health and the timer and voice keep running on the Lock Screen. Finished sessions are saved to
+            Health as workouts. You can change this any time in Me.
+          </ThemedText>
+          <View style={styles.healthButtons}>
+            <Button title="Turn on" compact style={styles.flex} onPress={() => void health.setEnabled(true)} />
+            <Button
+              title="Not now"
+              compact
+              variant="ghost"
+              style={styles.flex}
+              onPress={() => updateSettings({ appleHealth: false })}
+            />
+          </View>
+        </Card>
       )}
 
       {exerciseIds.length > 0 && (
@@ -167,5 +189,6 @@ const styles = StyleSheet.create({
   },
   bar: { width: 4, height: 18, borderRadius: 1 },
   flex: { flex: 1 },
+  healthButtons: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.one },
   note: { marginTop: Spacing.two, fontSize: 12, lineHeight: 17 },
 });

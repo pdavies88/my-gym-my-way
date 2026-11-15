@@ -17,14 +17,17 @@ import { ProgressBar } from '@/components/progress-bar';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
+import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
+import { healthAuthorized, saveWorkout } from '@/lib/health';
 import { activeMs } from '@/lib/session-clock';
 import { formatElapsed } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionScreen() {
+  const { settings } = useSettings();
   const { active, toggleExercise, finishSession, discardSession, pauseSession, resumeSession, restartSessionTimer } =
     useTraining();
   const [now, setNow] = useState(() => Date.now());
@@ -69,6 +72,8 @@ export default function SessionScreen() {
   const finish = () => {
     const save = () => {
       const log = finishSession();
+      if (log && settings.appleHealth && healthAuthorized())
+        saveWorkout('traditionalStrength', log.startedAt, log.finishedAt);
       if (log) router.replace({ pathname: '/log/[id]', params: { id: log.id, fresh: '1' } });
     };
     if (allDone) return save();

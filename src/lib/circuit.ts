@@ -198,6 +198,8 @@ function cardioBlock(station: CardioStation, seconds: number): CardioStep[] {
     const exerciseId = exerciseFor(zone);
     return {
       label: `${name} · ${ZONE_LABELS[zone]}`,
+      // The station is already on screen, so the voice only calls the effort: "Push", "All out".
+      say: ZONE_LABELS[zone].charAt(0).toUpperCase() + ZONE_LABELS[zone].slice(1),
       seconds: length,
       effort: ZONE_EFFORT[zone],
       cue: guide.cues[zone],

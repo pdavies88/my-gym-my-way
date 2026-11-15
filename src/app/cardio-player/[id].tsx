@@ -17,9 +17,11 @@ import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { useCardioCues } from '@/hooks/use-cardio-cues';
+import { useLiveWorkout } from '@/hooks/use-live-workout';
 import { useTheme } from '@/hooks/use-theme';
 import {
   cuesBetween,
+  spokenName,
   formatCountdown,
   getCardioSession,
   INTENSITY,
@@ -31,6 +33,8 @@ import {
 } from '@/lib/cardio';
 import { buildCircuit, parseCircuitParams, type CircuitPlan } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
+import { CATEGORY_ACTIVITY, healthAuthorized, pauseLiveWorkout, resumeLiveWorkout, saveWorkout } from '@/lib/health';
+import { showWorkoutActivity } from '@/lib/workout-activity';
 import { formatDuration } from '@/lib/time';
 import { goBackOrHome } from '@/lib/navigation';
 
@@ -80,6 +84,10 @@ function Player({
   const logged = useRef(false);
   const [howTo, setHowTo] = useState<string | null>(null);
   const cues = useCardioCues();
+  const { settings, updateSettings } = useSettings();
+  const appleHealth = settings.appleHealth === true;
+  const activity = circuit ? 'crossTraining' : CATEGORY_ACTIVITY[session.category];
+  const workout = useLiveWorkout(activity, appleHealth);
 
   const elapsed = Math.min(total, ((pausedAt ?? now) - startedAt - pausedMs) / 1000 + offset);
   const pos = positionAt(steps, elapsed);
@@ -109,17 +117,41 @@ function Player({
     ),
   );
 
-  // Leaving the app (switching away, locking the phone or closing it) pauses too. Cues can't play
-  // in the background, so a running clock would only skip steps you never heard.
+  // Leaving the app (switching away, locking the phone or closing it) pauses too, unless a live
+  // Apple Health workout keeps the app running. Without one, cues can't play in the background, so a
+  // running clock would only skip steps you never heard.
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') return;
+      if (state === 'active' || workout.liveRef.current) return;
       setPausedAt((p) => p ?? Date.now());
       cues.silence();
     });
     return () => subscription.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pausing the timer pauses the Health workout too, so its duration matches the time trained.
+  useEffect(() => {
+    if (!workout.live) return;
+    if (paused) pauseLiveWorkout();
+    else resumeLiveWorkout();
+  }, [paused, workout.live]);
+
+  // The Lock Screen shows the current step's countdown. It only needs an update when the step
+  // changes or the clock pauses, resumes or jumps; the system counts down in between.
+  useEffect(() => {
+    if (!workout.live || pos.done) return;
+    const time = Date.now();
+    showWorkoutActivity({
+      session: session.name,
+      step: spokenName(current),
+      ...(next ? { next: spokenName(next) } : {}),
+      stepStartedAt: time - pos.stepElapsed * 1000,
+      stepEndsAt: time + pos.stepRemaining * 1000,
+      ...(paused ? { pausedLeft: formatCountdown(secondsLeft) } : {}),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workout.live, pos.index, pos.done, paused, startedAt, pausedMs, offset]);
 
   /** Back to the first step at 0:00, as if the session had just started. */
   const restartSession = (time: number) => {
@@ -133,14 +165,13 @@ function Player({
 
   const finalCount = !paused && !pos.done && current.seconds > 4 && secondsLeft >= 1 && secondsLeft <= 3;
 
-  const { settings, updateSettings } = useSettings();
   const muted = settings.sounds === false && settings.voice === false;
 
   // Chimes and voice. Each clock reading plays whatever cues the clock just passed.
   const lastElapsed = useRef<number | null>(null);
   useEffect(() => {
     if (lastElapsed.current === null) {
-      cues.start(steps[0].seconds, steps[0].label);
+      cues.start(steps[0]);
     } else {
       for (const cue of cuesBetween(steps, lastElapsed.current, elapsed)) cues.play(cue);
     }
@@ -168,6 +199,11 @@ function Player({
           : 'cardio',
       ...(circuit ? { circuit: circuit.plan } : {}),
     });
+    // A live workout saves itself to Health. Without one, save the finished workout directly.
+    const trainedMs = activeMs(at);
+    if (!workout.finish(at, true, trainedMs / 1000) && appleHealth && healthAuthorized()) {
+      saveWorkout(activity, at - trainedMs, at);
+    }
   };
 
   // Save to history once, the moment the last step ends.
@@ -220,6 +256,7 @@ function Player({
           style: 'destructive',
           onPress: () => {
             logged.current = true;
+            workout.finish(Date.now(), false, 0);
             goBackOrHome();
           },
         },
@@ -265,7 +302,7 @@ function Player({
                 : session.category === 'mobility'
                   ? 'mobility'
                   : 'guided cardio'}
-            . It’s saved to your history.
+            . It’s saved to your history{appleHealth && healthAuthorized() ? ' and Apple Health' : ''}.
           </ThemedText>
           <Button title="Done" style={styles.doneButton} onPress={goBackOrHome} />
         </View>

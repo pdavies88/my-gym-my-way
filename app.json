@@ -46,6 +46,17 @@
             ]
           }
         ]
+      },
+      "infoPlist": {
+        "NSHealthUpdateUsageDescription": "My Gym My Way saves your finished workouts to Apple Health, and runs a workout while a timer is going so it keeps working on the Lock Screen.",
+        "NSHealthShareUsageDescription": "My Gym My Way does not read your health data. It only saves workouts.",
+        "UIBackgroundModes": [
+          "audio",
+          "workout-processing"
+        ]
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true
       }
     },
     "android": {
@@ -88,11 +99,19 @@
           "enableBackgroundPlayback": false
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-widgets",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": true,
+      "inlineModules": {
+        "watchedDirectories": [
+          "native"
+        ]
+      }
     },
     "backgroundColor": "#0A0B0A",
     "extra": {

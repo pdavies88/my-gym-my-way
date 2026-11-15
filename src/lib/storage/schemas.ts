@@ -29,6 +29,11 @@ export const SettingsSchema = z.object({
   voice: z.boolean().optional(),
   /** No longer used. Kept so settings saved by version 1.0 still parse. */
   haptics: z.boolean().optional(),
+  /**
+   * Save workouts to Apple Health and keep timers running on the Lock Screen. Missing means the
+   * person hasn't been asked yet; false means they said no or turned it off.
+   */
+  appleHealth: z.boolean().optional(),
   /** True once the person has read and closed the "before you start" health note. */
   healthNoteSeen: z.boolean().optional(),
 });
