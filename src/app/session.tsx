@@ -1,5 +1,5 @@
 import { router, Stack, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -14,6 +14,7 @@ import { Icon } from '@/components/icon';
 import { IconButton } from '@/components/icon-button';
 import { PressableScale } from '@/components/pressable-scale';
 import { ProgressBar } from '@/components/progress-bar';
+import { SetLogger } from '@/components/set-logger';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
@@ -22,14 +23,25 @@ import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
 import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
 import { healthAuthorized, saveWorkout } from '@/lib/health';
+import { LIGHT_WEEK } from '@/lib/program';
+import { lastSets, parseTarget } from '@/lib/progress';
 import { activeMs } from '@/lib/session-clock';
 import { formatElapsed } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionScreen() {
   const { settings } = useSettings();
-  const { active, toggleExercise, finishSession, discardSession, pauseSession, resumeSession, restartSessionTimer } =
-    useTraining();
+  const {
+    active,
+    sessions,
+    toggleExercise,
+    setExerciseSets,
+    finishSession,
+    discardSession,
+    pauseSession,
+    resumeSession,
+    restartSessionTimer,
+  } = useTraining();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -62,6 +74,9 @@ export default function SessionScreen() {
   const allDone = done === total && total > 0;
   const paused = active.pausedAt !== undefined;
   const elapsed = formatElapsed(activeMs(active, now));
+  const lightWeek = active.programDay?.week === LIGHT_WEEK;
+  /** The sets to aim for. A program's lighter last week drops one. */
+  const targetSets = (prescription: string) => Math.max(1, parseTarget(prescription).sets - (lightWeek ? 1 : 0));
 
   const confirmRestart = () =>
     Alert.alert('Restart the timer?', 'The clock goes back to 0:00. Your ticked exercises stay ticked.', [
@@ -144,6 +159,11 @@ export default function SessionScreen() {
         <ThemedText type="eyebrow" themeColor="textSecondary">
           {done} / {total} done
         </ThemedText>
+        {lightWeek && (
+          <ThemedText type="small" themeColor="textSecondary">
+            Lighter week: do one set fewer than usual and keep the same weights, so your body can catch up.
+          </ThemedText>
+        )}
       </View>
 
       <View style={styles.list}>
@@ -155,8 +175,15 @@ export default function SessionScreen() {
               checked={active.completedIds.includes(exercise.id)}
               onToggle={() => {
                 toggleExercise(exercise.id);
-              }}
-            />
+              }}>
+              <SetLogger
+                exercise={exercise}
+                sets={active.sets?.[exercise.id] ?? []}
+                last={lastSets(sessions, exercise.id)?.sets ?? null}
+                units={settings.units}
+                onChange={(sets) => setExerciseSets(exercise.id, sets, targetSets(exercise.prescription))}
+              />
+            </CheckRow>
           </Animated.View>
         ))}
       </View>
@@ -179,11 +206,14 @@ function CheckRow({
   index,
   checked,
   onToggle,
+  children,
 }: {
   exercise: Exercise;
   index: number;
   checked: boolean;
   onToggle: () => void;
+  /** The set logger, shown under the name. */
+  children?: ReactNode;
 }) {
   const theme = useTheme();
   const progress = useDerivedValue(() => withTiming(checked ? 1 : 0, { duration: 200 }));
@@ -195,30 +225,33 @@ function CheckRow({
   const textStyle = useAnimatedStyle(() => ({ opacity: 1 - progress.get() * 0.45 }));
 
   return (
-    <View style={[styles.row, { backgroundColor: theme.card, borderColor: checked ? theme.tint : theme.border }]}>
-      <PressableScale
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked }}
-        accessibilityLabel={exercise.name}
-        onPress={onToggle}
-        style={styles.rowMain}>
-        <Animated.View style={[styles.box, boxStyle]}>
-          {checked && <Icon name={{ ios: 'checkmark', android: 'check' }} size={14} color={theme.onTint} />}
-        </Animated.View>
-        <Animated.View style={[styles.rowText, textStyle]}>
-          <ThemedText type="smallBold" style={[styles.name, checked && styles.struck]}>
-            {exercise.name}
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
-            {String(index + 1).padStart(2, '0')} · {SLOT_LABELS[exercise.slots[0]]} · {exercise.prescription}
-          </ThemedText>
-        </Animated.View>
-      </PressableScale>
-      <IconButton
-        icon={{ ios: 'play.rectangle', android: 'smart_display' }}
-        label={`Show ${exercise.name} demo`}
-        onPress={() => router.push({ pathname: '/exercise/[id]', params: { id: exercise.id } })}
-      />
+    <View style={[styles.card, { backgroundColor: theme.card, borderColor: checked ? theme.tint : theme.border }]}>
+      <View style={styles.row}>
+        <PressableScale
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked }}
+          accessibilityLabel={exercise.name}
+          onPress={onToggle}
+          style={styles.rowMain}>
+          <Animated.View style={[styles.box, boxStyle]}>
+            {checked && <Icon name={{ ios: 'checkmark', android: 'check' }} size={14} color={theme.onTint} />}
+          </Animated.View>
+          <Animated.View style={[styles.rowText, textStyle]}>
+            <ThemedText type="smallBold" style={[styles.name, checked && styles.struck]}>
+              {exercise.name}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
+              {String(index + 1).padStart(2, '0')} · {SLOT_LABELS[exercise.slots[0]]} · {exercise.prescription}
+            </ThemedText>
+          </Animated.View>
+        </PressableScale>
+        <IconButton
+          icon={{ ios: 'play.rectangle', android: 'smart_display' }}
+          label={`Show ${exercise.name} demo`}
+          onPress={() => router.push({ pathname: '/exercise/[id]', params: { id: exercise.id } })}
+        />
+      </View>
+      {children && <View style={styles.logger}>{children}</View>}
     </View>
   );
 }
@@ -229,13 +262,9 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   list: { gap: Spacing.two },
   buttons: { gap: Spacing.two },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: Radius.card,
-    paddingRight: Spacing.two,
-  },
+  card: { borderWidth: 1, borderRadius: Radius.card },
+  row: { flexDirection: 'row', alignItems: 'center', paddingRight: Spacing.two },
+  logger: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.three },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: Spacing.three },
   box: {
     width: 26,

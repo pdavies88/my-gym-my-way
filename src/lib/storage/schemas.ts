@@ -9,6 +9,7 @@ export const KEYS = {
   workouts: 'workouts.v1',
   sessions: 'sessions.v1',
   activeSession: 'activeSession.v1',
+  program: 'program.v1',
 } as const;
 
 const FocusSchema = z.enum(['full', 'upper', 'lower', 'push', 'pull', 'core', 'conditioning']);
@@ -66,6 +67,20 @@ export const SavedWorkoutSchema = z.object({
 });
 export type SavedWorkout = z.infer<typeof SavedWorkoutSchema>;
 
+/**
+ * One logged set. `reps` counts seconds for timed holds such as a plank. Weight is always stored in
+ * kilograms and shown in the person's units; it is missing for bodyweight moves.
+ */
+export const SetEntrySchema = z.object({
+  reps: z.number().min(0).max(9999),
+  weightKg: z.number().min(0).max(1000).optional(),
+});
+export type SetEntry = z.infer<typeof SetEntrySchema>;
+
+/** Which program day a session was, so finishing it ticks the day off. */
+const ProgramDayRefSchema = z.object({ programId: z.string(), week: z.number(), day: z.number() });
+export type ProgramDayRef = z.infer<typeof ProgramDayRefSchema>;
+
 export const ActiveSessionSchema = z.object({
   workoutId: z.string().optional(),
   name: z.string(),
@@ -76,6 +91,9 @@ export const ActiveSessionSchema = z.object({
   pausedAt: z.number().optional(),
   /** Total time spent paused before the current pause. */
   pausedMs: z.number().optional(),
+  /** Logged sets for each exercise id. Sessions from before version 1.3 have none. */
+  sets: z.record(z.string(), z.array(SetEntrySchema)).optional(),
+  programDay: ProgramDayRefSchema.optional(),
 });
 export type ActiveSession = z.infer<typeof ActiveSessionSchema>;
 
@@ -90,3 +108,16 @@ export const SessionLogSchema = ActiveSessionSchema.extend({
   circuit: CircuitPlanSchema,
 });
 export type SessionLog = z.infer<typeof SessionLogSchema>;
+
+export const ProgramSchema = z.object({
+  id: z.string(),
+  createdAt: z.number(),
+  weeks: z.number().min(1).max(12),
+  /** The same days repeat every week, so the weights can climb from week to week. */
+  days: z.array(z.object({ name: z.string(), focus: FocusSchema, exerciseIds: z.array(z.string()) })),
+  /** A suggested cardio session for each week, by cardio session id. */
+  cardioIds: z.array(z.string()),
+  /** Finished days, as "week-day" keys such as "2-1", mapped to the session log id. */
+  done: z.record(z.string(), z.string()),
+});
+export type Program = z.infer<typeof ProgramSchema>;

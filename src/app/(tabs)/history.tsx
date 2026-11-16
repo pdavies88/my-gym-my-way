@@ -7,6 +7,7 @@ import { Card } from '@/components/card';
 import { Icon } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen, SectionHeader } from '@/components/screen';
+import { StreakCalendar } from '@/components/streak-calendar';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTraining } from '@/context/training-context';
@@ -36,6 +37,8 @@ export default function HistoryScreen() {
         <Stat label="Sessions" value={sessions.length} />
         <Stat label="Moves done" value={exercisesDone} />
       </View>
+
+      <StreakCalendar startTimes={sessions.map((s) => s.startedAt)} now={now} />
 
       <SectionHeader title="Sessions" />
       {sessions.length === 0 ? (

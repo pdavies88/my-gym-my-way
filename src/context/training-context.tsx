@@ -4,16 +4,22 @@ import { Alert, AppState } from 'react-native';
 import type { Focus } from '@/lib/generator';
 import type { CircuitPlan } from '@/lib/circuit';
 import { newId } from '@/lib/id';
+import { updateNextWorkoutWidget } from '@/lib/next-workout-widget';
+import { markProgramDay, nextProgramDay, programDayName } from '@/lib/program';
 import { activeMs, pause, restart, resume } from '@/lib/session-clock';
 import { readJson, readList, writeJson } from '@/lib/storage/kv';
 import {
   ActiveSessionSchema,
   KEYS,
+  ProgramSchema,
   SavedWorkoutSchema,
   SessionLogSchema,
   type ActiveSession,
+  type Program,
+  type ProgramDayRef,
   type SavedWorkout,
   type SessionLog,
+  type SetEntry,
 } from '@/lib/storage/schemas';
 
 type NewWorkout = { name: string; exerciseIds: string[]; focus?: Focus; circuit?: CircuitPlan };
@@ -25,8 +31,19 @@ type TrainingContextValue = {
   /** Returns null when the list is full and this would be a new workout. */
   saveWorkout: (workout: NewWorkout, id?: string) => SavedWorkout | null;
   deleteWorkout: (id: string) => void;
-  startSession: (session: { name: string; exerciseIds: string[]; workoutId?: string }) => void;
+  startSession: (session: {
+    name: string;
+    exerciseIds: string[];
+    workoutId?: string;
+    programDay?: ProgramDayRef;
+  }) => void;
   toggleExercise: (exerciseId: string) => void;
+  /** Replaces the logged sets for one exercise. Reaching the target number of sets ticks it off. */
+  setExerciseSets: (exerciseId: string, sets: SetEntry[], targetSets: number) => void;
+  program: Program | null;
+  saveProgram: (program: Program | null) => void;
+  /** Starts a program day as a workout session. Defaults to the next day not done yet. */
+  startProgramDay: (day?: { week: number; day: number }) => boolean;
   finishSession: () => SessionLog | null;
   logCardio: (entry: {
     cardioId: string;
@@ -57,6 +74,12 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
   const [workouts, setWorkouts] = useState(() => readList(KEYS.workouts, SavedWorkoutSchema));
   const [sessions, setSessions] = useState(() => readList(KEYS.sessions, SessionLogSchema));
   const [active, setActive] = useState(() => readJson(KEYS.activeSession, ActiveSessionSchema.nullable(), null));
+  const [program, setProgram] = useState(() => readJson(KEYS.program, ProgramSchema.nullable(), null));
+
+  // Keep the home screen widget in step with the program and history.
+  useEffect(() => {
+    updateNextWorkoutWidget(program, sessions, Date.now());
+  }, [program, sessions]);
 
   const persistWorkouts = (next: SavedWorkout[]) => {
     setWorkouts(next);
@@ -66,6 +89,11 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
   const persistSessions = (next: SessionLog[]) => {
     setSessions(next);
     void writeJson(KEYS.sessions, next);
+  };
+
+  const saveProgram = (next: Program | null) => {
+    setProgram(next);
+    void writeJson(KEYS.program, next);
   };
 
   const persistActive = (next: ActiveSession | null) => {
@@ -92,8 +120,39 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
 
   const deleteWorkout = (id: string) => persistWorkouts(workouts.filter((w) => w.id !== id));
 
-  const startSession: TrainingContextValue['startSession'] = ({ name, exerciseIds, workoutId }) => {
-    persistActive({ name, exerciseIds, workoutId, completedIds: [], startedAt: Date.now() });
+  const startSession: TrainingContextValue['startSession'] = ({ name, exerciseIds, workoutId, programDay }) => {
+    persistActive({
+      name,
+      exerciseIds,
+      ...(workoutId ? { workoutId } : {}),
+      ...(programDay ? { programDay } : {}),
+      completedIds: [],
+      startedAt: Date.now(),
+    });
+  };
+
+  const startProgramDay: TrainingContextValue['startProgramDay'] = (target) => {
+    if (!program) return false;
+    const pick = target ?? nextProgramDay(program);
+    const day = pick ? program.days[pick.day] : undefined;
+    if (!pick || !day) return false;
+    startSession({
+      name: programDayName(program, pick.week, pick.day),
+      exerciseIds: day.exerciseIds,
+      programDay: { programId: program.id, week: pick.week, day: pick.day },
+    });
+    return true;
+  };
+
+  const setExerciseSets: TrainingContextValue['setExerciseSets'] = (exerciseId, sets, targetSets) => {
+    if (!active) return;
+    const { [exerciseId]: _previous, ...others } = active.sets ?? {};
+    const reached = sets.length >= targetSets && !active.completedIds.includes(exerciseId);
+    persistActive({
+      ...active,
+      sets: sets.length ? { ...others, [exerciseId]: sets } : others,
+      completedIds: reached ? [...active.completedIds, exerciseId] : active.completedIds,
+    });
   };
 
   const toggleExercise = (exerciseId: string) => {
@@ -112,6 +171,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
     const log: SessionLog = { ...rest, id: newId(), finishedAt: active.startedAt + activeMs(active, Date.now()) };
     persistSessions([log, ...sessions].slice(0, MAX_SESSIONS));
     persistActive(null);
+    if (program) {
+      const next = markProgramDay(program, active.programDay, log.id);
+      if (next !== program) saveProgram(next);
+    }
     return log;
   };
 
@@ -172,6 +235,10 @@ export function TrainingProvider({ children }: { children: ReactNode }) {
         deleteWorkout,
         startSession,
         toggleExercise,
+        setExerciseSets,
+        program,
+        saveProgram,
+        startProgramDay,
         finishSession,
         logCardio,
         discardSession,

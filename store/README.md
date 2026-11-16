@@ -77,8 +77,14 @@ Get a class-style station workout in 30, 45 or 60 minutes. The app builds the st
 MOBILITY AND STRETCHING
 A Recover tab with guided mobility and stretch sessions, including 5-minute versions of each and a quick pre-workout warm-up. No equipment needed.
 
-A SIMPLE SESSION CHECKLIST
-Start a workout and tick off each exercise as you finish it. A timer tracks how long you've been training. It pauses when you leave the app, and you can pause or restart it any time. Finish, and the session goes into your history.
+LOG EVERY SET, GET STRONGER EVERY WEEK
+Log the weight and reps for each set. The app shows what you did last time and suggests your next step: one more rep, or a little more weight once you hit the top of the range. Each exercise has a progress chart and your personal best.
+
+FOLLOW A 4-WEEK PROGRAM
+Choose 2 to 5 days a week and get a plan built from your equipment, with a lighter final week and a suggested cardio session each week. Your streak calendar keeps you going.
+
+WIDGET AND SIRI
+Start your next workout from the Home Screen, or say "Start my next workout in My Gym My Way". Siri can start any guided session too, like Quiet morning.
 
 HISTORY AND BMI
 See your past sessions and how many you've done this week. A BMI calculator in US or metric units shows your BMI and its category.
@@ -161,7 +167,9 @@ No login, credentials or sample files are needed.
 a. Launch the app. On the Train tab, tap "Choose equipment", tick a few items (for example Dumbbells and Weight bench) and go back.
 b. Tap "Generate". Pick a focus and a length. Tap "Shuffle" to get a new mix, or swap a single exercise. Tap "Save workout".
 c. Tap any exercise to open its detail page with its YouTube demonstration video. Tap play. The credit line under the video opens it on YouTube.
-d. From the saved workout, tap "Start workout". Tick off each exercise, then tap "Finish workout".
+d. From the saved workout, tap "Start workout". Under each exercise, tap "Log a set", enter a weight and reps, and add more sets. The exercise ticks itself off at the target number of sets. Tap "Finish workout". Open any exercise again to see the progress chart and the suggested next step.
+d2. On the Train tab, tap "4-week program", choose the days a week and tap "Start this program". The Train tab then shows the next workout. History shows the streak calendar.
+d3. Widget and Siri (iPhone): add the "Next workout" widget from the Home Screen, or say "Start my next workout in My Gym My Way" or "Start Quiet morning in My Gym My Way".
 e. Open the Cardio tab, choose any session ("No-equipment HIIT" needs no gear) and tap "Start session". The timer shows each step with chimes and a spoken cue. Tap the skip button to move through steps, then the X and "Save and end".
 f. Open the History tab to see the sessions. Open it and tap "Delete from history" to remove it.
 g. Open the Me tab. Enter a height and weight to see the BMI and its category. Switch between US and metric units.

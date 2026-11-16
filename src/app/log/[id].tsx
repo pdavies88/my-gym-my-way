@@ -8,10 +8,12 @@ import { Icon } from '@/components/icon';
 import { Screen, SectionHeader } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
+import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
 import { useTheme } from '@/hooks/use-theme';
 import { circuitParams, normalizePlan } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
+import { parseTarget, summarizeSets } from '@/lib/progress';
 import { SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
 import { formatDuration } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
@@ -20,6 +22,7 @@ export default function SessionLogScreen() {
   const theme = useTheme();
   const { id, fresh } = useLocalSearchParams<{ id: string; fresh?: string }>();
   const { sessions, deleteSession, startSession, active } = useTraining();
+  const { settings } = useSettings();
   const log = sessions.find((s) => s.id === id);
 
   if (!log) {
@@ -96,6 +99,7 @@ export default function SessionLogScreen() {
           <SectionHeader title={isCardio ? 'Moves in this session' : 'Exercises'} />
           {exercises.map((exercise) => {
             const completed = log.completedIds.includes(exercise.id);
+            const sets = log.sets?.[exercise.id];
             return (
               <View key={exercise.id} style={[styles.item, { borderColor: theme.border }]}>
                 <Icon
@@ -107,9 +111,16 @@ export default function SessionLogScreen() {
                   size={20}
                   color={completed ? theme.tint : theme.textSecondary}
                 />
-                <ThemedText type="smallBold" themeColor={completed ? 'text' : 'textSecondary'} style={styles.itemText}>
-                  {exercise.name}
-                </ThemedText>
+                <View style={styles.itemText}>
+                  <ThemedText type="smallBold" themeColor={completed ? 'text' : 'textSecondary'}>
+                    {exercise.name}
+                  </ThemedText>
+                  {sets?.length ? (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {summarizeSets(sets, parseTarget(exercise.prescription).measure, settings.units)}
+                    </ThemedText>
+                  ) : null}
+                </View>
               </View>
             );
           })}

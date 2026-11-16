@@ -100,16 +100,36 @@
         }
       ],
       "expo-asset",
-      "expo-widgets",
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "NextWorkoutWidget",
+              "displayName": "Next workout",
+              "description": "Start your next program workout or a guided session with one tap.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium"
+                ],
+                "initialLayout": "./src/widgets/next-workout-widget.tsx"
+              }
+            }
+          ]
+        }
+      ],
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-app-intents"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true,
       "inlineModules": {
         "watchedDirectories": [
-          "native"
+          "native",
+          "app-intents"
         ]
       }
     },

@@ -14,13 +14,17 @@ import { AppName } from '@/constants/brand';
 import { Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
+import { useStartProgramDay } from '@/hooks/use-start-program-day';
 import { useTheme } from '@/hooks/use-theme';
 import { FOCUS_LABELS } from '@/lib/generator';
+import { nextProgramDay, programProgress } from '@/lib/program';
 
 export default function TrainScreen() {
   const theme = useTheme();
   const { settings, updateSettings } = useSettings();
-  const { workouts, active } = useTraining();
+  const { workouts, active, program } = useTraining();
+  const startDay = useStartProgramDay();
+  const next = program ? nextProgramDay(program) : null;
 
   return (
     <Screen eyebrow={AppName} title="Train">
@@ -74,6 +78,51 @@ export default function TrainScreen() {
           </Card>
         </Animated.View>
       )}
+
+      <Animated.View entering={FadeInDown.delay(80).duration(350)}>
+        {program && next ? (
+          <Card>
+            <ThemedText type="eyebrow" themeColor="tint">
+              Your program · week {next.week} of {program.weeks}
+            </ThemedText>
+            <ThemedText type="heading">{program.days[next.day].name}</ThemedText>
+            <ProgressBar progress={programProgress(program).done / programProgress(program).total} />
+            <View style={styles.programButtons}>
+              <Button
+                title="Start"
+                compact
+                icon={{ ios: 'play.fill', android: 'play_arrow' }}
+                style={styles.flex}
+                onPress={() => startDay()}
+              />
+              <Button
+                title="See plan"
+                compact
+                variant="secondary"
+                style={styles.flex}
+                onPress={() => router.push('/program')}
+              />
+            </View>
+          </Card>
+        ) : (
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={
+              program ? 'Program complete. Build a new one' : 'Follow a 4-week program built from your equipment'
+            }
+            onPress={() => router.push('/program')}
+            style={[styles.workout, { backgroundColor: theme.card, borderColor: theme.tint }]}>
+            <Icon name={{ ios: 'calendar', android: 'calendar_month' }} size={22} color={theme.tint} />
+            <View style={styles.workoutText}>
+              <ThemedText type="heading">{program ? 'Program complete' : '4-week program'}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {program ? 'Build the next one' : 'A plan built from your gear, getting stronger each week'}
+              </ThemedText>
+            </View>
+            <Icon name={{ ios: 'chevron.right', android: 'chevron_right' }} size={16} color={theme.textSecondary} />
+          </PressableScale>
+        )}
+      </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(100).duration(350)} style={styles.actions}>
         <ActionTile
@@ -189,6 +238,8 @@ function ActionTile({
 
 const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: Spacing.three },
+  programButtons: { flexDirection: 'row', gap: Spacing.two },
+  flex: { flex: 1 },
   tile: {
     flex: 1,
     minHeight: 150,

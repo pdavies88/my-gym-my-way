@@ -3,19 +3,22 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Card } from '@/components/card';
+import { ExerciseProgress } from '@/components/exercise-progress';
 import { ExerciseVideo } from '@/components/exercise-video';
 import { Screen, SectionHeader } from '@/components/screen';
 import { Tag } from '@/components/tag';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
+import { useTraining } from '@/context/training-context';
 import { equipmentName } from '@/lib/equipment';
 import { canDo, getExercise, SLOT_LABELS } from '@/lib/exercises';
 import { getVideo } from '@/lib/videos';
 
 export default function ExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { owned } = useSettings();
+  const { owned, settings } = useSettings();
+  const { sessions } = useTraining();
   const exercise = getExercise(id);
 
   if (!exercise) {
@@ -49,6 +52,11 @@ export default function ExerciseScreen() {
         {exercise.muscles.map((muscle) => (
           <Tag key={muscle} label={muscle} />
         ))}
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(110).duration(320)} style={styles.group}>
+        <SectionHeader title="Your progress" />
+        <ExerciseProgress exercise={exercise} sessions={sessions} units={settings.units} />
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(140).duration(320)} style={styles.group}>

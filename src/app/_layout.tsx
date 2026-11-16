@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { HeaderButton } from '@/components/header-button';
+import { SiriActions } from '@/components/siri-actions';
 import { Colors, DisplayFont } from '@/constants/theme';
 import { SettingsProvider } from '@/context/settings-context';
 import { TrainingProvider } from '@/context/training-context';
@@ -50,6 +51,7 @@ export default function RootLayout() {
         <SettingsProvider>
           <TrainingProvider>
             <StatusBar style="light" />
+            <SiriActions />
             <Stack
               screenOptions={{
                 // SDK 58 makes iOS headers transparent by default. Screens don't inset their content for
@@ -68,6 +70,7 @@ export default function RootLayout() {
               <Stack.Screen name="log/[id]" options={{ title: '', ...back }} />
               <Stack.Screen name="equipment" options={{ title: 'Your equipment', ...back }} />
               <Stack.Screen name="library" options={{ title: 'Exercise library', ...back }} />
+              <Stack.Screen name="program" options={{ title: '', ...back }} />
               <Stack.Screen name="cardio/[id]" options={{ title: '', ...back }} />
               <Stack.Screen
                 name="cardio-player/[id]"
