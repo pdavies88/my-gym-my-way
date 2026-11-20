@@ -218,8 +218,8 @@ Apple asks for a recording on a physical iPhone running the latest iOS, starting
 
 The App Store set is in [`screenshots/app-store/`](screenshots/app-store/): eight 6.9-inch shots, 1320 × 2868, from a Release build on the iPhone 18 Pro Max simulator, with sample data from a realistic month of training. Upload them in this order, since the first three show in search results:
 
-1. `01-train.png`: Train tab with the 4-week program card
-2. `02-log-sets.png`: logging sets with weights, last time's numbers and the next-step suggestion
+1. `01-train.png`: Train tab with the icon hero, the workout in progress and the 4-week program
+2. `02-log-sets.png`: logging sets with weights, the start time, last time's numbers and the next-step suggestion
 3. `03-progress.png`: an exercise with its demo, form cues and progress chart
 4. `04-program.png`: the 4-week program, 8 of 12 workouts done
 5. `05-history.png`: History with the streak calendar
