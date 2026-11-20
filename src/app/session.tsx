@@ -1,5 +1,5 @@
-import { router, Stack, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { router, Stack } from 'expo-router';
+import { type ReactNode } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -25,38 +25,12 @@ import { getExercise, SLOT_LABELS, type Exercise } from '@/lib/exercises';
 import { healthAuthorized, saveWorkout } from '@/lib/health';
 import { LIGHT_WEEK } from '@/lib/program';
 import { lastSets, parseTarget } from '@/lib/progress';
-import { activeMs } from '@/lib/session-clock';
-import { formatElapsed } from '@/lib/time';
+import { formatClockTime } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionScreen() {
   const { settings } = useSettings();
-  const {
-    active,
-    sessions,
-    toggleExercise,
-    setExerciseSets,
-    finishSession,
-    discardSession,
-    pauseSession,
-    resumeSession,
-    restartSessionTimer,
-  } = useTraining();
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Leaving this screen (minimizing it, or opening another tab) pauses the timer.
-  useFocusEffect(
-    useCallback(
-      () => () => pauseSession(),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [],
-    ),
-  );
+  const { active, sessions, toggleExercise, updateExerciseSets, finishSession, discardSession } = useTraining();
 
   if (!active) {
     return (
@@ -72,17 +46,9 @@ export default function SessionScreen() {
   const done = active.completedIds.length;
   const total = exercises.length;
   const allDone = done === total && total > 0;
-  const paused = active.pausedAt !== undefined;
-  const elapsed = formatElapsed(activeMs(active, now));
   const lightWeek = active.programDay?.week === LIGHT_WEEK;
   /** The sets to aim for. A program's lighter last week drops one. */
   const targetSets = (prescription: string) => Math.max(1, parseTarget(prescription).sets - (lightWeek ? 1 : 0));
-
-  const confirmRestart = () =>
-    Alert.alert('Restart the timer?', 'The clock goes back to 0:00. Your ticked exercises stay ticked.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Restart', onPress: restartSessionTimer },
-    ]);
 
   const finish = () => {
     const save = () => {
@@ -125,36 +91,13 @@ export default function SessionScreen() {
         }}
       />
       <View style={styles.header}>
-        <ThemedText type="eyebrow" themeColor={paused ? 'textSecondary' : 'tint'}>
-          {paused ? 'Paused' : 'In progress'} · {active.name}
+        <ThemedText type="eyebrow" themeColor="tint">
+          In progress
         </ThemedText>
-        <ThemedText
-          type="display"
-          themeColor={paused ? 'textSecondary' : 'text'}
-          accessibilityLabel={`${paused ? 'Paused at' : 'Elapsed time'} ${elapsed}`}>
-          {elapsed}
+        <ThemedText type="title">{active.name}</ThemedText>
+        <ThemedText themeColor="textSecondary">
+          Started at {formatClockTime(active.startedAt)}. Your time runs until you tap Finish.
         </ThemedText>
-        <View style={styles.timerButtons}>
-          <Button
-            compact
-            title={paused ? 'Resume' : 'Pause'}
-            variant={paused ? 'primary' : 'secondary'}
-            icon={paused ? { ios: 'play.fill', android: 'play_arrow' } : { ios: 'pause.fill', android: 'pause' }}
-            onPress={() => {
-              if (paused) resumeSession();
-              else pauseSession();
-            }}
-            style={styles.flex}
-          />
-          <Button
-            compact
-            title="Restart timer"
-            variant="ghost"
-            icon={{ ios: 'arrow.counterclockwise', android: 'restart_alt' }}
-            onPress={confirmRestart}
-            style={styles.flex}
-          />
-        </View>
         <ProgressBar progress={total ? done / total : 0} />
         <ThemedText type="eyebrow" themeColor="textSecondary">
           {done} / {total} done
@@ -181,7 +124,7 @@ export default function SessionScreen() {
                 sets={active.sets?.[exercise.id] ?? []}
                 last={lastSets(sessions, exercise.id)?.sets ?? null}
                 units={settings.units}
-                onChange={(sets) => setExerciseSets(exercise.id, sets, targetSets(exercise.prescription))}
+                onChange={(change) => updateExerciseSets(exercise.id, change, targetSets(exercise.prescription))}
               />
             </CheckRow>
           </Animated.View>
@@ -258,8 +201,6 @@ function CheckRow({
 
 const styles = StyleSheet.create({
   header: { gap: Spacing.two },
-  timerButtons: { flexDirection: 'row', gap: Spacing.two },
-  flex: { flex: 1 },
   list: { gap: Spacing.two },
   buttons: { gap: Spacing.two },
   card: { borderWidth: 1, borderRadius: Radius.card },

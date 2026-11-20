@@ -1,6 +1,6 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, AppState, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -81,6 +81,13 @@ function Player({
   const [pausedAt, setPausedAt] = useState<number | null>(null);
   const [pausedMs, setPausedMs] = useState(0);
   const [offset, setOffset] = useState(0);
+  // Skips read and write these refs rather than state, so taps faster than a render still each move
+  // exactly one step from where the clock really is.
+  const offsetRef = useRef(0);
+  const clockRef = useRef({ startedAt, pausedAt, pausedMs });
+  useLayoutEffect(() => {
+    clockRef.current = { startedAt, pausedAt, pausedMs };
+  });
   const logged = useRef(false);
   const [howTo, setHowTo] = useState<string | null>(null);
   const cues = useCardioCues();
@@ -158,9 +165,39 @@ function Player({
     setStartedAt(time);
     setPausedMs(0);
     setPausedAt(null);
+    offsetRef.current = 0;
     setOffset(0);
     setNow(time);
     lastElapsed.current = null;
+  };
+
+  /** Where the clock is at this instant, including skips that haven't rendered yet. */
+  const liveElapsed = () => {
+    const clock = clockRef.current;
+    return Math.min(
+      total,
+      ((clock.pausedAt ?? Date.now()) - clock.startedAt - clock.pausedMs) / 1000 + offsetRef.current,
+    );
+  };
+  /** Moves the clock to `target` seconds. The voice names the step you land on once tapping stops. */
+  const moveTo = (target: number) => {
+    offsetRef.current += target - liveElapsed();
+    setOffset(offsetRef.current);
+    // Landing on the end is left to the clock, which plays the "done" cue.
+    if (target >= total) return;
+    // The clock has already "heard" this jump, so it doesn't play its own cue for it too.
+    lastElapsed.current = target;
+    cues.jump(steps[positionAt(steps, target).index]);
+  };
+  const skip = () => {
+    const at = positionAt(steps, liveElapsed());
+    if (!at.done) moveTo(stepStart(steps, at.index + 1));
+  };
+  const previous = () => {
+    const at = positionAt(steps, liveElapsed());
+    if (at.done) return;
+    // Within the first 3 seconds of a step, go back a whole step. Otherwise restart this one.
+    moveTo(stepStart(steps, at.stepElapsed < 3 && at.index > 0 ? at.index - 1 : at.index));
   };
 
   const finalCount = !paused && !pos.done && current.seconds > 4 && secondsLeft >= 1 && secondsLeft <= 3;
@@ -221,14 +258,6 @@ function Player({
       setNow(time);
     }
   };
-  const skip = () => setOffset((o) => o + pos.stepRemaining);
-  const previous = () => {
-    // Within the first 3 seconds of a step, go back a whole step. Otherwise restart this one.
-    const index = pos.stepElapsed < 3 && pos.index > 0 ? pos.index - 1 : pos.index;
-    setOffset((o) => o - (elapsed - stepStart(steps, index)));
-    cues.play({ kind: 'step', index, step: steps[index] });
-  };
-
   const end = (pauseStart: number) => {
     if (pos.done) return goBackOrHome();
     // Hold the clock while the question is open, so nothing ends or speaks behind the alert.

@@ -1,11 +1,6 @@
-/** "4:05" or "1:02:09". */
-export function formatElapsed(ms: number): string {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const ss = String(seconds).padStart(2, '0');
-  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${ss}` : `${minutes}:${ss}`;
+/** "6:15 AM", in the phone's own clock format. */
+export function formatClockTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
 /** "42 min" or "1 h 5 min". */

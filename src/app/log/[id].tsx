@@ -15,7 +15,7 @@ import { circuitParams, normalizePlan } from '@/lib/circuit';
 import { getExercise } from '@/lib/exercises';
 import { parseTarget, summarizeSets } from '@/lib/progress';
 import { SESSION_KIND_LABELS, sessionKind } from '@/lib/session-kind';
-import { formatDuration } from '@/lib/time';
+import { formatClockTime, formatDuration } from '@/lib/time';
 import { goBackOrHome, goHome } from '@/lib/navigation';
 
 export default function SessionLogScreen() {
@@ -83,6 +83,11 @@ export default function SessionLogScreen() {
           {fresh ? 'Workout complete' : isCardio ? `${SESSION_KIND_LABELS[kind]} · ${date}` : date}
         </ThemedText>
         <ThemedText type="title">{log.name}</ThemedText>
+        {!isCardio && (
+          <ThemedText themeColor="textSecondary">
+            {formatClockTime(log.startedAt)} to {formatClockTime(log.finishedAt)}
+          </ThemedText>
+        )}
       </View>
 
       <Animated.View entering={FadeInDown.delay(80).duration(320)} style={styles.stats}>

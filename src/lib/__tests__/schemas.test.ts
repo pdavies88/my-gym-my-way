@@ -60,4 +60,20 @@ describe('stored data from earlier versions', () => {
     });
     expect(log.circuit).toBeUndefined();
   });
+
+  it('keeps an active workout when one logged number is out of range', () => {
+    const parsed = ActiveSessionSchema.parse({
+      name: 'Legs',
+      exerciseIds: ['goblet-squat'],
+      completedIds: [],
+      startedAt: 1,
+      sets: {
+        'goblet-squat': [
+          { reps: 12, weightKg: 2515 },
+          { reps: 10, weightKg: 14 },
+        ],
+      },
+    });
+    expect(parsed.sets?.['goblet-squat']).toEqual([{ reps: 12 }, { reps: 10, weightKg: 14 }]);
+  });
 });

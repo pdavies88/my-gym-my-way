@@ -72,8 +72,9 @@ export type SavedWorkout = z.infer<typeof SavedWorkoutSchema>;
  * kilograms and shown in the person's units; it is missing for bodyweight moves.
  */
 export const SetEntrySchema = z.object({
-  reps: z.number().min(0).max(9999),
-  weightKg: z.number().min(0).max(1000).optional(),
+  // An out-of-range number is dropped on its own, so one bad entry can never hide a whole workout.
+  reps: z.number().min(0).max(9999).catch(0),
+  weightKg: z.number().min(0).max(1000).optional().catch(undefined),
 });
 export type SetEntry = z.infer<typeof SetEntrySchema>;
 

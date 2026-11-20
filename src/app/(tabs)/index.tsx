@@ -1,4 +1,5 @@
-import { Link, router } from 'expo-router';
+import { Link, router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -9,8 +10,8 @@ import { PressableScale } from '@/components/pressable-scale';
 import { ProgressBar } from '@/components/progress-bar';
 import { Screen, SectionHeader } from '@/components/screen';
 import { Tag } from '@/components/tag';
+import { TrainHero } from '@/components/train-hero';
 import { ThemedText } from '@/components/themed-text';
-import { AppName } from '@/constants/brand';
 import { Radius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/settings-context';
 import { useTraining } from '@/context/training-context';
@@ -18,21 +19,29 @@ import { useStartProgramDay } from '@/hooks/use-start-program-day';
 import { useTheme } from '@/hooks/use-theme';
 import { FOCUS_LABELS } from '@/lib/generator';
 import { nextProgramDay, programProgress } from '@/lib/program';
+import { weekStreak } from '@/lib/streak';
+import { formatClockTime, startOfWeek } from '@/lib/time';
 
 export default function TrainScreen() {
   const theme = useTheme();
   const { settings, updateSettings } = useSettings();
-  const { workouts, active, program } = useTraining();
+  const { workouts, sessions, active, program } = useTraining();
   const startDay = useStartProgramDay();
   const next = program ? nextProgramDay(program) : null;
+  // "Now" refreshes when the tab gains focus, so the greeting and week count stay current.
+  const [now, setNow] = useState(() => Date.now());
+  useFocusEffect(useCallback(() => setNow(Date.now()), []));
+  const startTimes = sessions.map((s) => s.startedAt);
+  const thisWeek = startTimes.filter((t) => t >= startOfWeek(now)).length;
 
   return (
-    <Screen eyebrow={AppName} title="Train">
+    <Screen>
+      <TrainHero now={now} thisWeek={thisWeek} weekStreak={weekStreak(startTimes, now)} />
       {active && (
         <Animated.View entering={FadeInDown.duration(350)}>
           <Card accent>
             <ThemedText type="eyebrow" themeColor="tint">
-              {active.pausedAt !== undefined ? 'Session paused' : 'Session in progress'}
+              Session in progress · started {formatClockTime(active.startedAt)}
             </ThemedText>
             <ThemedText type="heading">{active.name}</ThemedText>
             <ProgressBar progress={active.completedIds.length / Math.max(1, active.exerciseIds.length)} />

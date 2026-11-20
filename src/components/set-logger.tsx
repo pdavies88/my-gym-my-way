@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
@@ -22,6 +22,12 @@ import {
 } from '@/lib/progress';
 import type { SetEntry } from '@/lib/storage/schemas';
 
+type Field = 'weight' | 'reps';
+
+/** Caps that keep a typo like "5540" from becoming a logged lift: 999 reps, 999 lb or 450 kg. */
+const MAX_REPS = 999;
+const MAX_WEIGHT: Record<Units, number> = { us: 999, metric: 450 };
+
 /** Text shown in a field: whole numbers plainly, halves as "22.5", nothing for zero. */
 const show = (value: number | undefined) => (value ? String(Math.round(value * 10) / 10) : '');
 const parse = (text: string) => {
@@ -32,6 +38,10 @@ const parse = (text: string) => {
 /**
  * Logs the sets for one exercise: weight (for moves that take one) and reps, or seconds for holds.
  * Shows last time's sets and a suggested next step, and pre-fills each new set from it.
+ *
+ * Every change is a function of the newest sets, so fast − and + taps all count. Numbers show as
+ * text until tapped; only the one field being typed in is a text input. It opens empty, and saves
+ * what you typed when it closes. Nothing on screen writes into a field while you type in it.
  */
 export function SetLogger({
   exercise,
@@ -45,59 +55,80 @@ export function SetLogger({
   /** The sets from the last session that logged this move, or null the first time. */
   last: SetEntry[] | null;
   units: Units;
-  onChange: (sets: SetEntry[]) => void;
+  onChange: (change: (sets: SetEntry[]) => SetEntry[]) => void;
 }) {
   const theme = useTheme();
   const target = parseTarget(exercise.prescription);
   const weighted = usesWeight(exercise);
   const suggestion = suggestNext(exercise, last, units);
-  // The fields are uncontrolled: typing updates the sets, but the app never pushes text back into a
-  // field while it's being edited. A field the app focused and set from code could stop showing new
-  // values on React Native 0.88. When − or + or a removal changes a number, bumping this remounts
-  // the fields with the new numbers.
-  const [revision, setRevision] = useState(0);
   const unit = weightUnit(units);
   const amountLabel = target.measure === 'seconds' ? 'sec' : 'reps';
+  const [editing, setEditing] = useState<{ index: number; field: Field } | null>(null);
+  // The open field and what's typed in it, read by handlers. Saved when the field closes.
+  const open = useRef<{ index: number; field: Field } | null>(null);
+  const draft = useRef<string | null>(null);
+
+  const withValue = (set: SetEntry, field: Field, value: number): SetEntry => {
+    if (field === 'reps') return { ...set, reps: Math.min(MAX_REPS, Math.max(0, Math.round(value))) };
+    const weight = Math.min(MAX_WEIGHT[units], value);
+    return weight > 0 ? { ...set, weightKg: fromDisplayWeight(weight, units) } : { reps: set.reps };
+  };
+  const displayValue = (set: SetEntry, field: Field) =>
+    field === 'reps' ? set.reps : set.weightKg ? toDisplayWeight(set.weightKg, units) : 0;
+
+  /** Saves what's typed in the open field, if anything, and closes it. Safe to call twice. */
+  const commit = () => {
+    const field = open.current;
+    const text = draft.current;
+    open.current = null;
+    draft.current = null;
+    setEditing(null);
+    if (!field || text === null) return;
+    onChange((current) =>
+      current.map((set, i) => (i === field.index ? withValue(set, field.field, parse(text)) : set)),
+    );
+  };
+
+  const startEditing = (index: number, field: Field) => {
+    commit();
+    open.current = { index, field };
+    setEditing({ index, field });
+  };
 
   const addSet = () => {
-    const previous = sets[sets.length - 1];
-    onChange([
-      ...sets,
-      previous ?? {
+    commit();
+    onChange((current) => [
+      ...current,
+      current[current.length - 1] ?? {
         reps: suggestion.reps,
         ...(weighted && suggestion.weightKg !== undefined ? { weightKg: suggestion.weightKg } : {}),
       },
     ]);
   };
 
-  /** Sets one field to a number, from typing or from the − and + buttons. */
-  const setValue = (index: number, field: 'reps' | 'weight', value: number) =>
-    onChange(
-      sets.map((set, i) => {
-        if (i !== index) return set;
-        if (field === 'reps') return { ...set, reps: Math.max(0, Math.round(value)) };
-        return value > 0 ? { ...set, weightKg: fromDisplayWeight(value, units) } : { reps: set.reps };
-      }),
-    );
-
-  const type = (index: number, field: 'reps' | 'weight', text: string) => setValue(index, field, parse(text));
-
   /** A − or + tap: one rep (or 5 seconds for holds), or one weight step of 5 lb or 2.5 kg. */
-  const step = (index: number, field: 'reps' | 'weight', direction: 1 | -1) => {
-    const set = sets[index];
-    const current = field === 'reps' ? set.reps : set.weightKg ? toDisplayWeight(set.weightKg, units) : 0;
+  const step = (index: number, field: Field, direction: 1 | -1) => {
+    commit();
+    Keyboard.dismiss();
     const size = field === 'reps' ? (target.measure === 'seconds' ? 5 : 1) : units === 'us' ? 5 : 2.5;
-    setRevision((r) => r + 1);
-    setValue(index, field, Math.max(0, current + direction * size));
+    onChange((current) =>
+      current.map((set, i) =>
+        i === index ? withValue(set, field, Math.max(0, displayValue(set, field) + direction * size)) : set,
+      ),
+    );
   };
 
   const remove = (index: number) => {
-    setRevision((r) => r + 1);
-    onChange(sets.filter((_, i) => i !== index));
+    open.current = null;
+    draft.current = null;
+    setEditing(null);
+    onChange((current) => current.filter((_, i) => i !== index));
   };
 
-  const field = (index: number, kind: 'reps' | 'weight', value: string, label: string) => {
+  const field = (set: SetEntry, index: number, kind: Field, label: string) => {
     const id = `${exercise.id}-${index}-${kind}`;
+    const isOpen = editing?.index === index && editing.field === kind;
+    const value = show(displayValue(set, kind));
     return (
       <View style={[styles.stepper, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
         <PressableScale
@@ -108,20 +139,32 @@ export function SetLogger({
           style={styles.stepButton}>
           <Icon name={{ ios: 'minus', android: 'remove' }} size={16} color={theme.textSecondary} />
         </PressableScale>
-        <TextInput
-          key={`${kind}-${revision}`}
-          defaultValue={value}
-          onChangeText={(text) => type(index, kind, text)}
-          keyboardType={kind === 'weight' ? 'decimal-pad' : 'number-pad'}
-          inputAccessoryViewID={id}
-          // Tapping selects the number, so typing replaces it instead of adding to it.
-          selectTextOnFocus
-          accessibilityLabel={`Set ${index + 1} ${label}`}
-          placeholder="0"
-          placeholderTextColor={theme.textSecondary}
-          style={[styles.input, { color: theme.text }]}
-          maxLength={kind === 'weight' ? 5 : 4}
-        />
+        {isOpen ? (
+          <TextInput
+            autoFocus
+            onChangeText={(text) => {
+              draft.current = text;
+            }}
+            onEndEditing={commit}
+            keyboardType={kind === 'weight' ? 'decimal-pad' : 'number-pad'}
+            inputAccessoryViewID={id}
+            accessibilityLabel={`Set ${index + 1} ${label}`}
+            // Opens empty, showing the current number faintly, so typing always replaces it. Closing
+            // without typing keeps the number as it was.
+            placeholder={value || '0'}
+            placeholderTextColor={theme.textSecondary}
+            style={[styles.value, styles.input, { color: theme.text }]}
+            maxLength={kind === 'weight' ? 5 : 3}
+          />
+        ) : (
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={`Set ${index + 1} ${label}: ${value || 0}. Tap to type`}
+            onPress={() => startEditing(index, kind)}
+            style={styles.valueButton}>
+            <ThemedText style={[styles.value, !value && { color: theme.textSecondary }]}>{value || '0'}</ThemedText>
+          </PressableScale>
+        )}
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel={`More ${label}, set ${index + 1}`}
@@ -130,7 +173,7 @@ export function SetLogger({
           style={styles.stepButton}>
           <Icon name={{ ios: 'plus', android: 'add' }} size={16} color={theme.tint} />
         </PressableScale>
-        <KeyboardDoneBar id={id} />
+        {isOpen && <KeyboardDoneBar id={id} />}
       </View>
     );
   };
@@ -166,9 +209,8 @@ export function SetLogger({
           <ThemedText type="mono" themeColor="textSecondary" style={styles.index}>
             {i + 1}
           </ThemedText>
-          {weighted &&
-            field(i, 'weight', show(set.weightKg && toDisplayWeight(set.weightKg, units)), `weight in ${unit}`)}
-          {field(i, 'reps', show(set.reps), amountLabel)}
+          {weighted && field(set, i, 'weight', `weight in ${unit}`)}
+          {field(set, i, 'reps', amountLabel)}
           <IconButton
             icon={{ ios: 'xmark', android: 'close' }}
             label={`Remove set ${i + 1}`}
@@ -182,6 +224,7 @@ export function SetLogger({
         compact
         variant="secondary"
         icon={{ ios: 'plus', android: 'add' }}
+        repeatDelayMs={0}
         onPress={addSet}
       />
     </View>
@@ -203,5 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.control,
   },
   stepButton: { width: 36, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
-  input: { flex: 1, minWidth: 0, textAlign: 'center', fontSize: 18, fontWeight: '700', paddingVertical: Spacing.two },
+  valueButton: { flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
+  value: { textAlign: 'center', fontSize: 18, fontWeight: '700' },
+  input: { flex: 1, minWidth: 0, paddingVertical: Spacing.two },
 });

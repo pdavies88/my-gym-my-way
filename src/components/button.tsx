@@ -1,4 +1,13 @@
-import { ActivityIndicator, StyleSheet, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { useRef } from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  type GestureResponderEvent,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
@@ -13,16 +22,38 @@ type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   loading?: boolean;
   compact?: boolean;
   style?: StyleProp<ViewStyle>;
+  /**
+   * A second tap within this many milliseconds is ignored, so a double tap can't start a workout or
+   * open a screen twice. Set it to 0 where fast repeat taps are the point.
+   */
+  repeatDelayMs?: number;
 };
 
-export function Button({ title, variant = 'primary', icon, loading = false, compact, disabled, style, ...rest }: ButtonProps) {
+export function Button({
+  title,
+  variant = 'primary',
+  icon,
+  loading = false,
+  compact,
+  disabled,
+  style,
+  repeatDelayMs = 400,
+  onPress,
+  ...rest
+}: ButtonProps) {
   const theme = useTheme();
+  const lastPress = useRef(0);
+  const press = (event: GestureResponderEvent) => {
+    const now = Date.now();
+    if (now - lastPress.current < repeatDelayMs) return;
+    lastPress.current = now;
+    onPress?.(event);
+  };
   const isDisabled = disabled || loading;
 
   const backgroundColor =
     variant === 'primary' ? theme.tint : variant === 'ghost' ? 'transparent' : theme.backgroundElement;
-  const textColor =
-    variant === 'primary' ? theme.onTint : variant === 'destructive' ? theme.danger : theme.text;
+  const textColor = variant === 'primary' ? theme.onTint : variant === 'destructive' ? theme.danger : theme.text;
 
   return (
     <PressableScale
@@ -37,7 +68,8 @@ export function Button({ title, variant = 'primary', icon, loading = false, comp
         variant === 'ghost' && { borderWidth: 1, borderColor: theme.border },
         style,
       ]}
-      {...rest}>
+      {...rest}
+      onPress={press}>
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
